@@ -1,0 +1,88 @@
+{
+  "posts": [
+    {
+      "id": "post_001",
+      "author": {
+        "name": "Priya Sharma",
+        "headline": "Engineering Manager at TechCorp India",
+        "profileUrl": "https://linkedin.com/in/priyasharma"
+      },
+      "content": "We are hiring! Looking for a Full Stack Developer (MERN Stack) to join our team at TechCorp India. 2+ years of experience with React, Node.js, and MongoDB required. Remote friendly. Send your resume to priya.sharma@techcorp.in or DM me directly. #hiring #reactjs #nodejs #fullstack",
+      "timestamp": "2025-01-15T10:30:00Z",
+      "reactions": 245,
+      "comments": 89
+    },
+    {
+      "id": "post_002",
+      "author": {
+        "name": "Rahul Verma",
+        "headline": "Senior Recruiter at StartupHub",
+        "profileUrl": "https://linkedin.com/in/rahulverma"
+      },
+      "content": "Excited to announce that StartupHub is expanding! We need a Frontend Developer with expertise in React.js, TypeScript, and Tailwind CSS. Experience with Next.js is a plus. Competitive salary + ESOPs. Interested? Drop your CV at careers@startuphub.io. Location: Bangalore/Remote. #frontend #react #hiring #startup",
+      "timestamp": "2025-01-14T14:00:00Z",
+      "reactions": 180,
+      "comments": 62
+    },
+    {
+      "id": "post_003",
+      "author": {
+        "name": "Amit Patel",
+        "headline": "CTO at CloudScale Solutions",
+        "profileUrl": "https://linkedin.com/in/amitpatel"
+      },
+      "content": "Just launched our new AI-powered analytics dashboard! Really proud of what the team has achieved. Built with Python, TensorFlow, and React. The power of data visualization is incredible. #tech #ai #datascience",
+      "timestamp": "2025-01-14T09:00:00Z",
+      "reactions": 520,
+      "comments": 45
+    },
+    {
+      "id": "post_004",
+      "author": {
+        "name": "Neha Gupta",
+        "headline": "HR Head at FinServe Technologies",
+        "profileUrl": "https://linkedin.com/in/nehagupta"
+      },
+      "content": "Urgent Hiring! FinServe Technologies is looking for:\n\n1. Node.js Backend Developer (2-4 yrs)\n2. React Frontend Developer (1-3 yrs)\n3. DevOps Engineer (3+ yrs)\n\nTech Stack: React, Node.js, Express, MongoDB, AWS, Docker\n\nLocation: Gurugram (Hybrid)\nCTC: Competitive + Benefits\n\nInterested candidates please send your resume to neha.gupta@finserve.com with the subject line mentioning the role.\n\n#hiring #nodejs #react #devops #jobs #gurugram",
+      "timestamp": "2025-01-13T16:30:00Z",
+      "reactions": 890,
+      "comments": 234
+    },
+    {
+      "id": "post_005",
+      "author": {
+        "name": "Vikram Singh",
+        "headline": "Product Designer at DesignStudio",
+        "profileUrl": "https://linkedin.com/in/vikramsingh"
+      },
+      "content": "5 design principles every product designer should follow in 2025. A thread. 1. User-first thinking 2. Accessibility by default 3. Design systems over individual screens 4. Prototype before pixel-perfecting 5. Data-informed decisions. What would you add? #design #ux #productdesign",
+      "timestamp": "2025-01-13T11:00:00Z",
+      "reactions": 1200,
+      "comments": 156
+    },
+    {
+      "id": "post_006",
+      "author": {
+        "name": "Sanjay Mehta",
+        "headline": "Founder & CEO at WebNova",
+        "profileUrl": "https://linkedin.com/in/sanjaymehta"
+      },
+      "content": "We're building something exciting at WebNova and need passionate developers to join us!\n\nOpen Role: Full Stack JavaScript Developer\nExperience: 1-3 years\nMust have: JavaScript, React, Node.js, MongoDB\nGood to have: TypeScript, AWS, Docker, Redis\n\nWhat we offer: Competitive pay, flexible hours, learning budget, and a great team.\n\nDM me or email your resume at jobs@webnova.dev\n\nRT to help someone find their next opportunity! #hiring #javascript #webdev",
+      "timestamp": "2025-01-12T13:45:00Z",
+      "reactions": 340,
+      "comments": 98
+    },
+    {
+      "id": "post_007",
+      "author": {
+        "name": "Anjali Reddy",
+        "headline": "Tech Lead at MegaSoft",
+        "profileUrl": "https://linkedin.com/in/anjalireddy"
+      },
+      "content": "My team is hiring a Senior React Developer at MegaSoft! If you love building scalable web applications and have 3+ years with React, Redux, and REST APIs, I want to hear from you. We work with Next.js, TypeScript, and deploy on AWS. Great work-life balance and competitive compensation. Reach out to me or apply through our careers page. #hiring #react #senior",
+      "timestamp": "2025-01-11T10:00:00Z",
+      "reactions": 456,
+      "comments": 78
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "feed-email-extractor",
+  "version": "1.0.0",
+  "description": "CLI tool to extract hiring emails from LinkedIn feed and generate personalized email content using Gemini AI",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "feed-email-extractor": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "start:file": "node index.js --file sample-feed.json",
+    "send": "node scripts/send-emails.js",
+    "send:verify": "node scripts/send-emails.js --verify",
+    "send:list": "node scripts/send-emails.js --list"
+  },
+  "keywords": [
+    "linkedin",
+    "email",
+    "hiring",
+    "ai",
+    "cli",
+    "job-search"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "clipboardy": "^4.0.0",
+    "dotenv": "^17.2.3",
+    "nodemailer": "^6.9.0"
+  }
+}

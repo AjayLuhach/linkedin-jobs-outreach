@@ -1,0 +1,1320 @@
+{
+  "results": [
+    {
+      "postId": "7432747158245822466",
+      "isHiring": true,
+      "poster": { "name": "Nidhi Panchal", "headline": "HR Executive || 200K+ followers" },
+      "summary": "Identixweb Limited is hiring a Team Lead for Node.js/React.js. The role requires strong expertise in Node.js, React.js, MySQL/PostgreSQL, and team leadership to drive technical excellence and deliver impactful software solutions.",
+      "job": {
+        "title": "Team Lead - Node.js / React.js",
+        "company": "Identixweb Limited",
+        "type": "full-time",
+        "requirements": ["Node.js", "React.js", "MySQL", "PostgreSQL", "Team Leadership"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432461600760176640",
+      "isHiring": false,
+      "poster": { "name": "Pratham Mishra", "headline": "Software developer @Hunto Ai" },
+      "summary": "Hunto AI hiring Full Stack Developer intern with 0-1 years experience, Remote India. Requires React JS, TypeScript, Node.js, MongoDB, Tailwind CSS.",
+      "job": {
+        "title": "Full Stack Developer Intern",
+        "company": "Hunto AI",
+        "type": "intern",
+        "requirements": ["React.js", "TypeScript", "Node.js", "MongoDB", "Tailwind CSS"],
+        "requiredExperience": 0,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432656716153978880",
+      "isHiring": true,
+      "poster": { "name": "Arushi Jain", "headline": "Tech Talent Specialist | Helping Engineers Scale Their Careers at Freelance" },
+      "summary": "Novatr is hiring a Backend Engineer with 2-8 years experience for their AEC edtech team. The role involves owning architecture, building scalable services, and shipping production systems. Tech stack includes Java/Node.js, Spring Boot, Kafka, MongoDB, Redis, PostgreSQL, and AWS.",
+      "job": {
+        "title": "Backend Engineer",
+        "company": "Novatr",
+        "type": "full-time",
+        "requirements": ["Node.js", "Java", "Spring Boot", "Kafka", "MongoDB", "Redis", "PostgreSQL", "AWS"],
+        "requiredExperience": 2,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432650117561622528",
+      "isHiring": true,
+      "poster": { "name": "Priyanka Muthukumar", "headline": "Talent Delivery Expert | Driving Recruitment Success" },
+      "summary": "ACL Digital is hiring a Backend Developer (Node.js) for on-site role at Manyata Tech Park, Bengaluru. Requires 4-8 years with expertise in Node.js, asynchronous programming, microservices, and telecom protocols (SIP, RTP/RTCP). Immediate joiners preferred with face-to-face interview required.",
+      "job": {
+        "title": "Backend Developer (Node.js)",
+        "company": "ACL Digital",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript", "REST APIs", "Microservices", "SQL", "Linux"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432689873154715648",
+      "isHiring": false,
+      "poster": { "name": "Debasis Sahoo", "headline": "Strategic Talent Acquisition Partner" },
+      "summary": "eInfochips hiring Senior React JS Engineer for on-site role in Centennial, CO (USA). Requires ReactJS, TypeScript, Node.js, Material UI, Jest/Cypress. Non-India office, not remote.",
+      "job": {
+        "title": "Sr. Engineer (React JS)",
+        "company": "eInfochips (An Arrow Company)",
+        "type": "full-time",
+        "requirements": ["React.js", "TypeScript", "Node.js", "Material UI", "Jest", "Cypress"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["debasis.sahoo@einfochips.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432694776979935232",
+      "isHiring": true,
+      "poster": { "name": "Jitendra Kumar", "headline": "Founder, #TJH Talent Community" },
+      "summary": "DataNimbus is hiring a Backend Engineer with 3+ years experience. Role involves building scalable backend systems using Node.js & GoLang, developing APIs, working with MongoDB aggregation pipelines, and using Docker, Kubernetes & CI/CD. Company works on Data + AI and payment modernization.",
+      "job": {
+        "title": "Backend Engineer",
+        "company": "DataNimbus",
+        "type": "full-time",
+        "requirements": ["Node.js", "GoLang", "MongoDB", "Docker", "Kubernetes", "CI/CD", "Git"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["careers@datanimbus.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432730608277045248",
+      "isHiring": true,
+      "poster": { "name": "Poonam Rajput", "headline": "HR Professional || Suffescom Solutions Inc" },
+      "summary": "Suffescom Solutions Inc is hiring a Node.js Developer with 3+ years of backend experience. Requires expertise in Node.js, Express.js, MongoDB/MySQL, RESTful APIs, and strong debugging skills. On-site in Mohali with preference for immediate joiners.",
+      "job": {
+        "title": "Node.js Developer",
+        "company": "Suffescom Solutions Inc",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "MongoDB", "MySQL", "REST APIs"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["poonam@suffescom.in"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432659812288712704",
+      "isHiring": true,
+      "poster": { "name": "Arushi Jain", "headline": "Tech Talent Specialist | Helping Engineers Scale Their Careers at Freelance" },
+      "summary": "OLX India is hiring a Senior Backend Engineer with 4+ years experience. Requires strong OOP, SOLID principles, microservices, Docker/Kubernetes, SQL/NoSQL, and experience with Java/Python/Node.js. Must-haves include SQL, REST APIs, microservices, and production deployments.",
+      "job": {
+        "title": "Senior Backend Engineer",
+        "company": "OLX India",
+        "type": "full-time",
+        "requirements": ["Node.js", "Microservices", "Docker", "Kubernetes", "SQL", "REST APIs"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432769591568752640",
+      "isHiring": false,
+      "poster": { "name": "Susmita Desai", "headline": "Senior Human Executive| IT Recruitment Specialist" },
+      "summary": "Walk-in drive for Node.js Developer (Fresher) in Mumbai on 27th Feb 2026. Targeting fresh graduates (2023-2025 batch). In-person walk-in only at Lower Parel, Mumbai.",
+      "job": {
+        "title": "Node.js Developer (Fresher)",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["JavaScript", "Node.js", "SQL"],
+        "requiredExperience": 0,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432747000766308352",
+      "isHiring": true,
+      "poster": { "name": "Monika Sharma", "headline": "Sr. HR | Incaendo Technologies | Activate Studio" },
+      "summary": "Incaendo Technologies hiring an AI-native Full Stack Developer (React.js/Node.js) in Noida WFO with 3+ years experience. Requires React.js, Node.js, Express.js, JavaScript, REST APIs, MongoDB/MySQL. Emphasis on using AI tools for code generation, testing, debugging and documentation.",
+      "job": {
+        "title": "Full Stack Developer (React.js / Node.js)",
+        "company": "Incaendo Technologies",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "Express.js", "JavaScript", "REST APIs", "MongoDB", "MySQL"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr@incaendo.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432675786957971456",
+      "isHiring": true,
+      "poster": { "name": "Puja Sengupta", "headline": "Recruitment Specialist at TRBITIX" },
+      "summary": "TRBITIX is urgently hiring a Node.js Lead with 8-10 years experience for a permanent on-site role in Noida. Requires Node.js, Microservices, AWS/GCP, Docker, Kubernetes, and leadership experience. Immediate joiners only.",
+      "job": {
+        "title": "Node.js Lead",
+        "company": "TRBITIX",
+        "type": "full-time",
+        "requirements": ["Node.js", "Microservices", "AWS", "Docker", "Kubernetes"],
+        "requiredExperience": 8,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["puja.sengupta@trbitix.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432780416123715586",
+      "isHiring": true,
+      "poster": { "name": "Sarita Singha", "headline": "Talent Acquisition Partner || Oxyzo Financial Services" },
+      "summary": "Oxyzo Financial Services is hiring Backend Developers (Node.js) in Bangalore with 3+ years experience. Building scalable fintech solutions. Preferred background in Fintech/NBFC industry and product-based companies. 4 backend positions available.",
+      "job": {
+        "title": "Backend Developer (Node.js)",
+        "company": "Oxyzo Financial Services",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript", "Angular"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["sarita.singha1@ofbusiness.in", "career@oxyzo.in"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432780416123715586",
+      "isHiring": true,
+      "poster": { "name": "Sarita Singha", "headline": "Talent Acquisition Partner || Oxyzo Financial Services" },
+      "summary": "Oxyzo Financial Services is hiring Frontend Developers (JavaScript & Angular) in Bangalore with 3+ years experience. Building scalable fintech solutions. Preferred background in Fintech/NBFC and product-based companies. 2 frontend positions available.",
+      "job": {
+        "title": "Frontend Developer",
+        "company": "Oxyzo Financial Services",
+        "type": "full-time",
+        "requirements": ["JavaScript", "Angular"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["sarita.singha1@ofbusiness.in", "career@oxyzo.in"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432713941824335872",
+      "isHiring": true,
+      "poster": { "name": "Lavi Sharma", "headline": "HR Manager at EPACK Prefab" },
+      "summary": "EPACK Prefab hiring a Backend Developer for Noida WFO. Tech stack includes Node.js, Express, NestJS, JavaScript/TypeScript, MySQL/MongoDB/PostgreSQL, AWS, Git. Looking for someone with strong backend fundamentals, problem-solving mindset, and comfort in fast-paced startup setup. AI exposure is a plus.",
+      "job": {
+        "title": "Backend Developer",
+        "company": "EPACK Prefab",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "NestJS", "TypeScript", "MySQL", "MongoDB", "PostgreSQL", "AWS"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["pebhr8@epack.in"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432769776831254528",
+      "isHiring": false,
+      "poster": { "name": "Susmita Desai", "headline": "Senior Human Executive| IT Recruitment Specialist" },
+      "summary": "Duplicate walk-in drive posting for Node.js Developer (Fresher) in Mumbai on 27th Feb 2026. In-person walk-in only, targeting fresh graduates.",
+      "job": {
+        "title": "Node.js Developer (Fresher)",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["JavaScript", "Node.js", "SQL"],
+        "requiredExperience": 0,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432635640183189504",
+      "isHiring": true,
+      "poster": { "name": "Heena Maru", "headline": "Actively Hiring at Moon Technolabs" },
+      "summary": "Moon Technolabs in Ahmedabad (on-site) hiring for multiple tech roles including Lead NodeJS Developer and Sr. NodeJS Developer. Company encourages ownership, collaboration, and meaningful career growth.",
+      "job": {
+        "title": "Lead NodeJS Developer",
+        "company": "Moon Technolabs",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript", "REST APIs"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["heena.s@moontechnolabs.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432635640183189504",
+      "isHiring": true,
+      "poster": { "name": "Heena Maru", "headline": "Actively Hiring at Moon Technolabs" },
+      "summary": "Moon Technolabs in Ahmedabad (on-site) hiring for Sr. NodeJS Developer among multiple open positions. Company values ownership and collaboration.",
+      "job": {
+        "title": "Sr. NodeJS Developer",
+        "company": "Moon Technolabs",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript", "REST APIs"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["heena.s@moontechnolabs.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432785174544805888",
+      "isHiring": true,
+      "poster": { "name": "Faiza Namal", "headline": "Hr Team Lead | Talent Acquisition | IT Recruiter" },
+      "summary": "Hiring Java Backend Developer with 5+ years experience for Backend API development. Requires Java, RESTful APIs, JWT/OAuth, JavaScript (ES6+), Vue.js, Node.js, C#/.NET, MySQL/PostgreSQL. Immediate joiners only.",
+      "job": {
+        "title": "Java Backend Developer",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["Java", "REST APIs", "JavaScript", "Vue.js", "Node.js", "MySQL", "PostgreSQL"],
+        "requiredExperience": 5,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["faiza.namal@rjitcs.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432765298723807232",
+      "isHiring": true,
+      "poster": { "name": "Infosys Referrals", "headline": "Consultant at Infosys" },
+      "summary": "Infosys referral assistance for Frontend & Backend Engineers. Frontend needs React, Angular, TypeScript, HTML/CSS. Backend needs Java, Spring Boot, Node.js, .Net, REST APIs. Note: referral assistance only, does not guarantee selection.",
+      "job": {
+        "title": "Backend Engineer",
+        "company": "Infosys",
+        "type": "full-time",
+        "requirements": ["Node.js", "Java", "Spring Boot", "REST APIs", ".NET"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["myinfosys.referrals@gmail.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432643105268441088",
+      "isHiring": true,
+      "poster": { "name": "Saurabh Aggarwal", "headline": "Technical Recruiter at CoverStack" },
+      "summary": "CoverStack is actively hiring Backend Developers and Node.js Developers. Post emphasizes growth opportunity and connecting with candidates. Limited role details provided.",
+      "job": {
+        "title": "Backend Developer / Node.js Developer",
+        "company": "CoverStack",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432739535689605120",
+      "isHiring": false,
+      "poster": { "name": "Meet Dhekale", "headline": "Business Growth Leader | HR Consultant" },
+      "summary": "Surge You HR Consultant hiring Mid-Level Serverless Developer in Mumbai (Hybrid), 3-6 years. Requires Node.js, TypeScript, AWS Lambda/S3/DynamoDB. ONLY MUMBAI CANDIDATES, immediate joiners preferred. Local candidates only restriction.",
+      "job": {
+        "title": "Mid-Level Serverless Developer",
+        "company": "Surge You HR Consultant",
+        "type": "full-time",
+        "requirements": ["Node.js", "TypeScript", "AWS Lambda", "DynamoDB", "Jest"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr.surgeyou@gmail.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432731634808008704",
+      "isHiring": false,
+      "poster": { "name": "Mohammed Nawaz", "headline": "BCA Student | Java | Data Structures" },
+      "summary": "Latinum HR Solutions hiring Backend Developer (Node.js) in Dubai, UAE (Hybrid). Salary up to AED 20,000/month. 3-6 years experience. Non-India location.",
+      "job": {
+        "title": "Backend Developer (Node.js)",
+        "company": "Latinum HR Solutions",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript", "TypeScript", "MongoDB", "PostgreSQL", "AWS"],
+        "requiredExperience": 3,
+        "salary": "AED 20,000/month",
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["jobs@latinumhr.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432693063568809984",
+      "isHiring": true,
+      "poster": { "name": "Rishika Teja Kumar", "headline": "Recruitment Consultant @ Vikash Technologies" },
+      "summary": "Vikash Technologies hiring Node.js Lead with 8-10 years experience in Noida WFO. Requires NodeJS with frameworks like ExpressJS/SailsJS/HapiJS, RDBMS (MySQL/PostgreSQL), and NoSQL (MongoDB/DynamoDB). Immediate to 15 days notice period.",
+      "job": {
+        "title": "Node.js Lead",
+        "company": "Vikash Technologies",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "MySQL", "PostgreSQL", "MongoDB", "DynamoDB"],
+        "requiredExperience": 8,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["rishika.vikashtechnologies@gmail.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432778325313523712",
+      "isHiring": true,
+      "poster": { "name": "Sunita M", "headline": "Senior Talent Strategist @ Accelon" },
+      "summary": "Hiring Senior Backend Developer (Node.js + AWS) in Bangalore (Hybrid) with 5+ years experience. Requires AWS services (ECS/Fargate, API Gateway, Lambda, SQS/SNS, DynamoDB, RDS, CloudWatch), REST APIs, and microservices architecture. Strong problem-solving and production deployment experience needed.",
+      "job": {
+        "title": "Senior Backend Developer (Node.js + AWS)",
+        "company": "Accelon",
+        "type": "full-time",
+        "requirements": ["Node.js", "AWS", "REST APIs", "Microservices", "DynamoDB", "Lambda"],
+        "requiredExperience": 5,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432664780173193216",
+      "isHiring": true,
+      "poster": { "name": "Seema Diwakr", "headline": "HR Executive at Nickelfox Technologies" },
+      "summary": "Nickelfox Technologies hiring Frontend Developer (React.js, React Native, JavaScript/TypeScript) in Noida Sector 62 WFO with 4+ years experience. Working on cutting-edge AI-powered products.",
+      "job": {
+        "title": "Frontend Developer",
+        "company": "Nickelfox Technologies",
+        "type": "full-time",
+        "requirements": ["React.js", "React Native", "JavaScript", "TypeScript"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["careers@nickelfox.com", "seema.diwakr@nickelfox.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432664780173193216",
+      "isHiring": true,
+      "poster": { "name": "Seema Diwakr", "headline": "HR Executive at Nickelfox Technologies" },
+      "summary": "Nickelfox Technologies hiring Backend Developer (Python/Node.js) in Noida Sector 62 WFO with 4+ years experience. Requires REST APIs, Microservices, SQL/NoSQL. Working on AI-powered products.",
+      "job": {
+        "title": "Backend Developer",
+        "company": "Nickelfox Technologies",
+        "type": "full-time",
+        "requirements": ["Python", "Node.js", "REST APIs", "Microservices", "SQL", "NoSQL"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["careers@nickelfox.com", "seema.diwakr@nickelfox.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432643685625970688",
+      "isHiring": false,
+      "poster": { "name": "Jessica Osborn", "headline": "Driving growth through strategic software partnerships" },
+      "summary": "Article about Top 10 Node.js Development Companies in 2026. Not a hiring post.",
+      "job": null,
+      "contacts": null
+    },
+    {
+      "postId": "7432764040361443328",
+      "isHiring": false,
+      "poster": { "name": "Deepak Jha", "headline": "Senior Full Stack Developer" },
+      "summary": "Blog post about migrating a production system from Java to Node.js with zero downtime. Not a hiring post.",
+      "job": null,
+      "contacts": null
+    },
+    {
+      "postId": "7432752474362519552",
+      "isHiring": true,
+      "poster": { "name": "Jeel Patel", "headline": "HR Executive" },
+      "summary": "Whitestork Software Solutions hiring Node.js Developer with 2+ years experience in Ahmedabad (on-site). Immediate joiner preferred.",
+      "job": {
+        "title": "Node.js Developer",
+        "company": "Whitestork Software Solutions",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript"],
+        "requiredExperience": 2,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr@whitestorksoft.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432614308938735616",
+      "isHiring": true,
+      "poster": { "name": "Akash Joshi", "headline": "National Award Winning Entrepreneur | TEDx Speaker" },
+      "summary": "Hiring Node.js Developer and other tech roles across multiple organizations. Looking for strong ownership mindset, problem-solving attitude, and ability to work in fast-paced environments. Immediate/short-notice joiners preferred.",
+      "job": {
+        "title": "Node.js Developer",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432696614911279104",
+      "isHiring": true,
+      "poster": { "name": "Manisha Madhavan", "headline": "HR Manager at Expandimo Technologies pvt ltd" },
+      "summary": "Expandimo Technologies hiring Senior Node.js Developer with 6+ years experience. Remote/hybrid/onsite options available. Requires NodeJS, AWS Lambda, Microservices, DynamoDB, Serverless architecture, GraphQL, EC2. Immediate joiners only, excellent communication skills mandatory.",
+      "job": {
+        "title": "Senior Node.js Developer",
+        "company": "Expandimo Technologies",
+        "type": "remote",
+        "requirements": ["Node.js", "AWS Lambda", "Microservices", "DynamoDB", "GraphQL", "EC2"],
+        "requiredExperience": 6,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["manisha@expandimo.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432739421436710912",
+      "isHiring": true,
+      "poster": { "name": "Harshita Shukla Bajpai", "headline": "HR Operation Manager" },
+      "summary": "Namaha Om hiring Backend Developer (Node.js) with 5+ years experience. Fully remote, salary 50,000-70,000/month. Requires Node.js, Express.js, REST APIs, microservices, MongoDB/MySQL/PostgreSQL, JWT/OAuth, and AWS/Azure deployment.",
+      "job": {
+        "title": "Backend Developer (Node.js)",
+        "company": "Namaha Om",
+        "type": "remote",
+        "requirements": ["Node.js", "Express.js", "REST APIs", "Microservices", "MongoDB", "AWS"],
+        "requiredExperience": 5,
+        "salary": "50,000-70,000/month",
+        "salaryMinLPA": 6,
+        "salaryMaxLPA": 8.4
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432690405508313088",
+      "isHiring": true,
+      "poster": { "name": "Tejjashri T.", "headline": "Senior Executive - Talent Acquisition Consultant @ Q3Tech Technologies" },
+      "summary": "Q3Tech hiring .NET Web Developer (Night Shift) for remote India role with 3-5 years experience. Must-have: C#, ASP.NET, MS SQL Server, HTML/CSS/JavaScript. Good-to-have: React/Node.js, REST APIs. Builds internal web apps for Sales, Marketing, Support teams.",
+      "job": {
+        "title": ".NET Web Developer",
+        "company": "Q3Tech Technologies",
+        "type": "remote",
+        "requirements": ["C#", "ASP.NET", "MS SQL Server", "JavaScript", "HTML", "CSS"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["tturambekar@q3tech.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432771771595964416",
+      "isHiring": false,
+      "poster": { "name": "Shikha Singh", "headline": "Senior Human Resource at GEMPERTS" },
+      "summary": "GEMPERTS hiring Senior Backend Developer (TypeScript & AWS) for remote contractual role (No PF). 5+ years, 2 positions. Contractual employment type.",
+      "job": {
+        "title": "Senior Backend Developer",
+        "company": "GEMPERTS",
+        "type": "contract",
+        "requirements": ["TypeScript", "Node.js", "REST APIs", "Microservices", "AWS"],
+        "requiredExperience": 5,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["shweta.sgempertsindia@gmail.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432705144779112448",
+      "isHiring": true,
+      "poster": { "name": "Ayushi Yadav", "headline": "Talent Acquisition Specialist" },
+      "summary": "Deqode is hiring a Node.js Developer with 6+ years experience in Bangalore. Requires strong backend expertise in Node.js, JavaScript, RESTful APIs, microservices architecture, databases (MongoDB/MySQL/PostgreSQL), authentication, security, and CI/CD pipelines. Immediate joiners preferred.",
+      "job": {
+        "title": "Node.js Developer",
+        "company": "Deqode",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript", "REST APIs", "Microservices", "MongoDB", "MySQL", "CI/CD"],
+        "requiredExperience": 6,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["ayyadav@deqode.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432772094129594370",
+      "isHiring": false,
+      "poster": { "name": "Faiz Faiz Shaikh", "headline": "IT Specialist at Ramdev Group" },
+      "summary": "Backend Developer Intern position, Remote (Australia). Stipend $600-900/month. Requires Node.js/Express, MongoDB/MySQL. Internship role.",
+      "job": {
+        "title": "Backend Developer Intern",
+        "company": null,
+        "type": "intern",
+        "requirements": ["Node.js", "Express.js", "MongoDB", "MySQL"],
+        "requiredExperience": 0,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432689097854586880",
+      "isHiring": true,
+      "poster": { "name": "Aman Pandey", "headline": "Jr.Executive HR at C-Zentrix" },
+      "summary": "C-Zentrix is hiring a Node.js Developer for full-time role in Gurugram. Responsibilities include building scalable backend apps and APIs. Requires JavaScript (ES6+), Node.js, Express.js, databases (MongoDB/MySQL/PostgreSQL), async programming, REST APIs. TypeScript and cloud experience preferred.",
+      "job": {
+        "title": "Node.js Developer",
+        "company": "C-Zentrix",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "JavaScript", "MongoDB", "MySQL", "PostgreSQL", "REST APIs"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr@c-zentrix.com", "aman.pandey@c-zentrix.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432636177167376384",
+      "isHiring": true,
+      "poster": { "name": "Baby Priyanka Ambati", "headline": "IT Recruiter @ SysTechCrop Inc" },
+      "summary": "SysTechCorp hiring Full Stack Developer (Node.js + React.js) with 8+ years experience, Pan India. Requires Node.js, Express.js, React.js, Redux, JavaScript (ES6+), REST APIs, Microservices, SQL/NoSQL databases, CI/CD.",
+      "job": {
+        "title": "Full Stack Developer (Node.js + React.js)",
+        "company": "SysTechCorp",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "React.js", "Redux", "JavaScript", "REST APIs", "Microservices"],
+        "requiredExperience": 8,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["Priyanka.Ambati@systechcorp.in"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432730113269522432",
+      "isHiring": true,
+      "poster": { "name": "Shivank Chhonkar", "headline": "Associate Business Analyst at Infosys" },
+      "summary": "Infosys hiring Technology Lead - React JS Developer in Bangalore with 5-9 years experience. Requires React JS, Node JS, JavaScript, TypeScript, Redux/Redux-Saga, Jest, RESTful APIs, Git/Bitbucket, CI/CD tools.",
+      "job": {
+        "title": "Technology Lead - React JS Developer",
+        "company": "Infosys",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "JavaScript", "TypeScript", "Redux", "Jest", "REST APIs"],
+        "requiredExperience": 5,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432666052641046528",
+      "isHiring": true,
+      "poster": { "name": "Roshani Singh", "headline": "Passionate and enthusiastic in my work" },
+      "summary": "Hiring Laravel & Vue.js Developer in Ahmedabad with 2+ years experience. Mandatory skills: Laravel, Vue.js. Optional: CodeIgniter, Core PHP, React.js, Node.js. Requires minimum 3-4 completed projects and strong communication skills.",
+      "job": {
+        "title": "Laravel & Vue.js Developer",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["Laravel", "Vue.js", "PHP", "JavaScript"],
+        "requiredExperience": 2,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["roshani@vnnovate.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432670961734410240",
+      "isHiring": true,
+      "poster": { "name": "Banika Kour Wazir", "headline": "Hiring | Talent Acquisition | Recruiter" },
+      "summary": "Hiring Node.js Developer in Pune WFO with 3-8 years experience. Requires strong Node.js, Nest.js, REST APIs, Microservices, JavaScript/TypeScript, MySQL/PostgreSQL/MongoDB. Rotational weekend work from home. CI/CD and Git knowledge needed.",
+      "job": {
+        "title": "Node.js Developer",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["Node.js", "NestJS", "REST APIs", "Microservices", "TypeScript", "MongoDB", "PostgreSQL"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["banika.wazir@programming.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432642592493715456",
+      "isHiring": false,
+      "poster": { "name": "Saakhi Bhagat", "headline": "Talent Acquisition @ Abhidi Solution" },
+      "summary": "Full Stack Developer (NodeJS+AWS) in Putrajaya, Malaysia. On-site permanent role. Requires locally available candidates, VISA sponsorship not available. Non-India location with local candidate restriction.",
+      "job": {
+        "title": "Full Stack Developer (NodeJS + AWS)",
+        "company": "Abhidi Solution",
+        "type": "full-time",
+        "requirements": ["Node.js", "AWS", "JavaScript", "Microservices"],
+        "requiredExperience": 6,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["saakhi.bhagat@abhidisolution.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432793650486464512",
+      "isHiring": false,
+      "poster": { "name": "Tanisha Verma", "headline": "Team Lead Recruitment || Oak Tree Software" },
+      "summary": "Middleware/Backend Developer contract role in Pune/Bangalore/Hyderabad (Hybrid). 10+ years experience. Requires ASP.NET Core, Node.js, REST API, Odoo Platform Integration. Contractual employment.",
+      "job": {
+        "title": "Middleware / Backend Developer",
+        "company": "Oak Tree Software",
+        "type": "contract",
+        "requirements": ["ASP.NET Core", "Node.js", "REST APIs", "Odoo"],
+        "requiredExperience": 10,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432771959333040128",
+      "isHiring": false,
+      "poster": { "name": "Shikha Singh", "headline": "Senior Human Resource at GEMPERTS" },
+      "summary": "GEMPERTS hiring Technical Lead - Backend (TypeScript & AWS) for remote contractual role (No PF). 8+ years with data migration expertise mandatory. Contractual employment.",
+      "job": {
+        "title": "Technical Lead - Backend",
+        "company": "GEMPERTS",
+        "type": "contract",
+        "requirements": ["TypeScript", "Node.js", "Microservices", "AWS"],
+        "requiredExperience": 8,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["shweta.sgempertsindia@gmail.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432676793330937856",
+      "isHiring": false,
+      "poster": { "name": "Radha Sharma", "headline": "HR Executive || InfoSparkles IT Solution" },
+      "summary": "InfoSparkles hiring Team Lead/Project Manager MERN Stack with 3+ years in Indore. Only local candidates allowed. Requires Node.js, Express.js, MongoDB, CI/CD pipelines.",
+      "job": {
+        "title": "Team Lead / Project Manager - MERN Stack",
+        "company": "InfoSparkles IT Solution",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "MongoDB", "CI/CD", "React.js"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr@infosparkles.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432769671990304768",
+      "isHiring": true,
+      "poster": { "name": "Lavanya", "headline": "Senior HR Recruiter | Talent Acquisition" },
+      "summary": "Hiring Senior JavaScript Full Stack Developer (Remote) with 7+ years experience. Requires JavaScript, TypeScript, React/Angular for frontend and Node.js/Nest.js for backend. Must be strong in TDD, MySQL, code reviews, and web application architecture.",
+      "job": {
+        "title": "Senior JavaScript Full Stack Developer",
+        "company": null,
+        "type": "remote",
+        "requirements": ["JavaScript", "TypeScript", "React.js", "Angular", "Node.js", "NestJS", "MySQL"],
+        "requiredExperience": 7,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["lavanya.a@arttechgroup.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432742003727200256",
+      "isHiring": true,
+      "poster": { "name": "sonal jain", "headline": "Urgently Hiring - Project Manager & Fullstack developer" },
+      "summary": "Hiring Fullstack Developer with 5+ years experience. Requires React, Next.js, JavaScript/TypeScript, NodeJS, ExpressJS, Contentful CMS, HTML5/CSS3/SCSS/Tailwind. Focus on building reusable components, design systems, and SEO optimization.",
+      "job": {
+        "title": "Fullstack Developer",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["React.js", "Next.js", "Node.js", "Express.js", "TypeScript", "Tailwind CSS"],
+        "requiredExperience": 5,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432808113046515713",
+      "isHiring": false,
+      "poster": { "name": "Praveen Alluri", "headline": "Technical Recruiter @ Meta Soft Inc" },
+      "summary": "React Native Developer role in Alameda, CA (3 days onsite). Strictly mobile developers only. 4+ years experience. Non-India location.",
+      "job": {
+        "title": "React Native Developer",
+        "company": "Meta Soft Inc",
+        "type": "full-time",
+        "requirements": ["React Native", "JavaScript", "TypeScript", "iOS", "Android"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["Praveen@metasoftinc.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432677081274273792",
+      "isHiring": true,
+      "poster": { "name": "James Roshan T", "headline": "MBA || Talent Acquisition - IT" },
+      "summary": "Hiring Node.js Fullstack Developer (with architectural design experience) for remote role. 10+ years experience required. Must be from a product-based company and Premier Institute graduate. Requires Node.js, React.js, TypeScript, AWS. Immediate to 20 days notice preferred.",
+      "job": {
+        "title": "Node.js Fullstack Developer",
+        "company": null,
+        "type": "remote",
+        "requirements": ["Node.js", "React.js", "TypeScript", "AWS"],
+        "requiredExperience": 10,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["james@coreimpaqt-s.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432741700114116609",
+      "isHiring": true,
+      "poster": { "name": "Tejas Kiran Pathak", "headline": "Seasoned Product Owner | Software Architecture" },
+      "summary": "Siemens R&D Goa hiring Senior Backend Developer (5-15 years, permanent) for IoT Smart Infrastructure team. Requires Python/Java/Node.js expertise, SOLID principles, design patterns, system design, microservices, APIs, and cloud/DevOps mindset. Building enterprise-scale IoT and digitalization solutions.",
+      "job": {
+        "title": "Senior Backend Developer",
+        "company": "Siemens R&D",
+        "type": "full-time",
+        "requirements": ["Node.js", "Python", "Java", "Microservices", "System Design", "Cloud", "DevOps"],
+        "requiredExperience": 5,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432774861610962944",
+      "isHiring": true,
+      "poster": { "name": "Divyesh Godhani", "headline": "Co-Founder & CTO at Movya Infotech" },
+      "summary": "Movya Infotech hiring MERN Stack Developers in Ahmedabad. Looking for full-stack problem solvers who can build REST APIs with Node.js, design MongoDB schemas, create optimized React frontends, and handle deployment & debugging. Work on real client projects with production APIs.",
+      "job": {
+        "title": "MERN Stack Developer",
+        "company": "Movya Infotech",
+        "type": "full-time",
+        "requirements": ["MongoDB", "Express.js", "React.js", "Node.js", "REST APIs", "JavaScript"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["career@movya.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432654069477052417",
+      "isHiring": false,
+      "poster": { "name": "Priyanshi Rajput", "headline": "Student at Lukhdhirji Engineering College" },
+      "summary": "Moon Technolabs hiring Trainee positions (React.js, Node.js, Laravel, Android, Unity) for 2025/2026 pass-outs in Ahmedabad. Trainee/internship roles for freshers.",
+      "job": {
+        "title": "Trainee Node.js Developer",
+        "company": "Moon Technolabs",
+        "type": "intern",
+        "requirements": ["Node.js", "JavaScript"],
+        "requiredExperience": 0,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["priyanshi@moontechnolabs.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432646875977109505",
+      "isHiring": true,
+      "poster": { "name": "KICT COMPUTER EDUCATION INDIA", "headline": "Shaping future-ready professionals" },
+      "summary": "Hiring MERN Stack Developer in Ahmedabad, Gujarat. Open to both freshers with strong fundamentals and experienced developers. Requires React frontend, Node.js backend, API development, and database handling. Competitive salary based on skills, immediate joiners preferred.",
+      "job": {
+        "title": "MERN Stack Developer",
+        "company": "KICT",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "MongoDB", "Express.js", "JavaScript"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": [],
+        "method": "DM"
+      }
+    },
+    {
+      "postId": "7432673686152974336",
+      "isHiring": true,
+      "poster": { "name": "Hanzla Akhtar", "headline": "Human Resources Specialist | Global IT Recruitment" },
+      "summary": "Hiring Blockchain Developer (L2/L3) with 6-8 years experience in Noida (Hybrid)/Remote. Requires 4+ years Blockchain development, Hyperledger Fabric, Smart Contracts, Node.js/Go, consensus mechanisms, DevOps tools. Building distributed ledger and blockchain architecture solutions.",
+      "job": {
+        "title": "Blockchain Developer",
+        "company": "TRBITIX",
+        "type": "full-time",
+        "requirements": ["Node.js", "Hyperledger Fabric", "Docker", "Kubernetes", "React.js", "Angular"],
+        "requiredExperience": 6,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hanzla.akhtar@trbitix.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432737857695526912",
+      "isHiring": true,
+      "poster": { "name": "Deepali Deora", "headline": "HR Executive | IT Recruitment & Talent Management" },
+      "summary": "5bix IT Solutions hiring Backend Developer with 1+ year experience in Chandigarh. Only female candidates. Requires Node.js, Express.js (NestJS preferred), MongoDB & SQL, REST APIs, and Git workflows.",
+      "job": {
+        "title": "Backend Developer",
+        "company": "5bix IT Solutions Inc.",
+        "type": "full-time",
+        "requirements": ["Node.js", "Express.js", "NestJS", "MongoDB", "SQL", "REST APIs"],
+        "requiredExperience": 1,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["deepali_hr@5bix.in"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432681288295342080",
+      "isHiring": true,
+      "poster": { "name": "Shainki Gupta", "headline": "Founder & CEO | Jawam Infotech" },
+      "summary": "Jawam Infotech hiring Full Stack Developer (React/Next/React Native/Node.js) with 3+ years experience in Indore (on-site). Requires React.js, React Native, Node.js, Express, REST APIs, MongoDB/MySQL/PostgreSQL, Git. Immediate joiners preferred. International project exposure.",
+      "job": {
+        "title": "Full Stack Developer",
+        "company": "Jawam Infotech",
+        "type": "full-time",
+        "requirements": ["React.js", "React Native", "Node.js", "Express.js", "MongoDB", "MySQL", "REST APIs"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["shainkig@jawaminfotech.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432710897443307520",
+      "isHiring": true,
+      "poster": { "name": "Deepak Pradhan", "headline": "Database Engineer" },
+      "summary": "Voya hiring Full Stack Developer with React.js and Node.js with 9-14 years experience. Minimal details provided in post.",
+      "job": {
+        "title": "Full Stack Developer (React.js + Node.js)",
+        "company": "Voya",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "JavaScript"],
+        "requiredExperience": 9,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["deepak.pradhan@voya.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432459586856632320",
+      "isHiring": true,
+      "poster": { "name": "Nootan Patel", "headline": "Hiring MERN Stack developer" },
+      "summary": "TekPillar hiring MERN Stack Developer with 1-3 years experience in Surat, Gujarat. Requires React.js for dynamic UI, Node.js & Express for backend, MongoDB for data management. Looking for a problem solver and team player.",
+      "job": {
+        "title": "MERN Stack Developer",
+        "company": "TekPillar",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "Express.js", "MongoDB", "JavaScript"],
+        "requiredExperience": 1,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["moxa@tekpillar.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432524325590732801",
+      "isHiring": false,
+      "poster": { "name": "KL C", "headline": "SR US IT RECRUITER" },
+      "summary": "Java Full Stack Developer W2 role, Remote USA only. Requires OPT/STEM OPT/GC/USC visa status. US work authorization required.",
+      "job": {
+        "title": "Java Full Stack Developer",
+        "company": null,
+        "type": "full-time",
+        "requirements": ["Java", "Spring Boot", "Node.js", "Python", "GoLang"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["chary@technologyhub.net"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432765380160307200",
+      "isHiring": true,
+      "poster": { "name": "VVR Chandhran", "headline": "Building What's Next - Through People" },
+      "summary": "Hiring .NET Developers in Bangalore with 3-6 years experience. Primary is .NET with working knowledge of Java & Python. Also requires AWS, security-by-design, GitLab/DevOps, JavaScript, NodeJS, Angular, SQL Server/MariaDB/PostgreSQL. Early joiners with short notice preferred.",
+      "job": {
+        "title": ".NET Developer",
+        "company": "Abeyaantrix Solutions",
+        "type": "full-time",
+        "requirements": [".NET", "Java", "Python", "AWS", "JavaScript", "Node.js", "Angular", "SQL Server"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["vvrchandhran@abeyaantrixsolutions.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432687839227695105",
+      "isHiring": true,
+      "poster": { "name": "Shaila Banarase", "headline": "Talent Acquisition Specialist at Apptware" },
+      "summary": "Apptware hiring Full Stack Developer (React.js + Node.js) in Pune/Mangalore with 4+ years experience. Requires React.js, Node.js, Next.js, AWS (EC2, S3), REST APIs, MongoDB/SQL. Multiple positions open.",
+      "job": {
+        "title": "Full Stack Developer (React.js + Node.js)",
+        "company": "Apptware",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "Next.js", "AWS", "REST APIs", "MongoDB", "SQL"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["shaila.banarase@apptware.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432687839227695105",
+      "isHiring": true,
+      "poster": { "name": "Shaila Banarase", "headline": "Talent Acquisition Specialist at Apptware" },
+      "summary": "Apptware hiring Full Stack Developer (React + Node) with 3-5 years experience. Requires React.js, Node.js, Express.js, MongoDB/MySQL, JWT Authentication.",
+      "job": {
+        "title": "Full Stack Developer (React + Node)",
+        "company": "Apptware",
+        "type": "full-time",
+        "requirements": ["React.js", "Node.js", "Express.js", "MongoDB", "MySQL", "JWT"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["shaila.banarase@apptware.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432651489812201472",
+      "isHiring": true,
+      "poster": { "name": "Sneha M.", "headline": "Hiring #QA Automation Engineer, #Laravel Developer" },
+      "summary": "Hiring Software Developer (Laravel) with 3-5 years experience in the Shopify ecosystem. Must-have: Laravel, Eloquent, Queues, SQL, GraphQL APIs, Git. Good-to-have: Shopify App development, Docker, Redis, AWS, Node.js/Vue.js.",
+      "job": {
+        "title": "Software Developer (Laravel)",
+        "company": "Rave Digital",
+        "type": "full-time",
+        "requirements": ["Laravel", "PHP", "GraphQL", "REST APIs", "MySQL", "PostgreSQL"],
+        "requiredExperience": 3,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr@ravedigital.agency"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432672609248436224",
+      "isHiring": true,
+      "poster": { "name": "Gayatri R.", "headline": "HR Operations | People & Culture Professional" },
+      "summary": "Green Byte Web hiring Web/Laravel Developer in Noida WFO with 4-5 years experience. Requires Laravel, PHP, REST APIs, Flutter API integration, CakePHP, Node.js, MySQL, Git.",
+      "job": {
+        "title": "Web/Laravel Developer",
+        "company": "Green Byte Web Pvt Ltd",
+        "type": "full-time",
+        "requirements": ["Laravel", "PHP", "REST APIs", "Node.js", "MySQL", "Git"],
+        "requiredExperience": 4,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["gayatri@greenbyteweb.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432680072433664002",
+      "isHiring": true,
+      "poster": { "name": "Akansha Dubey", "headline": "HR Professional || Talent Acquisition & Employee Relations" },
+      "summary": "Bitcot hiring Junior NodeJS Developer in Chennai/Indore. Great learning environment with career growth opportunities and supportive team culture. Multiple junior tech positions open.",
+      "job": {
+        "title": "Junior NodeJS Developer",
+        "company": "Bitcot",
+        "type": "full-time",
+        "requirements": ["Node.js", "JavaScript"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["akanshadubey@bitcot.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432680072433664002",
+      "isHiring": true,
+      "poster": { "name": "Akansha Dubey", "headline": "HR Professional || Talent Acquisition & Employee Relations" },
+      "summary": "Bitcot hiring Junior ReactJS Developer in Chennai/Indore. Great learning environment with career growth opportunities and supportive team culture.",
+      "job": {
+        "title": "Junior ReactJS Developer",
+        "company": "Bitcot",
+        "type": "full-time",
+        "requirements": ["React.js", "JavaScript"],
+        "requiredExperience": null,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["akanshadubey@bitcot.com"],
+        "method": "email"
+      }
+    },
+    {
+      "postId": "7432746888329834497",
+      "isHiring": false,
+      "poster": { "name": "Hem Lata Sharma", "headline": "HR Executive/ Hiring Video editor profile" },
+      "summary": "Hiring Web Developer (React.js, PHP) in Mohali for freshers. Only Mohali/Chandigarh candidates considered. On-site only, face-to-face interview. Local candidates only restriction.",
+      "job": {
+        "title": "Web Developer (React.js, PHP)",
+        "company": "Cool Plugins",
+        "type": "full-time",
+        "requirements": ["React.js", "JavaScript", "Node.js", "PHP", "HTML", "CSS"],
+        "requiredExperience": 0,
+        "salary": null,
+        "salaryMinLPA": null,
+        "salaryMaxLPA": null
+      },
+      "contacts": {
+        "emails": ["hr@coolplugins.net"],
+        "method": "email"
+      }
+    }
+  ]
+}
