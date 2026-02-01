@@ -7,7 +7,7 @@ import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import { markEmailAsSent } from "./contact-logger.js";
+import { markSent as markEmailAsSent } from "./contacts-store.js";
 import { isValidEmail } from "./email-validator.js";
 
 dotenv.config();

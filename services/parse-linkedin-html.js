@@ -1,289 +1,137 @@
-import { readFileSync, writeFileSync } from "fs";
+/**
+ * LinkedIn HTML Parser
+ * Parses copied LinkedIn feed HTML into normalized post format.
+ */
+
 import * as cheerio from "cheerio";
 
-const INPUT_FILE = process.argv[2] || "linkedin.html";
-const OUTPUT_FILE = process.argv[3] || "parsed-html-feed.json";
-
-const html = readFileSync(INPUT_FILE, "utf-8");
-const $ = cheerio.load(html);
-
-// Helper: clean text by stripping HTML comments, excess whitespace
+// Clean text by stripping HTML comments and excess whitespace
 function cleanText(text) {
   if (!text) return null;
-  return text
-    .replace(/<!---->/g, "")
-    .replace(/\s+/g, " ")
-    .trim() || null;
+  return text.replace(/<!---->/g, "").replace(/\s+/g, " ").trim() || null;
 }
 
-// Helper: extract text from a cheerio element, ignoring visually-hidden duplicates
+// Extract text from a cheerio element, ignoring visually-hidden duplicates
 function visibleText(el) {
   const clone = el.clone();
   clone.find(".visually-hidden").remove();
   return cleanText(clone.text());
 }
 
-// Extract job URL ID from linkedin job URL
-function extractJobId(url) {
-  if (!url) return null;
-  const match = url.match(/\/jobs\/view\/(\d+)/);
-  return match ? match[1] : null;
-}
+/**
+ * Parse LinkedIn HTML string into normalized posts.
+ * @param {string} html - The raw HTML string
+ * @returns {{ posts: object[] }} - Array of normalized post objects
+ */
+export function parseHTML(html) {
+  const $ = cheerio.load(html);
+  const now = new Date().toISOString();
+  const posts = [];
 
-// Parse each article (post)
-const posts = [];
-const articles = $('[role="article"][data-urn^="urn:li:activity:"]');
+  const articles = $('[role="article"][data-urn^="urn:li:activity:"]');
 
-articles.each((_i, article) => {
-  const $article = $(article);
-  const activityUrn = $article.attr("data-urn");
-  const activityId = activityUrn?.replace("urn:li:activity:", "") || null;
+  articles.each((_i, article) => {
+    const $article = $(article);
+    const activityUrn = $article.attr("data-urn");
+    const activityId = activityUrn?.replace("urn:li:activity:", "") || null;
+    if (!activityId) return;
 
-  // === AUTHOR ===
-  const actorContainer = $article.find(
-    ".update-components-actor__container"
-  ).first();
+    // === AUTHOR ===
+    const actorContainer = $article.find(".update-components-actor__container").first();
+    const profileLink = actorContainer.find("a.update-components-actor__meta-link").first();
+    const profileUrl = profileLink.attr("href") || null;
 
-  // Profile link & URL
-  const profileLink = actorContainer
-    .find("a.update-components-actor__meta-link")
-    .first();
-  const profileUrl = profileLink.attr("href") || null;
+    const nameEl = actorContainer.find(".update-components-actor__title").first();
+    const name = visibleText(nameEl.find('[dir="ltr"]').first());
 
-  // Name
-  const nameEl = actorContainer
-    .find(".update-components-actor__title")
-    .first();
-  const name = visibleText(
-    nameEl.find('[dir="ltr"]').first()
-  );
+    const headlineEl = actorContainer.find(".update-components-actor__description").first();
+    const headline = visibleText(headlineEl);
 
-  // Headline / description
-  const headlineEl = actorContainer
-    .find(".update-components-actor__description")
-    .first();
-  const headline = visibleText(headlineEl);
+    const followBtn = $article.find('button[aria-label^="Follow "]').first();
+    const followName = followBtn.attr("aria-label")?.replace("Follow ", "") || null;
 
-  // Connection degree & verification
-  const suppEl = actorContainer
-    .find(".update-components-actor__supplementary-actor-info")
-    .first();
-  const suppHidden = suppEl.find(".visually-hidden").first().text().trim().replace(/<!---->/g, "");
-  const isVerified = suppHidden.includes("Verified");
-  const isPremium = suppHidden.includes("Premium");
-  const connectionDegree = suppHidden.replace("Verified", "").replace("Premium", "").replace(/[•·]/g, "").trim() || null;
+    // Posted time
+    const subDescEl = $article.find(".update-components-actor__sub-description").first();
+    const postedAgo = visibleText(subDescEl);
 
-  // Posted time
-  const subDescEl = $article
-    .find(".update-components-actor__sub-description")
-    .first();
-  const postedAgo = visibleText(subDescEl);
-  const postedAgoFull =
-    subDescEl.find(".visually-hidden").first().text().trim().replace(/<!---->/g, "").trim() || null;
-
-  // Profile picture
-  const avatarImg = actorContainer
-    .find(".update-components-actor__avatar-image")
-    .first();
-  const profilePictureUrl = avatarImg.attr("src")?.replace(/&amp;/g, "&") || null;
-
-  // Follow button -> extract name for cases where profile name is hard to get
-  const followBtn = $article
-    .find('button[aria-label^="Follow "]')
-    .first();
-  const followName = followBtn.attr("aria-label")?.replace("Follow ", "") || null;
-
-  // === POST CONTENT / COMMENTARY ===
-  const commentaryEl = $article
-    .find(".update-components-update-v2__commentary")
-    .first();
-
-  let postText = null;
-  if (commentaryEl.length) {
-    // Get the inner span with dir="ltr" which has the actual post text
-    const textSpan = commentaryEl.find("span.break-words span[dir='ltr']").first();
-    if (textSpan.length) {
-      // Process the HTML to get clean text with line breaks
-      let rawHtml = textSpan.html() || "";
-      // Replace <br> with newlines
-      rawHtml = rawHtml.replace(/<span><br><\/span>/g, "\n");
-      rawHtml = rawHtml.replace(/<br\s*\/?>/g, "\n");
-      // Strip all remaining HTML tags but keep text
-      const $temp = cheerio.load(rawHtml);
-      postText = $temp.text()
-        .replace(/<!---->/g, "")
-        .replace(/hashtag\n?/g, "") // remove "hashtag" screen reader text
-        .replace(/\n{3,}/g, "\n\n") // collapse multiple newlines
-        .trim() || null;
+    // === POST CONTENT ===
+    const commentaryEl = $article.find(".update-components-update-v2__commentary").first();
+    let postText = null;
+    if (commentaryEl.length) {
+      const textSpan = commentaryEl.find("span.break-words span[dir='ltr']").first();
+      if (textSpan.length) {
+        let rawHtml = textSpan.html() || "";
+        rawHtml = rawHtml.replace(/<span><br><\/span>/g, "\n");
+        rawHtml = rawHtml.replace(/<br\s*\/?>/g, "\n");
+        const $temp = cheerio.load(rawHtml);
+        postText = $temp.text()
+          .replace(/<!---->/g, "")
+          .replace(/hashtag\n?/g, "")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim() || null;
+      }
     }
-  }
 
-  // Extract hashtags from the commentary
-  const hashtags = [];
-  commentaryEl.find('a[href*="keywords=%23"]').each((_j, el) => {
-    const href = $(el).attr("href");
-    const match = href?.match(/keywords=%23([^&]+)/);
-    if (match) {
-      hashtags.push({
-        tag: `#${decodeURIComponent(match[1])}`,
-        url: href?.replace(/&amp;/g, "&") || null,
-      });
-    }
-  });
-
-  // === JOB CARD (entity component) ===
-  let job = null;
-  const entityEl = $article.find(".update-components-entity").first();
-  if (entityEl.length) {
-    const entityLink = entityEl
-      .find("a.update-components-entity__content")
-      .first();
-    const jobUrl = entityLink.attr("href")?.replace(/&amp;/g, "&") || null;
-
-    const jobTitle = cleanText(
-      entityEl.find(".update-components-entity__title").first().text()
-    );
-    const jobSubtitle = cleanText(
-      entityEl.find(".update-components-entity__subtitle").first().text()
-    );
-    const jobLocation = cleanText(
-      entityEl.find(".update-components-entity__description").first().text()
-    );
-
-    // Company logo
-    const companyLogoImg = entityEl
-      .find(".update-components-entity__image-container img")
-      .first();
-    const companyLogoUrl =
-      companyLogoImg.attr("src")?.replace(/&amp;/g, "&") || null;
-
-    // Parse "Job by CompanyName" -> just company name
-    const company = jobSubtitle?.replace(/^Job by\s*/i, "") || null;
-
-    job = {
-      title: jobTitle,
-      company,
-      location: jobLocation,
-      jobUrl,
-      jobId: extractJobId(jobUrl),
-      companyLogoUrl,
-    };
-  }
-
-  // === ARTICLE LINK (shared article/link) ===
-  let article_link = null;
-  const articleEl = $article.find("article.update-components-article").first();
-  if (articleEl.length) {
-    const linkEl = articleEl.find("a").first();
-    const articleTitle = cleanText(
-      articleEl.find(".update-components-article__title").first().text()
-    );
-    const articleSubtitle = cleanText(
-      articleEl.find(".update-components-article__subtitle--inset").first().text()
-    );
-    const articleImgEl = articleEl.find("img").first();
-
-    article_link = {
-      title: articleTitle,
-      source: articleSubtitle,
-      url: linkEl.attr("href")?.replace(/&amp;/g, "&") || null,
-      imageUrl: articleImgEl.attr("src")?.replace(/&amp;/g, "&") || null,
-    };
-  }
-
-  // === IMAGE CONTENT ===
-  let image = null;
-  const imageEl = $article.find(".update-components-image").first();
-  if (imageEl.length) {
-    const imgTag = imageEl.find("img").first();
-    image = {
-      url: imgTag.attr("src")?.replace(/&amp;/g, "&") || null,
-      alt: imgTag.attr("alt") || null,
-      width: parseInt(imgTag.attr("width"), 10) || null,
-      height: parseInt(imgTag.attr("height"), 10) || null,
-    };
-  }
-
-  // === ENGAGEMENT / SOCIAL COUNTS ===
-  const socialCountsEl = $article
-    .find(".social-details-social-counts")
-    .first();
-
-  // Reactions count
-  const reactionsBtn = socialCountsEl
-    .find('[aria-label$="reactions"], [aria-label$="reaction"]')
-    .first();
-  const reactionsLabel = reactionsBtn.attr("aria-label") || "";
-  const reactionsCount = parseInt(reactionsLabel.match(/(\d[\d,]*)/)?.[1]?.replace(/,/g, ""), 10) || 0;
-
-  // Reaction types from icons
-  const reactionTypes = [];
-  socialCountsEl
-    .find("img.reactions-icon[data-test-reactions-icon-type]")
-    .each((_j, el) => {
-      const type = $(el).attr("data-test-reactions-icon-type");
-      if (type && !reactionTypes.includes(type)) reactionTypes.push(type);
+    // Extract hashtags
+    const hashtags = [];
+    commentaryEl.find('a[href*="keywords=%23"]').each((_j, el) => {
+      const href = $(el).attr("href");
+      const match = href?.match(/keywords=%23([^&]+)/);
+      if (match) hashtags.push(`#${decodeURIComponent(match[1])}`);
     });
 
-  // Comments count
-  const commentsBtn = socialCountsEl
-    .find('[aria-label*="comment"]')
-    .first();
-  const commentsLabel = commentsBtn.attr("aria-label") || "";
-  const commentsCount =
-    parseInt(commentsLabel.match(/(\d[\d,]*)/)?.[1]?.replace(/,/g, ""), 10) || 0;
+    // === JOB CARD ===
+    let job = null;
+    const entityEl = $article.find(".update-components-entity").first();
+    if (entityEl.length) {
+      const jobUrl = entityEl.find("a.update-components-entity__content").first().attr("href")?.replace(/&amp;/g, "&") || null;
+      const jobTitle = cleanText(entityEl.find(".update-components-entity__title").first().text());
+      const jobSubtitle = cleanText(entityEl.find(".update-components-entity__subtitle").first().text());
+      const jobLocation = cleanText(entityEl.find(".update-components-entity__description").first().text());
 
-  // Reposts count
-  const repostsBtn = socialCountsEl
-    .find('[aria-label*="repost"]')
-    .first();
-  const repostsLabel = repostsBtn.attr("aria-label") || "";
-  const repostsCount =
-    parseInt(repostsLabel.match(/(\d[\d,]*)/)?.[1]?.replace(/,/g, ""), 10) || 0;
+      job = {
+        title: jobTitle,
+        company: jobSubtitle?.replace(/^Job by\s*/i, "") || null,
+        location: jobLocation,
+        jobUrl,
+      };
+    }
 
-  // === BUILD POST OBJECT ===
-  const post = {
-    id: activityId,
-    activityUrn,
+    // === ENGAGEMENT ===
+    const socialCountsEl = $article.find(".social-details-social-counts").first();
 
-    author: {
-      name: name || followName,
-      headline,
-      profileUrl: profileUrl?.replace(/&amp;/g, "&") || null,
-      profilePictureUrl,
-      connectionDegree,
-      isVerified,
-      isPremium,
-    },
+    const reactionsLabel = socialCountsEl.find('[aria-label$="reactions"], [aria-label$="reaction"]').first().attr("aria-label") || "";
+    const reactions = parseInt(reactionsLabel.match(/(\d[\d,]*)/)?.[1]?.replace(/,/g, ""), 10) || 0;
 
-    post: {
-      text: postText,
-      postedAgo,
-      postedAgoFull,
-      hashtags,
-    },
+    const commentsLabel = socialCountsEl.find('[aria-label*="comment"]').first().attr("aria-label") || "";
+    const comments = parseInt(commentsLabel.match(/(\d[\d,]*)/)?.[1]?.replace(/,/g, ""), 10) || 0;
 
-    job,
-    articleLink: article_link,
-    image,
+    const repostsLabel = socialCountsEl.find('[aria-label*="repost"]').first().attr("aria-label") || "";
+    const reposts = parseInt(repostsLabel.match(/(\d[\d,]*)/)?.[1]?.replace(/,/g, ""), 10) || 0;
 
-    engagement: {
-      reactions: reactionsCount,
-      reactionTypes,
-      comments: commentsCount,
-      reposts: repostsCount,
-    },
-  };
+    posts.push({
+      id: activityId,
+      source: "html",
+      extractedAt: now,
+      processed: false,
 
-  posts.push(post);
-});
+      author: {
+        name: name || followName,
+        headline,
+        profileUrl: profileUrl?.replace(/&amp;/g, "&") || null,
+      },
 
-const result = {
-  extractedAt: new Date().toISOString(),
-  source: INPUT_FILE,
-  totalPosts: posts.length,
-  posts,
-};
+      post: {
+        text: postText,
+        postedAgo,
+        hashtags,
+      },
 
-writeFileSync(OUTPUT_FILE, JSON.stringify(result, null, 2));
-console.log(`Parsed ${posts.length} posts from HTML -> ${OUTPUT_FILE}`);
+      job,
+
+      engagement: { reactions, comments, reposts },
+    });
+  });
+
+  return { posts };
+}

@@ -8,9 +8,11 @@
     "feed-email-extractor": "./index.js"
   },
   "scripts": {
-    "start": "node index.js",
-    "start:file": "node index.js --file sample-feed.json",
-    "send": "node scripts/send-emails.js",
+    "parse": "node index.js parse",
+    "parse:file": "node index.js parse --file",
+    "generate": "node index.js generate",
+    "send": "node index.js send",
+    "send:emails": "node scripts/send-emails.js",
     "send:verify": "node scripts/send-emails.js --verify",
     "send:list": "node scripts/send-emails.js --list"
   },

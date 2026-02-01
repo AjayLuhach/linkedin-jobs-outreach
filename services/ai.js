@@ -1,6 +1,6 @@
 /**
- * AI Service - Gemini API for LinkedIn feed email extraction & email generation
- * 2-Step Pipeline: Extract Hiring Posts → Generate Email Content
+ * AI Service - Gemini API for batch post analysis, match scoring & email generation
+ * Processes posts in batches of 5: extract hiring info → score match → generate emails
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -13,9 +13,9 @@ import config from '../config.js';
 function initializeClient() {
   if (!config.ai.geminiApiKey) {
     throw new Error(
-      'GEMINI_API_KEY environment variable is not set.\n' +
-      'Get your API key from: https://makersuite.google.com/app/apikey\n' +
-      'Then add to .env: GEMINI_API_KEY=your_api_key_here'
+      'GEMINI_API_KEY is not set.\n' +
+      'Get your key from: https://makersuite.google.com/app/apikey\n' +
+      'Add to .env: GEMINI_API_KEY=your_key'
     );
   }
   return new GoogleGenerativeAI(config.ai.geminiApiKey);
@@ -25,9 +25,6 @@ function initializeClient() {
 // MODEL DISCOVERY & ROTATION
 // ============================================================
 
-/**
- * Fetch available models from Gemini API
- */
 async function fetchAvailableModels() {
   const apiKey = config.ai.geminiApiKey;
   if (!apiKey) return [];
@@ -36,15 +33,10 @@ async function fetchAvailableModels() {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
     );
-    if (!response.ok) {
-      console.warn('   Could not fetch model list, using defaults');
-      return [];
-    }
+    if (!response.ok) return [];
 
     const data = await response.json();
-    const models = data.models || [];
-
-    const textModels = models
+    return (data.models || [])
       .filter(m =>
         m.name.includes('gemini') &&
         m.supportedGenerationMethods?.includes('generateContent')
@@ -55,27 +47,24 @@ async function fetchAvailableModels() {
         !name.includes('embedding') &&
         !name.includes('aqa')
       );
-
-    console.log(`\n   Available Gemini models: ${textModels.join(', ')}`);
-    return textModels;
-  } catch (error) {
-    console.warn('   Error fetching models:', error.message);
+  } catch {
     return [];
   }
 }
 
 let cachedModels = null;
 
-async function getModelsForTask(taskType) {
+async function getModels() {
   if (cachedModels === null) {
     cachedModels = await fetchAvailableModels();
+    if (cachedModels.length > 0) {
+      console.log(`   Available models: ${cachedModels.slice(0, 5).join(', ')}`);
+    }
   }
 
-  if (cachedModels.length === 0) {
-    return config.ai.models[taskType] || config.ai.models.extraction;
-  }
+  const preferred = config.ai.models;
 
-  const preferred = config.ai.models[taskType] || config.ai.models.extraction;
+  if (cachedModels.length === 0) return preferred;
 
   const available = preferred.filter(m =>
     cachedModels.some(cached => cached.startsWith(m) || cached === m)
@@ -87,11 +76,11 @@ async function getModelsForTask(taskType) {
   );
 
   const result = [...available, ...extras];
-  return result.length > 0 ? result : config.ai.models[taskType];
+  return result.length > 0 ? result : preferred;
 }
 
 // ============================================================
-// MODEL ROTATION MANAGER
+// MODEL ROTATION
 // ============================================================
 
 const modelManager = {
@@ -100,41 +89,32 @@ const modelManager = {
   getAvailableModel(models) {
     const now = Date.now();
     for (const model of models) {
-      const cooldownUntil = this.rateLimitedUntil[model] || 0;
-      if (now >= cooldownUntil) return model;
+      if (now >= (this.rateLimitedUntil[model] || 0)) return model;
     }
-
-    let bestModel = models[0];
-    let shortestWait = Infinity;
+    // All rate-limited — return the one with shortest wait
+    let best = models[0];
+    let shortest = Infinity;
     for (const model of models) {
       const remaining = (this.rateLimitedUntil[model] || 0) - now;
-      if (remaining < shortestWait) {
-        shortestWait = remaining;
-        bestModel = model;
-      }
+      if (remaining < shortest) { shortest = remaining; best = model; }
     }
-    return bestModel;
+    return best;
   },
 
   markRateLimited(model) {
     this.rateLimitedUntil[model] = Date.now() + config.ai.rateLimitCooldown;
-    console.log(`   ${model} rate-limited, cooling down for ${config.ai.rateLimitCooldown / 1000}s`);
+    console.log(`   ${model} rate-limited, cooling down ${config.ai.rateLimitCooldown / 1000}s`);
   },
 
   isRateLimitError(error) {
     const msg = error.message?.toLowerCase() || '';
-    return msg.includes('429') ||
-           msg.includes('rate limit') ||
-           msg.includes('quota') ||
-           msg.includes('resource exhausted');
+    return msg.includes('429') || msg.includes('rate limit') ||
+           msg.includes('quota') || msg.includes('resource exhausted');
   },
 };
 
-/**
- * Execute AI request with automatic model rotation on rate limits
- */
-async function executeWithRotation(genAI, prompt, taskType, stepName) {
-  const models = await getModelsForTask(taskType);
+async function executeWithRotation(genAI, prompt, stepName) {
+  const models = await getModels();
   const triedModels = new Set();
 
   while (triedModels.size < models.length) {
@@ -170,23 +150,22 @@ async function executeWithRotation(genAI, prompt, taskType, stepName) {
     } catch (error) {
       if (modelManager.isRateLimitError(error)) {
         modelManager.markRateLimited(modelName);
-        console.log(`   Rotating to next available model...`);
+        console.log(`   Rotating to next model...`);
       } else {
         throw error;
       }
     }
   }
 
-  throw new Error(`All models exhausted for ${stepName}. Please wait and try again.`);
+  throw new Error(`All models exhausted for ${stepName}. Wait and try again.`);
 }
 
 // ============================================================
-// JSON PARSER
+// JSON PARSER (with truncation repair)
 // ============================================================
 
 function parseJSON(response, step = '') {
   let text = response.trim();
-
   if (text.startsWith('```json')) text = text.slice(7);
   else if (text.startsWith('```')) text = text.slice(3);
   if (text.endsWith('```')) text = text.slice(0, -3);
@@ -195,46 +174,33 @@ function parseJSON(response, step = '') {
   try {
     return JSON.parse(text);
   } catch {
-    // Attempt to repair truncated JSON by closing open brackets/braces
-    console.log(`   Attempting to repair truncated JSON in ${step}...`);
+    console.log(`   Repairing truncated JSON in ${step}...`);
     let repaired = text;
 
-    // If truncated mid-string, close the string first
-    // Count unescaped quotes
     const quoteCount = (repaired.match(/(?<!\\)"/g) || []).length;
     if (quoteCount % 2 !== 0) {
-      // Odd number of quotes = truncated inside a string
-      // Remove everything from the last unmatched quote
       const lastQuoteIdx = repaired.lastIndexOf('"');
-      // Find the key start before this value
       const beforeLastQuote = repaired.substring(0, lastQuoteIdx);
-      // Remove the incomplete key-value pair
       const lastComma = beforeLastQuote.lastIndexOf(',');
-      if (lastComma > 0) {
-        repaired = repaired.substring(0, lastComma);
-      }
+      if (lastComma > 0) repaired = repaired.substring(0, lastComma);
     }
 
-    // Remove trailing incomplete structures
     repaired = repaired.replace(/,\s*$/, '');
 
-    // Count open/close brackets
     const opens = (repaired.match(/\[/g) || []).length;
     const closes = (repaired.match(/\]/g) || []).length;
     const openBraces = (repaired.match(/\{/g) || []).length;
     const closeBraces = (repaired.match(/\}/g) || []).length;
 
-    // Close unclosed arrays and objects
     for (let i = 0; i < opens - closes; i++) repaired += ']';
     for (let i = 0; i < openBraces - closeBraces; i++) repaired += '}';
 
     try {
       const result = JSON.parse(repaired);
-      console.log(`   JSON repaired successfully (truncated response recovered)`);
+      console.log(`   JSON repaired successfully`);
       return result;
     } catch (error2) {
-      console.error(`\n   JSON Parse Error in ${step} (repair also failed):`);
-      console.error('Raw response (first 500 chars):');
+      console.error(`\n   JSON parse failed in ${step}:`);
       console.error(text.substring(0, 500));
       throw error2;
     }
@@ -242,135 +208,57 @@ function parseJSON(response, step = '') {
 }
 
 // ============================================================
-// STEP 1: EXTRACT HIRING POSTS & EMAILS
+// BATCH PROMPT BUILDER
 // ============================================================
 
-function buildExtractionPrompt(feedData) {
-  // Handle parsed LinkedIn data (from parser.js) vs raw text
-  let feedStr;
+function buildBatchPrompt(posts, candidate) {
+  const postsData = posts.map((p, i) => ({
+    index: i + 1,
+    id: p.id,
+    author: p.author?.name || 'Unknown',
+    authorHeadline: p.author?.headline || '',
+    text: p.post?.text || '',
+    jobTitle: p.job?.title || null,
+    jobCompany: p.job?.company || null,
+    hashtags: (p.post?.hashtags || []).join(', '),
+  }));
 
-  if (feedData.source && feedData.posts) {
-    // Parsed LinkedIn data — send only the clean posts
-    if (feedData.rawText) {
-      feedStr = feedData.rawText;
-    } else if (feedData.rawJson) {
-      feedStr = JSON.stringify(feedData.rawJson);
-    } else {
-      feedStr = JSON.stringify(feedData.posts, null, 2);
-    }
-  } else {
-    feedStr = typeof feedData === 'string' ? feedData : JSON.stringify(feedData);
-  }
+  return `Analyze these ${posts.length} LinkedIn posts. For each, determine if it's a hiring/job post and evaluate candidate fit.
 
-  // Include any pre-extracted emails from parser
-  const preExtractedEmails = (feedData.posts || [])
-    .flatMap(p => p.emailsFound || [])
-    .filter(Boolean);
+POSTS:
+${JSON.stringify(postsData, null, 2)}
 
-  const emailHint = preExtractedEmails.length > 0
-    ? `\nPRE-EXTRACTED EMAILS FOUND: ${preExtractedEmails.join(', ')}\nInclude these in your results.\n`
-    : '';
-
-  return `Analyze these LinkedIn posts and extract ONLY hiring-related posts where someone can apply.
-${emailHint}
-POSTS DATA:
-${feedStr}
-
-HIRING POSTS = posts with "hiring", "looking for", "open position", "send resume", "DM me", referral opportunities.
-
-CRITICAL - Extract ONLY email addresses (format: user@domain.com):
-- Extract emails in ALL formats (plain, obfuscated like "name [at] company [dot] com")
-- DO NOT include phone numbers (like +91-1234567890) in the emails array
-- DO NOT include WhatsApp numbers, contact numbers, or any numeric-only values
-- If post only has phone/contact number, leave emails array EMPTY []
-- Only valid email addresses with @ symbol belong in emails array
-
-Keep requirements to max 3 items. postSnippet max 50 chars. Be EXTREMELY concise.
-
-JSON only, NO markdown, NO extra whitespace:
-{"hiringPosts":[{"posterName":"","posterTitle":"short","company":"","role":"","requirements":["max 3"],"emails":[""],"contactMethod":"email/DM/phone","postSnippet":"max 50 chars","urgency":"high/medium/low"}],"totalPostsAnalyzed":0,"hiringPostsFound":0}`;
-}
-
-// ============================================================
-// STEP 2: GENERATE EMAIL CONTENT
-// ============================================================
-
-function buildEmailGenPrompt(hiringPost, candidate) {
-  return `Write a professional job application email.
-
-JOB DETAILS:
-- Poster: ${hiringPost.posterName} (${hiringPost.posterTitle})
-- Company: ${hiringPost.company}
-- Role: ${hiringPost.role}
-- Requirements: ${(hiringPost.requirements || []).join(', ')}
-
-CANDIDATE DETAILS (use ONLY this data - do NOT infer anything from the job post):
+CANDIDATE PROFILE (use ONLY this data — NEVER claim skills not listed here):
 - Name: ${candidate.name}
+- Role: Full Stack ${candidate.stack} Developer
+- Experience: ${candidate.experience} (since ${candidate.experienceStart})
 - Location: ${candidate.location}
-- Current Role: ${candidate.currentTitle} at ${candidate.currentCompany} (since ${candidate.experienceStart})
-- Experience: ${candidate.experience}
-- Tech Stack: ${candidate.stack}
-- Known Skills: ${candidate.allSkills.join(', ')}
+- Skills: ${candidate.skills.join(', ')}
 - Summary: ${candidate.summary}
-- Portfolio: ${candidate.portfolio}
-- LinkedIn: ${candidate.linkedin}
-- GitHub: ${candidate.github}
-- CANNOT claim: ${candidate.cannotClaim.slice(0, 15).join(', ')}
+- Key Projects: ${candidate.projects.map(p => `${p.name}: ${p.desc}`).join(' | ')}
+- Portfolio: ${candidate.portfolio} | LinkedIn: ${candidate.linkedin} | GitHub: ${candidate.github}
+- CANNOT CLAIM: ${candidate.cannotClaim.join(', ')}
 
-STRICT RULES:
-1. Subject: specific to role + company, include candidate name
-2. Opening: reference their LinkedIn post
-3. ONLY mention skills from the CANDIDATE DETAILS above - NEVER claim skills from the job post that aren't in candidate's known skills
-4. NEVER use location, city, or any personal detail from the job post for the candidate - candidate is from ${candidate.location}
-5. Max 150 words in body
-6. Mention attaching resume
-7. Professional but warm tone
-8. Sign off with candidate name, portfolio, LinkedIn, GitHub
+FOR EACH POST, determine:
+1. isHiring: Is this a hiring/job/referral post? (true/false)
+2. If hiring:
+   - Extract emails from post text (format: user@domain.com, including obfuscated like "name [at] company [dot] com")
+   - DO NOT include phone numbers in emails array
+   - Determine job type, role, requirements (max 3)
+   - Score match (1-10) based on candidate's ACTUAL skills vs requirements
+   - If score >= 5 AND emails found: generate personalized email (subject + body max 150 words)
+   - In email: ONLY mention skills from candidate profile, reference their LinkedIn post, mention attaching resume
+   - Sign off with candidate name, portfolio, LinkedIn, GitHub
 
-OUTPUT JSON (no markdown):
-{"subject":"","body":"","to":"recipient email","notes":""}`;
-}
+RESPOND WITH JSON ONLY (no markdown):
+{"results":[{"postId":"","isHiring":false,"job":{"title":"","company":"","type":"","requirements":[]},"contacts":{"emails":[],"method":"email/DM/phone"},"match":{"isGoodMatch":false,"score":0,"reason":""},"email":{"to":"","subject":"","body":""},"poster":{"name":"","headline":""}}]}
 
-// ============================================================
-// DISPLAY HELPERS
-// ============================================================
-
-function displayExtractionResults(extraction) {
-  console.log('\n' + '-'.repeat(60));
-  console.log('STEP 1: FEED ANALYSIS RESULTS');
-  console.log('-'.repeat(60));
-
-  console.log(`\n   Total posts analyzed: ${extraction.totalPostsAnalyzed}`);
-  console.log(`   Hiring posts found:  ${extraction.hiringPostsFound}`);
-
-  if (extraction.hiringPosts.length === 0) {
-    console.log('\n   No hiring posts with contact info found in this feed.');
-    return;
-  }
-
-  extraction.hiringPosts.forEach((post, i) => {
-    console.log(`\n   --- Post ${i + 1} ---`);
-    console.log(`   Poster:  ${post.posterName} (${post.posterTitle})`);
-    console.log(`   Company: ${post.company}`);
-    console.log(`   Role:    ${post.role}`);
-    console.log(`   Emails:  ${(post.emails || []).join(', ') || 'None found'}`);
-    console.log(`   Contact: ${post.contactMethod}`);
-    console.log(`   Urgency: ${post.urgency}`);
-    if (post.requirements?.length > 0) {
-      console.log(`   Skills:  ${post.requirements.join(', ')}`);
-    }
-  });
-}
-
-function displayGeneratedEmail(email, index) {
-  console.log(`\n   === Email ${index + 1} ===`);
-  console.log(`   To:      ${email.to}`);
-  console.log(`   Subject: ${email.subject}`);
-  console.log(`   ---`);
-  console.log(email.body.split('\n').map(line => `   ${line}`).join('\n'));
-  if (email.notes) {
-    console.log(`\n   Note: ${email.notes}`);
-  }
+RULES:
+- Non-hiring posts: set isHiring=false, leave other fields empty/default
+- No emails found: leave email.to empty, still score the match
+- NEVER claim skills from cannotClaim list
+- Keep requirements to max 3 items
+- Email body max 150 words, professional but warm`;
 }
 
 // ============================================================
@@ -378,71 +266,61 @@ function displayGeneratedEmail(email, index) {
 // ============================================================
 
 /**
- * Main 2-step pipeline: Extract hiring posts → Generate emails
+ * Process posts in batches of 5 through AI.
+ * @param {object[]} posts - Array of normalized posts to process
+ * @param {object} candidate - Candidate profile from config
+ * @returns {object[]} - Array of contact objects for contacts.json
  */
-export async function extractAndGenerate(feedData) {
+export async function processInBatches(posts, candidate) {
   const genAI = initializeClient();
-  const candidate = config.candidate;
+  const batchSize = 5;
+  const allContacts = [];
 
-  // ========== STEP 1: Extract Hiring Posts ==========
-  console.log('\n   STEP 1: Analyzing feed for hiring posts...');
-  const extractionPrompt = buildExtractionPrompt(feedData);
-  const extractionText = await executeWithRotation(genAI, extractionPrompt, 'extraction', 'Step 1 - Extraction');
-  const extraction = parseJSON(extractionText, 'Step 1 - Extraction');
-  displayExtractionResults(extraction);
+  const totalBatches = Math.ceil(posts.length / batchSize);
+  console.log(`\n   Processing ${posts.length} posts in ${totalBatches} batch(es) of ${batchSize}...\n`);
 
-  if (!extraction.hiringPosts || extraction.hiringPosts.length === 0) {
-    return { extraction, emails: [] };
-  }
+  for (let i = 0; i < posts.length; i += batchSize) {
+    const batch = posts.slice(i, i + batchSize);
+    const batchNum = Math.floor(i / batchSize) + 1;
+    console.log(`   --- Batch ${batchNum}/${totalBatches} (${batch.length} posts) ---`);
 
-  // Filter posts that have emails (we can actually send to these)
-  const postsWithEmails = extraction.hiringPosts.filter(
-    p => p.emails && p.emails.length > 0
-  );
+    const prompt = buildBatchPrompt(batch, candidate);
+    const responseText = await executeWithRotation(genAI, prompt, `Batch ${batchNum}`);
+    const parsed = parseJSON(responseText, `Batch ${batchNum}`);
 
-  const postsWithoutEmails = extraction.hiringPosts.filter(
-    p => !p.emails || p.emails.length === 0
-  );
+    const results = parsed.results || parsed;
 
-  if (postsWithoutEmails.length > 0) {
-    console.log(`\n   ${postsWithoutEmails.length} post(s) found without emails (DM/apply link only)`);
-  }
+    for (const result of results) {
+      if (!result.isHiring) continue;
 
-  if (postsWithEmails.length === 0) {
-    console.log('\n   No posts with email addresses found. Cannot generate emails.');
-    return { extraction, emails: [] };
-  }
+      const contact = {
+        postId: result.postId,
+        generatedAt: new Date().toISOString(),
+        poster: result.poster || {},
+        job: result.job || {},
+        match: result.match || { isGoodMatch: false, score: 0, reason: '' },
+        email: result.email || {},
+        contacts: result.contacts || { emails: [], method: '' },
+        sent: false,
+        sentAt: null,
+      };
 
-  // ========== STEP 2: Generate Emails ==========
-  console.log(`\n   STEP 2: Generating emails for ${postsWithEmails.length} post(s)...`);
+      allContacts.push(contact);
 
-  const generatedEmails = [];
-
-  for (let i = 0; i < postsWithEmails.length; i++) {
-    const post = postsWithEmails[i];
-    console.log(`\n   Generating email ${i + 1}/${postsWithEmails.length} (${post.company} - ${post.role})...`);
-
-    const emailPrompt = buildEmailGenPrompt(post, candidate);
-    const emailText = await executeWithRotation(genAI, emailPrompt, 'emailGen', `Step 2 - Email ${i + 1}`);
-    const email = parseJSON(emailText, `Step 2 - Email ${i + 1}`);
-
-    // Ensure the 'to' field has the actual email from extraction
-    if (!email.to || email.to === 'recipient email') {
-      email.to = post.emails[0];
+      // Display result
+      const matchIcon = contact.match.isGoodMatch ? '+' : '-';
+      console.log(`   [${matchIcon}] ${contact.poster.name || 'Unknown'} — ${contact.job.title || 'Unknown role'} @ ${contact.job.company || '?'} — Match: ${contact.match.score}/10`);
+      if (contact.email.to) {
+        console.log(`       Email: ${contact.email.to}`);
+      }
     }
 
-    email.company = post.company;
-    email.role = post.role;
-    email.posterName = post.posterName;
-
-    generatedEmails.push(email);
-    displayGeneratedEmail(email, i);
+    // Small delay between batches to avoid rate limits
+    if (i + batchSize < posts.length) {
+      console.log('   Waiting 2s before next batch...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
   }
 
-  return {
-    extraction,
-    emails: generatedEmails,
-  };
+  return allContacts;
 }
-
-export default { extractAndGenerate };

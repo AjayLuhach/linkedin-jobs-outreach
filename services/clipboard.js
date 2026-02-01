@@ -1,17 +1,17 @@
 /**
- * Clipboard Service - Read LinkedIn feed data from clipboard
+ * Clipboard Service - Read and auto-detect LinkedIn data format
  */
 
 import clipboardy from 'clipboardy';
-import { parseLinkedInResponse } from './parser.js';
+import { parseFeedJSON } from './parse-linkedin-feed.js';
+import { parseHTML } from './parse-linkedin-html.js';
 
 /**
  * Read text from system clipboard
  * @returns {Promise<string>} clipboard contents
  */
 export async function readClipboard() {
-  console.log('   Reading feed data from clipboard...');
-
+  console.log('   Reading from clipboard...');
   try {
     const text = await clipboardy.read();
     if (!text || text.trim().length === 0) {
@@ -22,47 +22,82 @@ export async function readClipboard() {
     if (error.message === 'Clipboard is empty') throw error;
     throw new Error(
       'Could not read clipboard.\n' +
-      'Copy the LinkedIn feed API response to your clipboard and try again.'
+      'Copy LinkedIn feed data (HTML or API JSON) to your clipboard and try again.'
     );
   }
 }
 
 /**
- * Validate and parse clipboard content into clean feed data
- * @param {string} text - clipboard content
- * @returns {object} - parsed LinkedIn data (clean format)
+ * Auto-detect format and parse into normalized posts.
+ * Supports: LinkedIn HTML, LinkedIn API JSON, raw text.
+ * @param {string} text - raw input text
+ * @returns {{ posts: object[], source: string }}
  */
-export function validateFeedData(text) {
+export function detectAndParse(text) {
   if (text.length < 20) {
-    throw new Error(
-      'Clipboard content is too short to be feed data.\n' +
-      'Copy the full LinkedIn feed API response and try again.'
-    );
+    throw new Error('Input is too short to be feed data.');
+  }
+
+  // Check if it looks like HTML
+  const trimmed = text.trimStart();
+  if (trimmed.startsWith('<') || trimmed.includes('role="article"') || trimmed.includes('data-urn="urn:li:activity:')) {
+    console.log('   Detected: LinkedIn HTML');
+    const result = parseHTML(text);
+    return { ...result, source: 'html' };
   }
 
   // Try to parse as JSON
   let parsed;
   try {
     parsed = JSON.parse(text);
-    console.log('   Valid JSON feed data detected');
   } catch {
-    // Not JSON - return as raw text for Gemini to handle directly
-    console.log('   Raw text feed data detected (not JSON)');
-    return { source: 'raw', totalResults: 0, posts: [], rawText: text };
+    // Not JSON, not HTML — raw text
+    console.log('   Detected: Raw text (not JSON or HTML)');
+    return { posts: [], source: 'raw', rawText: text };
   }
 
-  // Check if this is a LinkedIn API response we can parse
+  // Check if it's a LinkedIn API response
   const data = parsed?.data?.data;
-  const included = parsed?.included;
-
-  if (data && (data.searchDashClustersByAll || data.feedDashMainFeedByMainFeed) && included) {
-    console.log('   LinkedIn API response detected, parsing...');
-    return parseLinkedInResponse(parsed);
+  if (data && (data.searchDashClustersByAll || data.feedDashMainFeedByMainFeed) && parsed.included) {
+    console.log('   Detected: LinkedIn API JSON');
+    const result = parseFeedJSON(parsed);
+    return { ...result, source: 'api' };
   }
 
-  // Unknown JSON format — wrap it for Gemini to handle
-  console.log('   Unknown JSON format, passing to AI as-is');
-  return { source: 'unknown', totalResults: 0, posts: [], rawJson: parsed };
-}
+  // Check if it's already a posts array or object with posts
+  if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
+    console.log('   Detected: Posts array JSON');
+    const now = new Date().toISOString();
+    const posts = parsed.map(p => ({
+      id: p.id,
+      source: 'json',
+      extractedAt: now,
+      processed: false,
+      author: p.author || { name: null, headline: null, profileUrl: null },
+      post: { text: p.content || p.text || null, postedAgo: null, hashtags: [] },
+      job: p.job || null,
+      engagement: { reactions: p.reactions || 0, comments: p.comments || 0, reposts: p.reposts || 0 },
+    }));
+    return { posts, source: 'json' };
+  }
 
-export default { readClipboard, validateFeedData };
+  if (parsed.posts && Array.isArray(parsed.posts)) {
+    console.log('   Detected: Posts object JSON');
+    const now = new Date().toISOString();
+    const posts = parsed.posts.map(p => ({
+      id: p.id,
+      source: 'json',
+      extractedAt: now,
+      processed: false,
+      author: p.author || { name: null, headline: null, profileUrl: null },
+      post: { text: p.content || p.text || null, postedAgo: null, hashtags: [] },
+      job: p.job || null,
+      engagement: { reactions: p.reactions || 0, comments: p.comments || 0, reposts: p.reposts || 0 },
+    }));
+    return { posts, source: 'json' };
+  }
+
+  // Unknown JSON
+  console.log('   Detected: Unknown JSON format');
+  return { posts: [], source: 'unknown', rawJson: parsed };
+}
