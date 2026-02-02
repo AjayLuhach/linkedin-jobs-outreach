@@ -28,7 +28,8 @@ export function loadContacts() {
     return [];
   }
   try {
-    return JSON.parse(fs.readFileSync(CONTACTS_PATH, 'utf-8'));
+    const data = JSON.parse(fs.readFileSync(CONTACTS_PATH, 'utf-8'));
+    return Array.isArray(data) ? data : (data.contacts || []);
   } catch {
     return [];
   }

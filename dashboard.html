@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feed Email Extractor — Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: #2a2a3d;
+    --text: #e4e4ef;
+    --text-dim: #8888a4;
+    --accent: #7c5cfc;
+    --accent-glow: #7c5cfc44;
+    --green: #34d399;
+    --green-dim: #34d39933;
+    --red: #f87171;
+    --red-dim: #f8717133;
+    --yellow: #fbbf24;
+    --yellow-dim: #fbbf2433;
+    --cyan: #22d3ee;
+    --cyan-dim: #22d3ee33;
+    --pink: #f472b6;
+    --pink-dim: #f472b633;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 20%, #7c5cfc08 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, #22d3ee06 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, #f472b604 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #7c5cfc, #22d3ee, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .header p {
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+
+  /* ── STATS ROW ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--cyan)); }
+  .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+  .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--cyan), var(--accent)); }
+  .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--pink), var(--accent)); }
+  .stat-card:nth-child(5)::before { background: linear-gradient(90deg, var(--yellow), var(--green)); }
+  .stat-card:nth-child(6)::before { background: linear-gradient(90deg, var(--red), var(--pink)); }
+
+  .stat-number {
+    font-size: 2.4rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box:focus {
+    border-color: var(--accent);
+  }
+
+  .search-box::placeholder {
+    color: var(--text-dim);
+  }
+
+  /* ── CONTACT CARDS ── */
+  .cards {
+    display: grid;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px #7c5cfc11;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .score-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .score-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 3px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .score-high { color: var(--green); background: var(--green-dim); }
+  .score-high::before { background: linear-gradient(135deg, var(--green), var(--cyan)); }
+  .score-mid { color: var(--yellow); background: var(--yellow-dim); }
+  .score-mid::before { background: linear-gradient(135deg, var(--yellow), #fb923c); }
+  .score-low { color: var(--red); background: var(--red-dim); }
+  .score-low::before { background: linear-gradient(135deg, var(--red), var(--pink)); }
+
+  .card-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .card-info .role {
+    font-size: 0.85rem;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+
+  .card-info .reason {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .card-badges {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .badge {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .badge-sent { background: var(--green-dim); color: var(--green); border: 1px solid #34d39944; }
+  .badge-ready { background: var(--accent-glow); color: var(--accent); border: 1px solid #7c5cfc44; }
+  .badge-no-email { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #fbbf2444; }
+  .badge-low { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
+  .badge-method { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+
+  /* ── EXPANDABLE DETAIL ── */
+  .card-detail {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 0 24px 24px;
+    animation: slideDown 0.2s ease;
+  }
+
+  .card.expanded .card-detail {
+    display: block;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding-top: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+
+  .detail-section h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .detail-section h4::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .detail-section:nth-child(1) h4::before { background: var(--cyan); }
+  .detail-section:nth-child(2) h4::before { background: var(--pink); }
+  .detail-section:nth-child(3) h4::before { background: var(--green); }
+  .detail-section:nth-child(4) h4::before { background: var(--yellow); }
+
+  .email-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    grid-column: 1 / -1;
+  }
+
+  .email-preview .email-to {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+
+  .email-preview .email-subject {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .email-preview .email-body {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #ffffff06;
+  }
+
+  .detail-row .label {
+    color: var(--text-dim);
+  }
+
+  .detail-row .value {
+    color: var(--text);
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .reqs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .req-tag {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  /* ── EXPAND CHEVRON ── */
+  .chevron {
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .card.expanded .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  /* ── COUNTER ── */
+  .results-count {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Feed Email Extractor</h1>
+    <p id="subtitle">Loading contacts...</p>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="sendable">Sendable</button>
+    <button class="filter-btn" data-filter="sent">Sent</button>
+    <button class="filter-btn" data-filter="no-email">No Email (DM)</button>
+    <button class="filter-btn" data-filter="low-match">Low Match</button>
+    <input type="text" class="search-box" id="search" placeholder="Search by name, role, company, email...">
+  </div>
+
+  <div class="results-count" id="resultsCount"></div>
+  <div class="cards" id="cards"></div>
+</div>
+
+<script>
+(async () => {
+  let contacts = [];
+
+  try {
+    const res = await fetch('./output/contacts.json');
+    const data = await res.json();
+    contacts = Array.isArray(data) ? data : (data.contacts || []);
+  } catch (e) {
+    document.getElementById('subtitle').textContent = 'Failed to load contacts.json';
+    return;
+  }
+
+  const total = contacts.length;
+  const goodMatch = contacts.filter(c => c.match?.isGoodMatch);
+  const withEmail = contacts.filter(c => c.email?.to && c.email.to.includes('@'));
+  const sendable = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent);
+  const sent = contacts.filter(c => c.sent);
+  const avgScore = total ? (contacts.reduce((s, c) => s + (c.match?.score || 0), 0) / total).toFixed(1) : 0;
+
+  document.getElementById('subtitle').textContent = `${total} contacts from ${new Date().toLocaleDateString()}`;
+
+  // Stats
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--accent)">${total}</div>
+      <div class="stat-label">Total Contacts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--green)">${goodMatch.length}</div>
+      <div class="stat-label">Good Matches</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--cyan)">${withEmail.length}</div>
+      <div class="stat-label">With Email</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--pink)">${sendable.length}</div>
+      <div class="stat-label">Ready to Send</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--yellow)">${sent.length}</div>
+      <div class="stat-label">Sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--text)">${avgScore}</div>
+      <div class="stat-label">Avg Score</div>
+    </div>
+  `;
+
+  // Render
+  let activeFilter = 'all';
+  let searchQuery = '';
+
+  function getStatus(c) {
+    if (c.sent) return 'sent';
+    if (c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body) return 'sendable';
+    if (!c.email?.to || !c.email.to.includes('@')) return 'no-email';
+    if (!c.match?.isGoodMatch) return 'low-match';
+    return 'sendable';
+  }
+
+  function matchesFilter(c) {
+    const status = getStatus(c);
+    if (activeFilter !== 'all' && status !== activeFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const haystack = [
+        c.poster?.name, c.poster?.headline,
+        c.job?.title, c.job?.company, c.job?.type,
+        c.email?.to, c.email?.subject,
+        c.match?.reason,
+        ...(c.job?.requirements || []),
+        ...(c.contacts?.emails || []),
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    }
+    return true;
+  }
+
+  function scoreClass(score) {
+    if (score >= 8) return 'score-high';
+    if (score >= 5) return 'score-mid';
+    return 'score-low';
+  }
+
+  function statusBadge(c) {
+    const s = getStatus(c);
+    if (s === 'sent') return '<span class="badge badge-sent">Sent</span>';
+    if (s === 'sendable') return '<span class="badge badge-ready">Ready</span>';
+    if (s === 'no-email') return '<span class="badge badge-no-email">DM Only</span>';
+    if (s === 'low-match') return '<span class="badge badge-low">Low Match</span>';
+    return '';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderCards() {
+    const filtered = contacts.filter(matchesFilter);
+    // Sort: sendable first, then by score desc
+    filtered.sort((a, b) => {
+      const sa = getStatus(a) === 'sendable' ? 1 : 0;
+      const sb = getStatus(b) === 'sendable' ? 1 : 0;
+      if (sb !== sa) return sb - sa;
+      return (b.match?.score || 0) - (a.match?.score || 0);
+    });
+
+    document.getElementById('resultsCount').textContent = `${filtered.length} of ${total} contacts`;
+
+    if (filtered.length === 0) {
+      document.getElementById('cards').innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">&#9788;</div>
+          <p>No contacts match your filters</p>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('cards').innerHTML = filtered.map((c, i) => `
+      <div class="card" data-idx="${i}">
+        <div class="card-top" onclick="this.parentElement.classList.toggle('expanded')">
+          <div class="score-ring ${scoreClass(c.match?.score || 0)}">${c.match?.score || 0}</div>
+          <div class="card-info">
+            <h3>${escapeHtml(c.poster?.name || 'Unknown')}</h3>
+            <div class="role">${escapeHtml(c.job?.title || 'Unknown Role')}${c.job?.company ? ' @ ' + escapeHtml(c.job.company) : ''}</div>
+            <div class="reason">${escapeHtml(c.match?.reason || '')}</div>
+          </div>
+          <div class="card-badges">
+            ${statusBadge(c)}
+            ${c.contacts?.method ? `<span class="badge badge-method">${escapeHtml(c.contacts.method)}</span>` : ''}
+            ${c.job?.type ? `<span class="badge badge-method">${escapeHtml(c.job.type)}</span>` : ''}
+          </div>
+          <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-detail">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Job Details</h4>
+              <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(c.job?.title || '—')}</span></div>
+              <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(c.job?.company || '—')}</span></div>
+              <div class="detail-row"><span class="label">Type</span><span class="value">${escapeHtml(c.job?.type || '—')}</span></div>
+              ${(c.job?.requirements?.length) ? `<div style="margin-top:8px"><div class="reqs">${c.job.requirements.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
+            </div>
+            <div class="detail-section">
+              <h4>Contact Info</h4>
+              <div class="detail-row"><span class="label">Method</span><span class="value">${escapeHtml(c.contacts?.method || '—')}</span></div>
+              ${(c.contacts?.emails || []).map(e => `<div class="detail-row"><span class="label">Email</span><span class="value" style="color:var(--cyan)">${escapeHtml(e)}</span></div>`).join('')}
+              <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(c.poster?.headline || '—')}</span></div>
+              <div class="detail-row"><span class="label">Post ID</span><span class="value" style="font-family:JetBrains Mono,monospace;font-size:0.75rem">${escapeHtml(c.postId || '—')}</span></div>
+              ${c.sent ? `<div class="detail-row"><span class="label">Sent At</span><span class="value" style="color:var(--green)">${c.sentAt ? new Date(c.sentAt).toLocaleString() : '—'}</span></div>` : ''}
+            </div>
+            ${c.email?.to ? `
+            <div class="email-preview">
+              <div class="email-to">To: ${escapeHtml(c.email.to)}</div>
+              <div class="email-subject">${escapeHtml(c.email.subject || '(no subject)')}</div>
+              <div class="email-body">${escapeHtml(c.email.body || '(no body)')}</div>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderCards();
+    });
+  });
+
+  // Search
+  document.getElementById('search').addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    renderCards();
+  });
+
+  renderCards();
+})();
+</script>
+</body>
+</html>
