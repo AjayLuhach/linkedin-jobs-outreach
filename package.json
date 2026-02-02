@@ -27,6 +27,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.990.0",
     "@google/generative-ai": "^0.21.0",
     "cheerio": "^1.2.0",
     "clipboardy": "^4.0.0",

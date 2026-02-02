@@ -14,7 +14,15 @@ import config from './config.js';
 import { readClipboard, detectAndParse } from './services/clipboard.js';
 import { appendPosts, getUnprocessedPosts, markProcessed } from './services/extract-store.js';
 import { appendContacts, getUnsent } from './services/contacts-store.js';
-import { processInBatches } from './services/ai.js';
+// Dynamic AI provider import based on config
+async function getAIProvider() {
+  if (config.aiProvider === 'bedrock') {
+    const mod = await import('./services/ai-bedrock.js');
+    return mod.processInBatches;
+  }
+  const mod = await import('./services/ai.js');
+  return mod.processInBatches;
+}
 
 // ============================================================
 // CLI ARGUMENT PARSING
@@ -79,8 +87,14 @@ async function cmdParse(options) {
 async function cmdGenerate() {
   console.log('\n   GENERATE — AI process unprocessed posts\n');
 
-  if (!config.ai.geminiApiKey) {
-    throw new Error('GEMINI_API_KEY not set in .env');
+  const provider = config.aiProvider;
+  console.log(`   AI Provider: ${provider}`);
+
+  if (provider === 'bedrock' && !config.bedrock.accessKeyId) {
+    throw new Error('AWS_ACCESS_KEY_ID not set in .env (AI_PROVIDER=bedrock)');
+  }
+  if (provider === 'gemini' && !config.ai.geminiApiKey) {
+    throw new Error('GEMINI_API_KEY not set in .env (AI_PROVIDER=gemini)');
   }
 
   const unprocessed = getUnprocessedPosts();
@@ -93,6 +107,7 @@ async function cmdGenerate() {
 
   console.log(`   Found ${unprocessed.length} unprocessed post(s)`);
 
+  const processInBatches = await getAIProvider();
   const contacts = await processInBatches(unprocessed, config.candidate);
 
   // Mark all posts as processed

@@ -49,6 +49,9 @@ function loadCandidate() {
 }
 
 export const config = {
+  // AI provider: "gemini" or "bedrock"
+  aiProvider: (process.env.AI_PROVIDER || 'gemini').toLowerCase(),
+
   paths: {
     outputDir: join(__dirname, 'output'),
     extractPath: join(__dirname, 'output', 'extract.json'),
@@ -56,6 +59,7 @@ export const config = {
     logsDir: join(__dirname, 'logs'),
   },
 
+  // Gemini config
   ai: {
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     models: [
@@ -67,6 +71,14 @@ export const config = {
       'gemini-2.0-flash-lite',
     ],
     rateLimitCooldown: 60000,
+  },
+
+  // AWS Bedrock config
+  bedrock: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    region: process.env.AWS_REGION || 'us-east-1',
+    modelId: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-5-sonnet-20241022-v2:0',
   },
 
   candidate: loadCandidate(),
