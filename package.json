@@ -14,7 +14,8 @@
     "send": "node index.js send",
     "send:emails": "node scripts/send-emails.js",
     "send:verify": "node scripts/send-emails.js --verify",
-    "send:list": "node scripts/send-emails.js --list"
+    "send:list": "node scripts/send-emails.js --list",
+    "dashboard": "npx -y serve . -p 3456 -o /dashboard.html"
   },
   "keywords": [
     "linkedin",
