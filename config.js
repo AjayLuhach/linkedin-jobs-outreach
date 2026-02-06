@@ -26,6 +26,10 @@ function loadCandidate() {
   const now = new Date();
   const years = ((now - startDate) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
 
+  // skills is now { "React.js": ["react", "reactjs", ...], ... }
+  const skillsMap = data.skills || {};
+  const skillNames = Object.keys(skillsMap);
+
   return {
     name: info.name,
     email: info.email,
@@ -39,7 +43,8 @@ function loadCandidate() {
     experienceStart: data.experienceStart,
     experience: `${years} years`,
     summary: data.summary,
-    skills: data.skills,
+    skills: skillNames,
+    skillsWithAliases: skillsMap,
     projects: data.projects,
     cannotClaim: data.cannotClaim,
     currentTitle: data.experience?.[0]?.title || 'SDE',
@@ -78,7 +83,7 @@ export const config = {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
     region: process.env.AWS_REGION || 'us-east-1',
-    modelId: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+    modelId: process.env.BEDROCK_MODEL_ID || 'google.gemma-3-27b-it',
   },
 
   candidate: loadCandidate(),

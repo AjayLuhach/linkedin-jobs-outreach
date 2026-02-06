@@ -194,6 +194,40 @@
     color: var(--text-dim);
   }
 
+  .salary-filter {
+    padding: 8px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238888a4' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  .salary-filter:focus {
+    border-color: var(--accent);
+  }
+
+  .salary-badge {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: var(--green-dim);
+    border: 1px solid #34d39944;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
   /* ── CONTACT CARDS ── */
   .cards {
     display: grid;
@@ -302,7 +336,37 @@
   .badge-approved { background: var(--cyan-dim); color: var(--cyan); border: 1px solid #22d3ee44; }
   .badge-no-email { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #fbbf2444; }
   .badge-low { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
+  .badge-rejected { background: #44444466; color: #888; border: 1px solid #55555544; }
   .badge-method { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+
+  .btn-reject {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-reject:hover {
+    border-color: var(--red);
+    color: var(--red);
+    background: var(--red-dim);
+  }
+
+  .btn-reject:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .card.rejected-card {
+    opacity: 0.5;
+  }
 
   /* ── APPROVE BUTTON ── */
   .btn-approve {
@@ -513,8 +577,26 @@
     <button class="filter-btn" data-filter="sendable">Sendable</button>
     <button class="filter-btn" data-filter="approved">Approved</button>
     <button class="filter-btn" data-filter="sent">Sent</button>
-    <button class="filter-btn" data-filter="no-email">No Email (DM)</button>
+    <button class="filter-btn" data-filter="has-email">Email Only</button>
+    <button class="filter-btn" data-filter="no-email">DM Only</button>
     <button class="filter-btn" data-filter="low-match">Low Match</button>
+    <button class="filter-btn" data-filter="rejected">Rejected</button>
+    <select class="salary-filter" id="salaryFilter">
+      <option value="all">All Salaries</option>
+      <option value="has-salary">Has Salary</option>
+      <option value="7+">7+ LPA</option>
+      <option value="10+">10+ LPA</option>
+      <option value="15+">15+ LPA</option>
+      <option value="20+">20+ LPA</option>
+      <option value="30+">30+ LPA</option>
+    </select>
+    <select class="salary-filter" id="typeFilter">
+      <option value="all">All Types</option>
+      <option value="full-time">Full-Time</option>
+      <option value="contract">Contract</option>
+      <option value="remote">Remote</option>
+      <option value="intern">Intern</option>
+    </select>
     <input type="text" class="search-box" id="search" placeholder="Search by name, role, company, email...">
   </div>
 
@@ -582,8 +664,11 @@
   // Render
   let activeFilter = 'all';
   let searchQuery = '';
+  let salaryFilter = 'all';
+  let typeFilter = 'all';
 
   function getStatus(c) {
+    if (c.rejected) return 'rejected';
     if (c.sent) return 'sent';
     if (c.approved) return 'approved';
     if (c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body) return 'sendable';
@@ -592,9 +677,45 @@
     return 'sendable';
   }
 
+  function getSalaryMax(c) {
+    return c.job?.salaryMaxLPA ?? null;
+  }
+
+  function getSalaryDisplay(c) {
+    const min = c.job?.salaryMinLPA;
+    const max = c.job?.salaryMaxLPA;
+    if (min != null && max != null) {
+      return min === max ? `${min} LPA` : `${min}-${max} LPA`;
+    }
+    if (c.job?.salary) return c.job.salary;
+    return null;
+  }
+
   function matchesFilter(c) {
     const status = getStatus(c);
-    if (activeFilter !== 'all' && status !== activeFilter) return false;
+    // Hide rejected from all views except the "rejected" filter
+    if (status === 'rejected' && activeFilter !== 'rejected') return false;
+    // Status filter
+    if (activeFilter === 'has-email') {
+      if (!c.contacts?.emails?.length) return false;
+    } else if (activeFilter !== 'all' && status !== activeFilter) {
+      return false;
+    }
+    // Salary filter
+    if (salaryFilter !== 'all') {
+      const maxLPA = getSalaryMax(c);
+      if (salaryFilter === 'has-salary') {
+        if (maxLPA == null) return false;
+      } else {
+        const threshold = parseInt(salaryFilter);
+        if (maxLPA == null || maxLPA < threshold) return false;
+      }
+    }
+    // Job type filter
+    if (typeFilter !== 'all') {
+      if ((c.job?.type || '').toLowerCase() !== typeFilter) return false;
+    }
+    // Search
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const haystack = [
@@ -618,12 +739,17 @@
 
   function statusBadge(c) {
     const s = getStatus(c);
+    if (s === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
     if (s === 'sent') return '<span class="badge badge-sent">Sent</span>';
     if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
     if (s === 'sendable') return '<span class="badge badge-ready">Ready</span>';
     if (s === 'no-email') return '<span class="badge badge-no-email">DM Only</span>';
     if (s === 'low-match') return '<span class="badge badge-low">Low Match</span>';
     return '';
+  }
+
+  function postUrl(postId) {
+    return postId ? `https://www.linkedin.com/feed/update/urn:li:activity:${postId}/` : null;
   }
 
   function escapeHtml(str) {
@@ -653,7 +779,7 @@
     }
 
     document.getElementById('cards').innerHTML = filtered.map((c, i) => `
-      <div class="card" data-idx="${i}">
+      <div class="card${c.rejected ? ' rejected-card' : ''}" data-idx="${i}">
         <div class="card-top" onclick="this.parentElement.classList.toggle('expanded')">
           <div class="score-ring ${scoreClass(c.match?.score || 0)}">${c.match?.score || 0}</div>
           <div class="card-info">
@@ -665,6 +791,7 @@
             ${statusBadge(c)}
             ${c.contacts?.method ? `<span class="badge badge-method">${escapeHtml(c.contacts.method)}</span>` : ''}
             ${c.job?.type ? `<span class="badge badge-method">${escapeHtml(c.job.type)}</span>` : ''}
+            ${getSalaryDisplay(c) ? `<span class="salary-badge">${escapeHtml(getSalaryDisplay(c))}</span>` : ''}
           </div>
           <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -677,6 +804,7 @@
               <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(c.job?.title || '—')}</span></div>
               <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(c.job?.company || '—')}</span></div>
               <div class="detail-row"><span class="label">Type</span><span class="value">${escapeHtml(c.job?.type || '—')}</span></div>
+              <div class="detail-row"><span class="label">Salary</span><span class="value" style="color:var(--green)">${escapeHtml(getSalaryDisplay(c) || '—')}</span></div>
               ${(c.job?.requirements?.length) ? `<div style="margin-top:8px"><div class="reqs">${c.job.requirements.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
             </div>
             <div class="detail-section">
@@ -684,20 +812,31 @@
               <div class="detail-row"><span class="label">Method</span><span class="value">${escapeHtml(c.contacts?.method || '—')}</span></div>
               ${(c.contacts?.emails || []).map(e => `<div class="detail-row"><span class="label">Email</span><span class="value" style="color:var(--cyan)">${escapeHtml(e)}</span></div>`).join('')}
               <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(c.poster?.headline || '—')}</span></div>
-              <div class="detail-row"><span class="label">Post ID</span><span class="value" style="font-family:JetBrains Mono,monospace;font-size:0.75rem">${escapeHtml(c.postId || '—')}</span></div>
+              <div class="detail-row"><span class="label">Post</span><span class="value">${c.postId ? `<a href="${postUrl(c.postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn &nearr;</a>` : '—'}</span></div>
               ${c.sent ? `<div class="detail-row"><span class="label">Sent At</span><span class="value" style="color:var(--green)">${c.sentAt ? new Date(c.sentAt).toLocaleString() : '—'}</span></div>` : ''}
             </div>
+            ${c.summary ? `
+            <div class="post-summary" style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:0">
+              <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span> Post Summary</div>
+              <div style="font-size:0.85rem;color:var(--text);line-height:1.7;white-space:pre-wrap">${escapeHtml(c.summary)}</div>
+            </div>` : ''}
             ${c.email?.to ? `
             <div class="email-preview">
               <div class="email-to">To: ${escapeHtml(c.email.to)}</div>
               <div class="email-subject">${escapeHtml(c.email.subject || '(no subject)')}</div>
               <div class="email-body">${escapeHtml(c.email.body || '(no body)')}</div>
-              ${!c.sent ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+              ${!c.sent && !c.rejected ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
                 <button class="btn-approve ${c.approved ? 'approved' : ''}" data-postid="${escapeHtml(c.postId)}" onclick="handleApprove(event, this)">
                   ${c.approved ? 'Revoke' : 'Approve Send'}
                 </button>
+                <button class="btn-reject" data-postid="${escapeHtml(c.postId)}" onclick="handleReject(event, this)">Reject</button>
                 ${c.scheduledAt ? `<span class="scheduled-info">Scheduled: ${new Date(c.scheduledAt).toLocaleString()}</span>` : ''}
               </div>` : ''}
+              ${c.rejected ? `<div style="margin-top:14px"><button class="btn-approve" data-postid="${escapeHtml(c.postId)}" onclick="handleUnreject(event, this)">Restore</button></div>` : ''}
+            </div>` : ''}
+            ${!c.email?.to && !c.sent ? `
+            <div style="grid-column:1/-1;display:flex;gap:12px;padding-top:12px">
+              ${!c.rejected ? `<button class="btn-reject" data-postid="${escapeHtml(c.postId)}" onclick="handleReject(event, this)">Reject</button>` : `<button class="btn-approve" data-postid="${escapeHtml(c.postId)}" onclick="handleUnreject(event, this)">Restore</button>`}
             </div>` : ''}
           </div>
         </div>
@@ -713,6 +852,18 @@
       activeFilter = btn.dataset.filter;
       renderCards();
     });
+  });
+
+  // Salary filter
+  document.getElementById('salaryFilter').addEventListener('change', (e) => {
+    salaryFilter = e.target.value;
+    renderCards();
+  });
+
+  // Type filter
+  document.getElementById('typeFilter').addEventListener('change', (e) => {
+    typeFilter = e.target.value;
+    renderCards();
   });
 
   // Search
@@ -794,6 +945,82 @@
       alert('Failed: ' + err.message);
       btn.disabled = false;
       btn.textContent = isApproved ? 'Revoke' : 'Approve Send';
+    }
+  };
+
+  window.handleReject = async function(event, btn) {
+    event.stopPropagation();
+    const postId = btn.dataset.postid;
+    const card = btn.closest('.card');
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const contact = contacts.find(c => c.postId === postId);
+      if (contact) {
+        contact.rejected = true;
+        contact.approved = false;
+        delete contact.scheduledAt;
+      }
+
+      // In-place update — mark as rejected visually, hide on next reload
+      card.classList.add('rejected-card');
+      const badges = card.querySelector('.card-badges');
+      const oldBadge = badges.querySelector('.badge-ready,.badge-approved,.badge-no-email,.badge-low');
+      if (oldBadge) oldBadge.remove();
+      const rejBadge = document.createElement('span');
+      rejBadge.className = 'badge badge-rejected';
+      rejBadge.textContent = 'REJECTED';
+      badges.prepend(rejBadge);
+
+      // Replace buttons with "Rejected" text
+      const wrapper = btn.parentElement;
+      wrapper.innerHTML = '<span style="color:#888;font-size:0.8rem">Rejected — hidden on next load</span>';
+
+      updateStatCounts();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Reject';
+    }
+  };
+
+  window.handleUnreject = async function(event, btn) {
+    event.stopPropagation();
+    const postId = btn.dataset.postid;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/unreject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const contact = contacts.find(c => c.postId === postId);
+      if (contact) {
+        contact.rejected = false;
+        delete contact.rejectedAt;
+      }
+
+      // In-place update — just re-render since we're in rejected view
+      renderCards();
+      updateStatCounts();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Restore';
     }
   };
 })();

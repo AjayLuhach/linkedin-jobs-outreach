@@ -142,6 +142,39 @@ export function unapproveContact(postId) {
 }
 
 /**
+ * Reject a contact by postId — hides it from sendable/default views.
+ */
+export function rejectContact(postId) {
+  const contacts = loadContacts();
+  const contact = contacts.find(c => c.postId === postId);
+  if (!contact) return null;
+
+  contact.rejected = true;
+  contact.rejectedAt = new Date().toISOString();
+  contact.approved = false;
+  delete contact.approvedAt;
+  delete contact.scheduledAt;
+
+  saveContacts(contacts);
+  return contact;
+}
+
+/**
+ * Unreject a contact by postId — restores it to sendable.
+ */
+export function unrejectContact(postId) {
+  const contacts = loadContacts();
+  const contact = contacts.find(c => c.postId === postId);
+  if (!contact) return null;
+
+  contact.rejected = false;
+  delete contact.rejectedAt;
+
+  saveContacts(contacts);
+  return contact;
+}
+
+/**
  * Get all approved but unsent contacts whose scheduled time has passed.
  */
 export function getScheduledReady() {

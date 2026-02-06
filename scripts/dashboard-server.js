@@ -9,7 +9,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { approveContact, unapproveContact } from '../services/contacts-store.js';
+import { approveContact, unapproveContact, rejectContact, unrejectContact } from '../services/contacts-store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -61,6 +61,22 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/api/unapprove') {
     const body = JSON.parse(await readBody(req));
     const contact = unapproveContact(body.postId);
+    if (!contact) return json(res, 404, { error: 'Contact not found' });
+    return json(res, 200, { ok: true });
+  }
+
+  // API: POST /api/reject
+  if (req.method === 'POST' && req.url === '/api/reject') {
+    const body = JSON.parse(await readBody(req));
+    const contact = rejectContact(body.postId);
+    if (!contact) return json(res, 404, { error: 'Contact not found' });
+    return json(res, 200, { ok: true });
+  }
+
+  // API: POST /api/unreject
+  if (req.method === 'POST' && req.url === '/api/unreject') {
+    const body = JSON.parse(await readBody(req));
+    const contact = unrejectContact(body.postId);
     if (!contact) return json(res, 404, { error: 'Contact not found' });
     return json(res, 200, { ok: true });
   }

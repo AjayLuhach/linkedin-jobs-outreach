@@ -28,7 +28,13 @@ export function loadExtract() {
     return { lastUpdated: null, totalPosts: 0, posts: [] };
   }
   try {
-    return JSON.parse(fs.readFileSync(EXTRACT_PATH, 'utf-8'));
+    const raw = fs.readFileSync(EXTRACT_PATH, 'utf-8').trim();
+    if (!raw) return { lastUpdated: null, totalPosts: 0, posts: [] };
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.posts)) {
+      return { lastUpdated: null, totalPosts: 0, posts: [] };
+    }
+    return parsed;
   } catch {
     return { lastUpdated: null, totalPosts: 0, posts: [] };
   }
