@@ -94,3 +94,60 @@ export function markSent(email) {
   }
   saveContacts(contacts);
 }
+
+/**
+ * Approve a contact for scheduled sending by postId.
+ * Assigns a random time between 9 AM and 1 PM IST for the next day.
+ */
+export function approveContact(postId) {
+  const contacts = loadContacts();
+  const contact = contacts.find(c => c.postId === postId);
+  if (!contact) return null;
+
+  // Random time between 9:00 AM and 1:00 PM IST tomorrow
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // 9 AM IST = 3:30 AM UTC, 1 PM IST = 7:30 AM UTC
+  const startMinutes = 3 * 60 + 30; // 3:30 UTC in minutes
+  const endMinutes = 7 * 60 + 30;   // 7:30 UTC in minutes
+  const randomMinutes = startMinutes + Math.floor(Math.random() * (endMinutes - startMinutes));
+
+  const scheduled = new Date(tomorrow);
+  scheduled.setUTCHours(Math.floor(randomMinutes / 60), randomMinutes % 60, Math.floor(Math.random() * 60), 0);
+
+  contact.approved = true;
+  contact.approvedAt = now.toISOString();
+  contact.scheduledAt = scheduled.toISOString();
+
+  saveContacts(contacts);
+  return contact;
+}
+
+/**
+ * Unapprove a contact by postId.
+ */
+export function unapproveContact(postId) {
+  const contacts = loadContacts();
+  const contact = contacts.find(c => c.postId === postId);
+  if (!contact) return null;
+
+  contact.approved = false;
+  delete contact.approvedAt;
+  delete contact.scheduledAt;
+
+  saveContacts(contacts);
+  return contact;
+}
+
+/**
+ * Get all approved but unsent contacts whose scheduled time has passed.
+ */
+export function getScheduledReady() {
+  const contacts = loadContacts();
+  const now = new Date();
+  return contacts.filter(c =>
+    c.approved && !c.sent && c.scheduledAt && new Date(c.scheduledAt) <= now
+  );
+}

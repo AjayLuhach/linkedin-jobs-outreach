@@ -299,9 +299,53 @@
 
   .badge-sent { background: var(--green-dim); color: var(--green); border: 1px solid #34d39944; }
   .badge-ready { background: var(--accent-glow); color: var(--accent); border: 1px solid #7c5cfc44; }
+  .badge-approved { background: var(--cyan-dim); color: var(--cyan); border: 1px solid #22d3ee44; }
   .badge-no-email { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #fbbf2444; }
   .badge-low { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
   .badge-method { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+
+  /* ── APPROVE BUTTON ── */
+  .btn-approve {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--green);
+    background: var(--green-dim);
+    color: var(--green);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-approve:hover {
+    background: var(--green);
+    color: #000;
+  }
+
+  .btn-approve.approved {
+    border-color: var(--red);
+    background: var(--red-dim);
+    color: var(--red);
+  }
+
+  .btn-approve.approved:hover {
+    background: var(--red);
+    color: #000;
+  }
+
+  .btn-approve:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .scheduled-info {
+    font-size: 0.72rem;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 4px;
+  }
 
   /* ── EXPANDABLE DETAIL ── */
   .card-detail {
@@ -467,6 +511,7 @@
   <div class="filters" id="filters">
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="sendable">Sendable</button>
+    <button class="filter-btn" data-filter="approved">Approved</button>
     <button class="filter-btn" data-filter="sent">Sent</button>
     <button class="filter-btn" data-filter="no-email">No Email (DM)</button>
     <button class="filter-btn" data-filter="low-match">Low Match</button>
@@ -493,13 +538,14 @@
   const total = contacts.length;
   const goodMatch = contacts.filter(c => c.match?.isGoodMatch);
   const withEmail = contacts.filter(c => c.email?.to && c.email.to.includes('@'));
-  const sendable = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent);
+  const sendable = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent && !c.approved);
+  const approved = contacts.filter(c => c.approved && !c.sent);
   const sent = contacts.filter(c => c.sent);
   const avgScore = total ? (contacts.reduce((s, c) => s + (c.match?.score || 0), 0) / total).toFixed(1) : 0;
 
   document.getElementById('subtitle').textContent = `${total} contacts from ${new Date().toLocaleDateString()}`;
 
-  // Stats
+  // Stats — rendered once, updated by ID
   document.getElementById('stats').innerHTML = `
     <div class="stat-card">
       <div class="stat-number" style="color:var(--accent)">${total}</div>
@@ -514,18 +560,24 @@
       <div class="stat-label">With Email</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number" style="color:var(--pink)">${sendable.length}</div>
+      <div class="stat-number" id="stat-ready" style="color:var(--pink)">${sendable.length}</div>
       <div class="stat-label">Ready to Send</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number" style="color:var(--yellow)">${sent.length}</div>
-      <div class="stat-label">Sent</div>
+      <div class="stat-number" id="stat-approved" style="color:var(--cyan)">${approved.length}</div>
+      <div class="stat-label">Approved</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number" style="color:var(--text)">${avgScore}</div>
-      <div class="stat-label">Avg Score</div>
+      <div class="stat-number" id="stat-sent" style="color:var(--yellow)">${sent.length}</div>
+      <div class="stat-label">Sent</div>
     </div>
   `;
+
+  function updateStatCounts() {
+    document.getElementById('stat-ready').textContent = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent && !c.approved).length;
+    document.getElementById('stat-approved').textContent = contacts.filter(c => c.approved && !c.sent).length;
+    document.getElementById('stat-sent').textContent = contacts.filter(c => c.sent).length;
+  }
 
   // Render
   let activeFilter = 'all';
@@ -533,6 +585,7 @@
 
   function getStatus(c) {
     if (c.sent) return 'sent';
+    if (c.approved) return 'approved';
     if (c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body) return 'sendable';
     if (!c.email?.to || !c.email.to.includes('@')) return 'no-email';
     if (!c.match?.isGoodMatch) return 'low-match';
@@ -566,6 +619,7 @@
   function statusBadge(c) {
     const s = getStatus(c);
     if (s === 'sent') return '<span class="badge badge-sent">Sent</span>';
+    if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
     if (s === 'sendable') return '<span class="badge badge-ready">Ready</span>';
     if (s === 'no-email') return '<span class="badge badge-no-email">DM Only</span>';
     if (s === 'low-match') return '<span class="badge badge-low">Low Match</span>';
@@ -638,6 +692,12 @@
               <div class="email-to">To: ${escapeHtml(c.email.to)}</div>
               <div class="email-subject">${escapeHtml(c.email.subject || '(no subject)')}</div>
               <div class="email-body">${escapeHtml(c.email.body || '(no body)')}</div>
+              ${!c.sent ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+                <button class="btn-approve ${c.approved ? 'approved' : ''}" data-postid="${escapeHtml(c.postId)}" onclick="handleApprove(event, this)">
+                  ${c.approved ? 'Revoke' : 'Approve Send'}
+                </button>
+                ${c.scheduledAt ? `<span class="scheduled-info">Scheduled: ${new Date(c.scheduledAt).toLocaleString()}</span>` : ''}
+              </div>` : ''}
             </div>` : ''}
           </div>
         </div>
@@ -662,6 +722,80 @@
   });
 
   renderCards();
+
+  // In-place DOM update — no full re-render
+  window.handleApprove = async function(event, btn) {
+    event.stopPropagation();
+    const postId = btn.dataset.postid;
+    const isApproved = btn.classList.contains('approved');
+    const endpoint = isApproved ? '/api/unapprove' : '/api/approve';
+    const card = btn.closest('.card');
+
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Update local data
+      const contact = contacts.find(c => c.postId === postId);
+      if (contact) {
+        if (isApproved) {
+          contact.approved = false;
+          delete contact.scheduledAt;
+        } else {
+          contact.approved = true;
+          contact.scheduledAt = data.scheduledAt;
+        }
+      }
+
+      // Update button
+      btn.disabled = false;
+      if (isApproved) {
+        btn.classList.remove('approved');
+        btn.textContent = 'Approve Send';
+      } else {
+        btn.classList.add('approved');
+        btn.textContent = 'Revoke';
+      }
+
+      // Update scheduled info next to button
+      const wrapper = btn.parentElement;
+      let infoEl = wrapper.querySelector('.scheduled-info');
+      if (!isApproved && data.scheduledAt) {
+        if (!infoEl) {
+          infoEl = document.createElement('span');
+          infoEl.className = 'scheduled-info';
+          wrapper.appendChild(infoEl);
+        }
+        infoEl.textContent = 'Scheduled: ' + new Date(data.scheduledAt).toLocaleString();
+      } else if (infoEl) {
+        infoEl.remove();
+      }
+
+      // Update badge on the card header
+      const badges = card.querySelector('.card-badges');
+      const oldStatusBadge = badges.querySelector('.badge-ready,.badge-approved');
+      if (oldStatusBadge) oldStatusBadge.remove();
+      const newBadge = document.createElement('span');
+      newBadge.className = isApproved ? 'badge badge-ready' : 'badge badge-approved';
+      newBadge.textContent = isApproved ? 'READY' : 'APPROVED';
+      badges.prepend(newBadge);
+
+      // Update stat counters
+      updateStatCounts();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = isApproved ? 'Revoke' : 'Approve Send';
+    }
+  };
 })();
 </script>
 </body>
