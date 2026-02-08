@@ -9,9 +9,10 @@ import { fork } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getScheduledReady, markSent } from '../services/contacts-store.js';
+import { getScheduledReady, markSent, markVerifyFailed } from '../services/contacts-store.js';
 import { sendEmail, verifyConnection } from '../services/email-sender.js';
 import { isValidEmail } from '../services/email-validator.js';
+import { verifyEmail } from '../services/email-verifier.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PID_FILE = path.join(__dirname, '..', '.mailer.pid');
@@ -88,6 +89,13 @@ async function tick() {
     const to = contact.email?.to;
     if (!to || !isValidEmail(to)) {
       log(`  [SKIP] Invalid: ${to || '(empty)'}`);
+      continue;
+    }
+
+    const check = await verifyEmail(to);
+    if (!check.verified) {
+      log(`  [SKIP] ${to}: ${check.error}`);
+      markVerifyFailed(to, check.error);
       continue;
     }
 

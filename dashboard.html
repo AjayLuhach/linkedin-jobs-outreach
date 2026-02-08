@@ -123,6 +123,7 @@
   .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--pink), var(--accent)); }
   .stat-card:nth-child(5)::before { background: linear-gradient(90deg, var(--yellow), var(--green)); }
   .stat-card:nth-child(6)::before { background: linear-gradient(90deg, var(--red), var(--pink)); }
+  .stat-card:nth-child(7)::before { background: linear-gradient(90deg, #f87171, #ef4444); }
 
   .stat-number {
     font-size: 2.4rem;
@@ -337,6 +338,7 @@
   .badge-no-email { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #fbbf2444; }
   .badge-low { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
   .badge-rejected { background: #44444466; color: #888; border: 1px solid #55555544; }
+  .badge-verify-failed { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
   .badge-method { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
 
   .btn-reject {
@@ -581,6 +583,7 @@
     <button class="filter-btn" data-filter="no-email">DM Only</button>
     <button class="filter-btn" data-filter="low-match">Low Match</button>
     <button class="filter-btn" data-filter="rejected">Rejected</button>
+    <button class="filter-btn" data-filter="verify-failed">Verify Failed</button>
     <select class="salary-filter" id="salaryFilter">
       <option value="all">All Salaries</option>
       <option value="has-salary">Has Salary</option>
@@ -623,6 +626,7 @@
   const sendable = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent && !c.approved);
   const approved = contacts.filter(c => c.approved && !c.sent);
   const sent = contacts.filter(c => c.sent);
+  const verifyFailed = contacts.filter(c => c.verifyFailed && !c.rejected);
   const avgScore = total ? (contacts.reduce((s, c) => s + (c.match?.score || 0), 0) / total).toFixed(1) : 0;
 
   document.getElementById('subtitle').textContent = `${total} contacts from ${new Date().toLocaleDateString()}`;
@@ -653,12 +657,17 @@
       <div class="stat-number" id="stat-sent" style="color:var(--yellow)">${sent.length}</div>
       <div class="stat-label">Sent</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-number" id="stat-verify-failed" style="color:var(--red)">${verifyFailed.length}</div>
+      <div class="stat-label">Verify Failed</div>
+    </div>
   `;
 
   function updateStatCounts() {
     document.getElementById('stat-ready').textContent = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent && !c.approved).length;
     document.getElementById('stat-approved').textContent = contacts.filter(c => c.approved && !c.sent).length;
     document.getElementById('stat-sent').textContent = contacts.filter(c => c.sent).length;
+    document.getElementById('stat-verify-failed').textContent = contacts.filter(c => c.verifyFailed && !c.rejected).length;
   }
 
   // Render
@@ -669,6 +678,7 @@
 
   function getStatus(c) {
     if (c.rejected) return 'rejected';
+    if (c.verifyFailed) return 'verify-failed';
     if (c.sent) return 'sent';
     if (c.approved) return 'approved';
     if (c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body) return 'sendable';
@@ -693,8 +703,9 @@
 
   function matchesFilter(c) {
     const status = getStatus(c);
-    // Hide rejected from all views except the "rejected" filter
+    // Hide rejected/verify-failed from all views except their own filter
     if (status === 'rejected' && activeFilter !== 'rejected') return false;
+    if (status === 'verify-failed' && activeFilter !== 'verify-failed' && activeFilter !== 'all') return false;
     // Status filter
     if (activeFilter === 'has-email') {
       if (!c.contacts?.emails?.length) return false;
@@ -740,6 +751,7 @@
   function statusBadge(c) {
     const s = getStatus(c);
     if (s === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
+    if (s === 'verify-failed') return '<span class="badge badge-verify-failed">Verify Failed</span>';
     if (s === 'sent') return '<span class="badge badge-sent">Sent</span>';
     if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
     if (s === 'sendable') return '<span class="badge badge-ready">Ready</span>';
@@ -823,6 +835,7 @@
             ${c.email?.to ? `
             <div class="email-preview">
               <div class="email-to">To: ${escapeHtml(c.email.to)}</div>
+              ${c.verifyFailed ? `<div style="color:var(--red);font-size:0.8rem;margin:6px 0;padding:8px 12px;background:var(--red-dim);border-radius:8px;border:1px solid #f8717133">Verify Failed: ${escapeHtml(c.verifyError || 'Unknown error')}</div>` : ''}
               <div class="email-subject">${escapeHtml(c.email.subject || '(no subject)')}</div>
               <div class="email-body">${escapeHtml(c.email.body || '(no body)')}</div>
               ${!c.sent && !c.rejected ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">

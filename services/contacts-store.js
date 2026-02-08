@@ -175,6 +175,21 @@ export function unrejectContact(postId) {
 }
 
 /**
+ * Mark a contact as verify-failed by email address.
+ */
+export function markVerifyFailed(email, error) {
+  const contacts = loadContacts();
+  for (const contact of contacts) {
+    if (contact.email?.to === email && !contact.sent) {
+      contact.verifyFailed = true;
+      contact.verifyError = error || 'Unknown verification error';
+      contact.verifyFailedAt = new Date().toISOString();
+    }
+  }
+  saveContacts(contacts);
+}
+
+/**
  * Get all approved but unsent contacts whose scheduled time has passed.
  */
 export function getScheduledReady() {

@@ -15,8 +15,9 @@ import {
   sendEmail,
   verifyConnection,
 } from "../services/email-sender.js";
-import { getUnsent, markSent, loadContacts } from "../services/contacts-store.js";
+import { getUnsent, markSent, markVerifyFailed, loadContacts } from "../services/contacts-store.js";
 import { isValidEmail } from "../services/email-validator.js";
+import { verifyEmail } from "../services/email-verifier.js";
 
 function askConfirmation(question) {
   const rl = readline.createInterface({
@@ -90,6 +91,15 @@ async function main() {
     if (!to || !isValidEmail(to)) {
       console.log(`   [INVALID] Skipping ${to || '(empty)'}`);
       results.invalid++;
+      continue;
+    }
+
+    // Inline MX + junk check before sending
+    const check = await verifyEmail(to);
+    if (!check.verified) {
+      console.log(`   [SKIP] ${to}: ${check.error}`);
+      markVerifyFailed(to, check.error);
+      results.skipped++;
       continue;
     }
 
