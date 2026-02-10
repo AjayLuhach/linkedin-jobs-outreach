@@ -1,434 +1,200 @@
-# 📧 LinkedIn Feed Email Extractor
+# LinkedIn Feed Email Extractor
 
-> **Automate your job search**: Extract hiring posts from LinkedIn, generate personalized emails with AI, and send them automatically.
+CLI tool that extracts hiring posts from LinkedIn, uses AI to identify contacts and generate personalized emails, and sends them on a schedule with a dashboard for review.
 
-A CLI tool that processes LinkedIn feed API responses, uses Gemini AI to identify hiring posts with contact emails, generates personalized job application emails, and sends them via SMTP.
+## Features
 
----
+- Parse LinkedIn feed API responses (JSON) or scraped HTML
+- AI-powered hiring post detection (Gemini or AWS Bedrock)
+- Extract and validate emails from posts (including obfuscated formats)
+- Generate personalized cold emails with AI
+- Web dashboard for reviewing, approving, and rejecting contacts
+- Scheduled email sending with background mailer daemon (9 AM - 1 PM IST)
+- Email verification before sending (MX lookup + junk filter)
+- Test mode for safe email testing
+- Resume PDF attachment
 
-## 🚀 Features
+## Prerequisites
 
-- ✅ Parse LinkedIn feed/search API responses
-- 🤖 AI-powered hiring post detection (Gemini)
-- 📧 Extract and validate emails from posts (including obfuscated formats)
-- ✔️ Smart email validation - filters out phone numbers and invalid formats
-- ✍️ Generate personalized email content with AI
-- 📮 Send emails via SMTP with resume attachment
-- 📊 Track sent emails and prevent duplicates
-- 🛡️ Graceful error handling - invalid emails won't stop the batch
-- 🧪 Test mode for safe email testing
+- Node.js v16+
+- AI provider — one of:
+  - [Gemini API key](https://makersuite.google.com/app/apikey) (free)
+  - AWS credentials for Bedrock
+- SMTP credentials (Gmail/Outlook/custom)
 
----
+## Setup
 
-## 📋 Prerequisites
-
-- **Node.js** v16+ installed
-- **Gemini API key** (free from [Google AI Studio](https://makersuite.google.com/app/apikey))
-- **SMTP credentials** (Gmail/Outlook/custom SMTP server)
-- **LinkedIn API access** (optional - can use browser DevTools)
-
----
-
-## 🛠️ Installation
-
-### 1. Clone the repository
-```bash
-git clone <your-repo-url>
-cd feed-email-extractor
-```
-
-### 2. Install dependencies
 ```bash
 npm install
+cp .env.example .env    # edit with your credentials
 ```
 
-### 3. Configure environment variables
-```bash
-cp .env.example .env
-```
+Edit `.env`:
 
-Edit `.env` and add your credentials:
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
+# AI — choose "gemini" or "bedrock"
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_key
+
+# SMTP
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 FROM_NAME=Your Name
-RESUME_PATH=./your_resume.pdf
-```
-
-> **Gmail users**: Use an [App Password](https://support.google.com/accounts/answer/185833), not your regular password.
-
-### 4. Update your resume data
-Edit `resumeData.json` with your personal information:
-```json
-{
-  "personalInfo": {
-    "name": "Your Name",
-    "email": "your@email.com",
-    "phone": "+1234567890",
-    "location": "City, State, Country",
-    "linkedin": "linkedin.com/in/yourprofile",
-    "github": "github.com/yourusername",
-    "portfolio": "https://yourportfolio.com"
-  },
-  "meta": {
-    "experienceStart": "Jan 2020",
-    "stack": "MERN",
-    "primaryCloud": "AWS",
-    "cannotClaim": ["Java", "Python Django"]
-  },
-  ...
-}
-```
-
-### 5. Add your resume PDF
-Place your resume PDF in the project root and update `RESUME_PATH` in `.env`:
-```
 RESUME_PATH=./Your_Resume.pdf
 ```
 
----
+Gmail users: use an [App Password](https://support.google.com/accounts/answer/185833), not your regular password.
 
-## 📖 How to Use
+Edit `resumeData.json` with your personal info, skills, and experience.
 
-### Step 1: Get LinkedIn Feed Data
+## Workflow
 
-**Option A: Using Browser DevTools** (Recommended)
-1. Open LinkedIn and search for jobs/posts (e.g., "React developer hiring")
-2. Open DevTools (F12) → Network tab → Filter by "Fetch/XHR"
-3. Scroll through posts to trigger API calls
-4. Look for requests to `/voyager/api/feed/` or `/search/`
-5. Copy the JSON response
-
-**Option B: Using LinkedIn API** (if you have access)
-- Use the official LinkedIn API to fetch feed/search data
-
-### Step 2: Run the Extractor
-
-**From clipboard:**
-```bash
-npm start
 ```
-(Make sure you copied the LinkedIn API response first)
-
-**From a file:**
-```bash
-npm run start:file sample-feed.json
+1. Parse LinkedIn data    →  output/extract.json
+2. AI generate emails     →  output/contacts.json
+3. Review in dashboard    →  approve / reject contacts
+4. Mailer daemon sends    →  scheduled between 9 AM - 1 PM IST
 ```
 
-The tool will:
-1. ✅ Parse the LinkedIn data
-2. 🤖 Analyze posts with Gemini AI
-3. 📧 Extract hiring posts with emails
-4. ✍️ Generate personalized email content
-5. 💾 Save everything to `output/extracted_TIMESTAMP.json`
-6. 📝 Log contacts to `logs/contacts.json`
+## Commands
 
-### Step 3: Review Generated Emails
+| Command | Description |
+|---|---|
+| `npm run parse` | Parse LinkedIn data from clipboard |
+| `npm run parse:file <path>` | Parse from a file |
+| `npm run generate` | AI process posts into contacts + emails |
+| `npm run send` | List unsent emails |
+| `npm run dashboard` | Open web dashboard (localhost:3456) |
+| `npm run mailer` | Start background mailer daemon |
+| `npm run mailer:stop` | Stop the mailer daemon |
+| `npm run send:emails` | Send all unsent emails immediately |
+| `npm run send:list` | List unsent emails |
+| `npm run send:verify` | Test SMTP connection |
 
-Check `logs/contacts.json` to see all extracted contacts and generated emails.
+### Typical usage
 
-### Step 4: Send Emails
-
-**List unsent emails:**
 ```bash
-npm run send:list
+# 1. Copy LinkedIn feed JSON to clipboard, then:
+npm run parse
+
+# 2. Run AI to identify hiring posts and generate emails:
+npm run generate
+
+# 3. Open dashboard to review and approve contacts:
+npm run dashboard
+
+# 4. Start the mailer daemon (sends approved emails on schedule):
+npm run mailer
 ```
 
-**Verify SMTP connection:**
-```bash
-npm run send:verify
+## Dashboard
+
+`npm run dashboard` starts a local server at `http://localhost:3456` with:
+
+- Contact cards with match scores, job details, and email previews
+- Approve / reject / restore actions
+- Filters: Sendable, Approved, Sent, Email Only, DM Only, Low Match, Rejected, Verify Failed
+- Salary and job type filters
+- Search across all fields
+- Scheduled send time display
+
+## Email Verification
+
+Before sending, each email is automatically checked:
+
+1. **Junk filter** — skips role-based addresses (noreply@, info@, abuse@, etc.)
+2. **MX lookup** — verifies the domain has mail servers (falls back to A record per RFC 5321)
+
+Failed verifications are marked in `contacts.json` and visible under the "Verify Failed" filter in the dashboard.
+
+Configure in `.env`:
+```env
+VERIFY_MX_TIMEOUT=5000   # DNS lookup timeout in ms
 ```
 
-**Send all unsent emails:**
-```bash
-npm run send
-```
+## Mailer Daemon
 
-> **Safety feature**: If an email was previously sent, you'll be prompted to confirm before resending.
+`npm run mailer` starts a background process that:
 
----
+- Checks every 60 seconds for approved emails whose scheduled time has passed
+- Sends them with a 2-second delay between each
+- Runs between 9 AM and 1 PM IST, auto-exits after
+- Logs to `logs/mailer.log`
 
-## 🧪 Testing
+Stop with `npm run mailer:stop`.
 
-**Test Mode** (redirect all emails to a test inbox):
+## Test Mode
+
+Redirect all emails to a test inbox:
+
 ```env
 EMAIL_TEST_MODE=true
 EMAIL_TEST_INBOX=test@yopmail.com
 ```
 
-All emails will be sent to the test inbox instead of real recipients. Perfect for testing!
-
----
-
-## 📂 Project Structure
+## Project Structure
 
 ```
 feed-email-extractor/
-├── index.js                    # Main CLI entry point
-├── config.js                   # Configuration loader
-├── resumeData.json             # Your personal info (edit this!)
-├── package.json                # Dependencies & scripts
-├── .env                        # Environment variables (create from .env.example)
+├── index.js                       # CLI entry point (parse/generate/send)
+├── config.js                      # Configuration loader
+├── resumeData.json                # Your personal info (edit this)
+├── dashboard.html                 # Web dashboard UI
+├── .env.example                   # Environment template
 ├── services/
-│   ├── clipboard.js            # Read clipboard content
-│   ├── parser.js               # Parse LinkedIn API responses
-│   ├── ai.js                   # Gemini AI integration
-│   ├── email-validator.js      # Validate emails, filter phone numbers
-│   ├── contact-logger.js       # Track contacts & sent status
-│   ├── email-sender.js         # SMTP email sending
-│   └── output.js               # Save results to files
+│   ├── ai.js                      # Gemini AI integration
+│   ├── ai-bedrock.js              # AWS Bedrock AI integration
+│   ├── clipboard.js               # Clipboard reader
+│   ├── parse-linkedin-feed.js     # Parse LinkedIn API JSON
+│   ├── parse-linkedin-html.js     # Parse LinkedIn HTML
+│   ├── extract-store.js           # Manages output/extract.json
+│   ├── contacts-store.js          # Manages output/contacts.json
+│   ├── email-sender.js            # SMTP email sending
+│   ├── email-validator.js         # Email format validation
+│   └── email-verifier.js          # MX lookup + junk filter
 ├── scripts/
-│   └── send-emails.js          # CLI for sending emails
-├── output/                     # Extracted results (auto-generated)
-└── logs/
-    ├── contacts.json           # Contact log with sent status
-    └── extraction_history.json # Extraction history stats
+│   ├── dashboard-server.js        # Dashboard HTTP server
+│   ├── send-emails.js             # CLI for sending emails
+│   ├── send-scheduled.js          # Send scheduled emails
+│   ├── mailer-daemon.js           # Background mailer daemon
+│   └── mailer-stop.js             # Stop the daemon
+├── output/                        # Generated data (gitignored)
+│   ├── extract.json               # Parsed posts
+│   └── contacts.json              # AI-generated contacts + emails
+└── logs/                          # Logs (gitignored)
+    └── mailer.log                 # Daemon log
 ```
 
----
+## AI Providers
 
-## 🔄 Workflow Diagram
+### Gemini (default)
 
-```
-┌──────────────────┐
-│  LinkedIn Feed   │
-│  (Copy JSON)     │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Clipboard /     │
-│  File Input      │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Parser          │
-│  (Extract posts) │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Gemini AI       │
-│  - Find hiring   │
-│  - Extract emails│
-│  - Generate msgs │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Save Results    │
-│  - output/*.json │
-│  - logs/*.json   │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Send Emails     │
-│  (SMTP)          │
-└──────────────────┘
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_key
 ```
 
----
+Auto-rotates between models on rate limits: gemini-2.5-pro, gemini-3-pro-preview, gemini-2.5-flash, gemini-3-flash-preview, gemini-2.0-flash, gemini-2.0-flash-lite.
 
-## 🎯 Understanding the Code
+### AWS Bedrock
 
-### **1. index.js** - Main Orchestrator
-```javascript
-// Entry point - coordinates the entire flow
-main()
-  → preflightChecks()      // Verify API keys, paths
-  → getFeedData()          // Read clipboard or file
-  → extractAndGenerate()   // AI extraction + email generation
-  → logExtractedContacts() // Save to contacts.json
-  → saveResults()          // Save to output/
+```env
+AI_PROVIDER=bedrock
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_REGION=us-east-1
+BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
 ```
 
-### **2. config.js** - Configuration Hub
-```javascript
-// Loads all configuration from:
-// - .env (API keys, SMTP settings)
-// - resumeData.json (your personal info)
-// Single source of truth for the entire app
-```
+## Notes
 
-### **3. services/parser.js** - LinkedIn Data Parser
-```javascript
-// Parses raw LinkedIn API response
-// Extracts: author, post text, job details, emails
-// Handles: search results & feed data
-// Returns: Clean array of posts
-```
+- **Gmail limit**: 500 emails/day. Recommend max 20-30/day to avoid spam flags.
+- **Privacy**: Never commit `.env` or `resumeData.json` (both in `.gitignore`).
+- **Duplicates**: The tool warns before sending to the same email twice.
+- **LinkedIn ToS**: Use for personal job search only.
 
-### **4. services/ai.js** - AI Brain
-```javascript
-// Two-step AI pipeline:
-// Step 1: Extract hiring posts from feed
-// Step 2: Generate personalized emails
-// Features: Model rotation, rate limit handling, JSON repair
-```
+## License
 
-### **5. services/contact-logger.js** - Contact Tracker
-```javascript
-// Manages logs/contacts.json
-// Tracks: email addresses, job details, sent status
-// Prevents: duplicate emails to same person
-```
-
-### **6. services/email-sender.js** - Email Dispatcher
-```javascript
-// Sends emails via SMTP
-// Attaches: resume PDF
-// Supports: test mode, connection verification
-```
-
-### **7. scripts/send-emails.js** - Email CLI
-```javascript
-// Interactive CLI for sending emails
-// Features: list unsent, verify connection, duplicate warnings
-```
-
----
-
-## 🔧 Customization Guide
-
-### Change AI Model Preferences
-Edit `config.js`:
-```javascript
-models: {
-  extraction: ['gemini-2.5-pro', 'gemini-2.5-flash'],
-  emailGen: ['gemini-2.5-pro', 'gemini-2.5-flash'],
-}
-```
-
-### Modify Email Generation Prompt
-Edit `services/ai.js` → `buildEmailGenPrompt()` function
-
-### Add More Resume Fields
-1. Add fields to `resumeData.json`
-2. Update `config.js` → `loadCandidate()` function
-3. Use in AI prompts in `services/ai.js`
-
-### Change Output Format
-Edit `services/output.js` → `saveResults()` function
-
----
-
-## ⚠️ Important Notes
-
-### Email Limits
-- **Gmail**: 500 emails/day for free accounts
-- **Recommendation**: Send max 20-30 emails/day to avoid spam flags
-- Use `EMAIL_TEST_MODE=true` for testing
-
-### Privacy
-- Never commit `.env` or `resumeData.json` to GitHub (use `.gitignore`)
-- Keep your API keys and SMTP passwords secure
-
-### LinkedIn API
-- This tool works with LinkedIn API responses
-- Respect LinkedIn's Terms of Service
-- Use for personal job search only
-
-### Duplicate Prevention
-- The tool tracks sent emails in `logs/contacts.json`
-- You'll be warned before sending to the same email twice
-- Mark emails as sent even if you skip them
-
----
-
-## 🐛 Troubleshooting
-
-### "GEMINI_API_KEY not set"
-→ Add `GEMINI_API_KEY` to your `.env` file
-
-### "SMTP connection failed"
-→ Check SMTP credentials in `.env`
-→ Gmail users: Use [App Password](https://support.google.com/accounts/answer/185833)
-
-### "Clipboard is empty"
-→ Copy LinkedIn API response before running
-→ Or use `npm run start:file sample-feed.json`
-
-### "No hiring posts found"
-→ LinkedIn feed might not contain hiring posts
-→ Search for "hiring" or specific job titles on LinkedIn first
-
-### Rate limits / 429 errors
-→ Tool automatically rotates between Gemini models
-→ Wait 60 seconds if all models are rate-limited
-
----
-
-## 📊 Output Files
-
-### `output/extracted_TIMESTAMP.json`
-Complete extraction results with all posts and generated emails.
-
-### `logs/contacts.json`
-Contact database with tracking:
-```json
-{
-  "date": "2025-02-15",
-  "job": {
-    "title": "Full Stack Developer",
-    "company": "TechCorp"
-  },
-  "contacts": [{
-    "type": "email",
-    "value": "hiring@techcorp.com",
-    "name": "John Doe"
-  }],
-  "emailSent": false,
-  "emailData": {
-    "subject": "Application for Full Stack Developer at TechCorp",
-    "body": "..."
-  }
-}
-```
-
-### `logs/extraction_history.json`
-Stats tracking:
-```json
-{
-  "entries": [...],
-  "stats": {
-    "totalExtractions": 10,
-    "totalEmails": 25,
-    "totalHiringPosts": 35
-  }
-}
-```
-
----
-
-## 🤝 Contributing
-
-Feel free to open issues or submit PRs to improve this tool!
-
----
-
-## 📜 License
-
-MIT License - See LICENSE file for details
-
----
-
-## 🙏 Acknowledgments
-
-- **Google Gemini AI** for powerful text analysis
-- **Nodemailer** for email sending
-- **Clipboardy** for clipboard access
-
----
-
-## 📞 Support
-
-If you encounter issues or have questions, please open an issue on GitHub.
-
----
-
-**Happy job hunting! 🎯**
+MIT
