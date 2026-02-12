@@ -11,6 +11,7 @@
     "parse": "node index.js parse",
     "parse:file": "node index.js parse --file",
     "generate": "node index.js generate",
+    "emails": "node index.js emails",
     "send": "node index.js send",
     "send:emails": "node scripts/send-emails.js",
     "send:verify": "node scripts/send-emails.js --verify",

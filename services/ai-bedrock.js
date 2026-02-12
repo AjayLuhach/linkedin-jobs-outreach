@@ -386,20 +386,17 @@ RESPOND WITH ONLY JSON (no markdown, no code fences):
 }
 
 // ============================================================
-// MAIN PIPELINE — 3-phase processing
+// PHASE 1 ONLY — AI Extraction (for pushing to shared sheet)
 // ============================================================
 
-export async function processInBatches(posts, candidate) {
+export async function extractPhase1(posts) {
   const batchSize = parseInt(process.env.BATCH_SIZE) || 7;
   const modelId = config.bedrock.modelId;
 
-  console.log(`\n   3-PHASE PIPELINE`);
+  console.log(`\n   PHASE 1: AI Extraction`);
   console.log(`   Model: ${modelId} | Posts: ${posts.length} | Batch: ${batchSize}\n`);
 
-  // ── PHASE 1: AI EXTRACTION ──
-  console.log(`   ═══ PHASE 1: AI Extraction ═══`);
   const totalBatches = Math.ceil(posts.length / batchSize);
-  console.log(`   ${posts.length} posts in ${totalBatches} batch(es)\n`);
 
   const batches = [];
   for (let i = 0; i < posts.length; i += batchSize) {
@@ -418,7 +415,6 @@ export async function processInBatches(posts, candidate) {
   });
 
   const batchResults = await Promise.all(batchPromises);
-
   const extracted = [];
 
   let extractFailed = 0;
@@ -458,11 +454,22 @@ export async function processInBatches(posts, candidate) {
   }
 
   console.log(`\n   Phase 1 complete: ${extracted.length} hiring posts extracted\n`);
+  return extracted;
+}
 
-  if (extracted.length === 0) return [];
+// ============================================================
+// PHASE 2+3 — Score + Email from sheet data
+// ============================================================
 
+/**
+ * Takes pre-extracted data (from sheet) and runs scoring + email drafting.
+ * @param {object[]} extracted - Array of extraction objects (from sheet's approved rows)
+ * @param {object} candidate - Candidate profile
+ * @returns {object[]} contacts ready for contacts.json
+ */
+export async function scoreAndDraftEmails(extracted, candidate) {
   // ── PHASE 2: CODE SCORING ──
-  console.log(`   ═══ PHASE 2: Code Scoring ═══\n`);
+  console.log(`\n   ═══ PHASE 2: Code Scoring (${extracted.length} posts) ═══\n`);
 
   const allContacts = [];
 
@@ -492,8 +499,8 @@ export async function processInBatches(posts, candidate) {
     console.log(`   [${icon}] ${contact.poster.name || '?'} — ${contact.job.title || '?'} @ ${contact.job.company || '?'} — Score: ${match.score}/10${match.score === 0 ? ` (${match.reason})` : ''}`);
   }
 
-  // Deduplicate contacts by email — keep the highest-scored contact per email address
-  const emailBestMap = new Map(); // email → contact with highest score
+  // Deduplicate contacts by email — keep the highest-scored contact per email
+  const emailBestMap = new Map();
   for (const c of allContacts) {
     if (c.match.score < 7 || !c.contacts.emails?.length) continue;
     const primaryEmail = c.contacts.emails[0].toLowerCase();
@@ -521,7 +528,6 @@ export async function processInBatches(posts, candidate) {
     emailBatches.push(goodWithEmail.slice(i, i + emailBatchSize));
   }
 
-  // Fire all email batches in parallel
   const emailPromises = emailBatches.map((batch, i) => {
     console.log(`   [Email] Batch ${i + 1}/${emailBatches.length} (${batch.length} emails) — sending`);
     const prompt = buildEmailPrompt(batch, candidate);
@@ -570,4 +576,14 @@ export async function processInBatches(posts, candidate) {
   console.log(`\n   Phase 3 complete: ${emailCount} emails drafted\n`);
 
   return allContacts;
+}
+
+// ============================================================
+// LEGACY — Full 3-phase pipeline (kept for backward compat)
+// ============================================================
+
+export async function processInBatches(posts, candidate) {
+  const extracted = await extractPhase1(posts);
+  if (extracted.length === 0) return [];
+  return scoreAndDraftEmails(extracted, candidate);
 }

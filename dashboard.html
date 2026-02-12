@@ -38,14 +38,11 @@
     overflow-x: hidden;
   }
 
-  /* Ambient background glow */
   body::before {
     content: '';
     position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
     background: radial-gradient(circle at 30% 20%, #7c5cfc08 0%, transparent 50%),
                 radial-gradient(circle at 70% 80%, #22d3ee06 0%, transparent 50%),
                 radial-gradient(circle at 50% 50%, #f472b604 0%, transparent 50%);
@@ -64,7 +61,7 @@
   /* ── HEADER ── */
   .header {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 32px;
   }
 
   .header h1 {
@@ -83,19 +80,69 @@
     font-size: 0.95rem;
   }
 
+  /* ── USER TABS ── */
+  .user-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .user-tab {
+    padding: 10px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .user-tab:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .user-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .user-tab .tab-count {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .user-tab.active .tab-count {
+    background: rgba(255,255,255,0.25);
+  }
+
   /* ── STATS ROW ── */
   .stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 16px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
   }
 
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 24px;
+    padding: 20px;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -110,9 +157,7 @@
   .stat-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 3px;
     border-radius: 16px 16px 0 0;
   }
@@ -123,17 +168,16 @@
   .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--pink), var(--accent)); }
   .stat-card:nth-child(5)::before { background: linear-gradient(90deg, var(--yellow), var(--green)); }
   .stat-card:nth-child(6)::before { background: linear-gradient(90deg, var(--red), var(--pink)); }
-  .stat-card:nth-child(7)::before { background: linear-gradient(90deg, #f87171, #ef4444); }
 
   .stat-number {
-    font-size: 2.4rem;
+    font-size: 2.2rem;
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
     line-height: 1;
   }
 
   .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -187,47 +231,8 @@
     transition: border-color 0.2s;
   }
 
-  .search-box:focus {
-    border-color: var(--accent);
-  }
-
-  .search-box::placeholder {
-    color: var(--text-dim);
-  }
-
-  .salary-filter {
-    padding: 8px 16px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238888a4' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-  }
-
-  .salary-filter:focus {
-    border-color: var(--accent);
-  }
-
-  .salary-badge {
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    background: var(--green-dim);
-    border: 1px solid #34d39944;
-    color: var(--green);
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--text-dim); }
 
   /* ── CONTACT CARDS ── */
   .cards {
@@ -248,6 +253,8 @@
     box-shadow: 0 0 30px #7c5cfc11;
   }
 
+  .card.rejected-card { opacity: 0.5; }
+
   .card-top {
     display: flex;
     align-items: flex-start;
@@ -258,8 +265,7 @@
   }
 
   .score-ring {
-    width: 56px;
-    height: 56px;
+    width: 56px; height: 56px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -273,8 +279,7 @@
 
   .score-ring::before {
     content: '';
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     border-radius: 50%;
     padding: 3px;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -290,29 +295,10 @@
   .score-low { color: var(--red); background: var(--red-dim); }
   .score-low::before { background: linear-gradient(135deg, var(--red), var(--pink)); }
 
-  .card-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .card-info h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .card-info .role {
-    font-size: 0.85rem;
-    color: var(--cyan);
-    margin-bottom: 6px;
-  }
-
-  .card-info .reason {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    line-height: 1.4;
-  }
+  .card-info { flex: 1; min-width: 0; }
+  .card-info h3 { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .card-info .role { font-size: 0.85rem; color: var(--cyan); margin-bottom: 6px; }
+  .card-info .reason { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; }
 
   .card-badges {
     display: flex;
@@ -332,14 +318,37 @@
     white-space: nowrap;
   }
 
-  .badge-sent { background: var(--green-dim); color: var(--green); border: 1px solid #34d39944; }
-  .badge-ready { background: var(--accent-glow); color: var(--accent); border: 1px solid #7c5cfc44; }
+  .badge-drafted { background: var(--accent-glow); color: var(--accent); border: 1px solid #7c5cfc44; }
   .badge-approved { background: var(--cyan-dim); color: var(--cyan); border: 1px solid #22d3ee44; }
-  .badge-no-email { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #fbbf2444; }
-  .badge-low { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
+  .badge-sent { background: var(--green-dim); color: var(--green); border: 1px solid #34d39944; }
   .badge-rejected { background: #44444466; color: #888; border: 1px solid #55555544; }
-  .badge-verify-failed { background: var(--red-dim); color: var(--red); border: 1px solid #f8717144; }
-  .badge-method { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+  .badge-no-email { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #fbbf2444; }
+  .badge-user { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+
+  /* ── BUTTONS ── */
+  .btn-approve {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--green);
+    background: var(--green-dim);
+    color: var(--green);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-approve:hover { background: var(--green); color: #000; }
+  .btn-approve:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-approve.is-approved {
+    border-color: var(--red);
+    background: var(--red-dim);
+    color: var(--red);
+  }
+  .btn-approve.is-approved:hover { background: var(--red); color: #000; }
 
   .btn-reject {
     padding: 6px 16px;
@@ -355,28 +364,15 @@
     white-space: nowrap;
   }
 
-  .btn-reject:hover {
-    border-color: var(--red);
-    color: var(--red);
-    background: var(--red-dim);
-  }
+  .btn-reject:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+  .btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .btn-reject:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .card.rejected-card {
-    opacity: 0.5;
-  }
-
-  /* ── APPROVE BUTTON ── */
-  .btn-approve {
+  .btn-restore {
     padding: 6px 16px;
     border-radius: 8px;
-    border: 1px solid var(--green);
-    background: var(--green-dim);
-    color: var(--green);
+    border: 1px solid var(--accent);
+    background: var(--accent-glow);
+    color: var(--accent);
     font-family: 'Inter', sans-serif;
     font-size: 0.78rem;
     font-weight: 600;
@@ -385,33 +381,8 @@
     white-space: nowrap;
   }
 
-  .btn-approve:hover {
-    background: var(--green);
-    color: #000;
-  }
-
-  .btn-approve.approved {
-    border-color: var(--red);
-    background: var(--red-dim);
-    color: var(--red);
-  }
-
-  .btn-approve.approved:hover {
-    background: var(--red);
-    color: #000;
-  }
-
-  .btn-approve:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .scheduled-info {
-    font-size: 0.72rem;
-    color: var(--cyan);
-    font-family: 'JetBrains Mono', monospace;
-    margin-top: 4px;
-  }
+  .btn-restore:hover { background: var(--accent); color: #fff; }
+  .btn-restore:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* ── EXPANDABLE DETAIL ── */
   .card-detail {
@@ -421,9 +392,7 @@
     animation: slideDown 0.2s ease;
   }
 
-  .card.expanded .card-detail {
-    display: block;
-  }
+  .card.expanded .card-detail { display: block; }
 
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-8px); }
@@ -437,9 +406,7 @@
     padding-top: 20px;
   }
 
-  @media (max-width: 768px) {
-    .detail-grid { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
 
   .detail-section h4 {
     font-size: 0.75rem;
@@ -454,15 +421,39 @@
 
   .detail-section h4::before {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
   }
 
   .detail-section:nth-child(1) h4::before { background: var(--cyan); }
   .detail-section:nth-child(2) h4::before { background: var(--pink); }
-  .detail-section:nth-child(3) h4::before { background: var(--green); }
-  .detail-section:nth-child(4) h4::before { background: var(--yellow); }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #ffffff06;
+  }
+
+  .detail-row .label { color: var(--text-dim); }
+  .detail-row .value { color: var(--text); font-weight: 500; text-align: right; }
+
+  .reqs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .req-tag {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
 
   .email-preview {
     background: var(--surface2);
@@ -496,41 +487,7 @@
     font-family: 'Inter', sans-serif;
   }
 
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    font-size: 0.85rem;
-    border-bottom: 1px solid #ffffff06;
-  }
-
-  .detail-row .label {
-    color: var(--text-dim);
-  }
-
-  .detail-row .value {
-    color: var(--text);
-    font-weight: 500;
-    text-align: right;
-  }
-
-  .reqs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 4px;
-  }
-
-  .req-tag {
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-  }
-
-  /* ── EXPAND CHEVRON ── */
+  /* ── CHEVRON ── */
   .chevron {
     color: var(--text-dim);
     transition: transform 0.2s;
@@ -538,9 +495,7 @@
     align-self: center;
   }
 
-  .card.expanded .chevron {
-    transform: rotate(180deg);
-  }
+  .card.expanded .chevron { transform: rotate(180deg); }
 
   /* ── EMPTY STATE ── */
   .empty {
@@ -562,6 +517,52 @@
     margin-bottom: 16px;
     font-family: 'JetBrains Mono', monospace;
   }
+
+  /* ── LOADING ── */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .refresh-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .refresh-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  .refresh-btn.spinning svg {
+    animation: spin 0.8s linear infinite;
+  }
 </style>
 </head>
 <body>
@@ -569,177 +570,49 @@
 <div class="container">
   <div class="header">
     <h1>Feed Email Extractor</h1>
-    <p id="subtitle">Loading contacts...</p>
+    <p id="subtitle">Loading...</p>
   </div>
 
+  <div class="user-tabs" id="userTabs"></div>
   <div class="stats" id="stats"></div>
 
   <div class="filters" id="filters">
     <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="sendable">Sendable</button>
+    <button class="filter-btn" data-filter="drafted">Drafted</button>
     <button class="filter-btn" data-filter="approved">Approved</button>
     <button class="filter-btn" data-filter="sent">Sent</button>
-    <button class="filter-btn" data-filter="has-email">Email Only</button>
-    <button class="filter-btn" data-filter="no-email">DM Only</button>
-    <button class="filter-btn" data-filter="low-match">Low Match</button>
     <button class="filter-btn" data-filter="rejected">Rejected</button>
-    <button class="filter-btn" data-filter="verify-failed">Verify Failed</button>
-    <select class="salary-filter" id="salaryFilter">
-      <option value="all">All Salaries</option>
-      <option value="has-salary">Has Salary</option>
-      <option value="7+">7+ LPA</option>
-      <option value="10+">10+ LPA</option>
-      <option value="15+">15+ LPA</option>
-      <option value="20+">20+ LPA</option>
-      <option value="30+">30+ LPA</option>
-    </select>
-    <select class="salary-filter" id="typeFilter">
-      <option value="all">All Types</option>
-      <option value="full-time">Full-Time</option>
-      <option value="contract">Contract</option>
-      <option value="remote">Remote</option>
-      <option value="intern">Intern</option>
-    </select>
     <input type="text" class="search-box" id="search" placeholder="Search by name, role, company, email...">
   </div>
 
   <div class="results-count" id="resultsCount"></div>
-  <div class="cards" id="cards"></div>
+  <div class="cards" id="cards">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading emails from sheet...</p>
+    </div>
+  </div>
 </div>
 
+<button class="refresh-btn" id="refreshBtn" title="Refresh data from sheet">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M17 10a7 7 0 01-12.9 3.7M3 10a7 7 0 0112.9-3.7M17 10V4m0 6h-6M3 10v6m0-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
 <script>
-(async () => {
-  let contacts = [];
-
-  try {
-    const res = await fetch('./output/contacts.json');
-    const data = await res.json();
-    contacts = Array.isArray(data) ? data : (data.contacts || []);
-  } catch (e) {
-    document.getElementById('subtitle').textContent = 'Failed to load contacts.json';
-    return;
-  }
-
-  const total = contacts.length;
-  const goodMatch = contacts.filter(c => c.match?.isGoodMatch);
-  const withEmail = contacts.filter(c => c.email?.to && c.email.to.includes('@'));
-  const sendable = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent && !c.approved);
-  const approved = contacts.filter(c => c.approved && !c.sent);
-  const sent = contacts.filter(c => c.sent);
-  const verifyFailed = contacts.filter(c => c.verifyFailed && !c.rejected);
-  const avgScore = total ? (contacts.reduce((s, c) => s + (c.match?.score || 0), 0) / total).toFixed(1) : 0;
-
-  document.getElementById('subtitle').textContent = `${total} contacts from ${new Date().toLocaleDateString()}`;
-
-  // Stats — rendered once, updated by ID
-  document.getElementById('stats').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-number" style="color:var(--accent)">${total}</div>
-      <div class="stat-label">Total Contacts</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" style="color:var(--green)">${goodMatch.length}</div>
-      <div class="stat-label">Good Matches</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" style="color:var(--cyan)">${withEmail.length}</div>
-      <div class="stat-label">With Email</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="stat-ready" style="color:var(--pink)">${sendable.length}</div>
-      <div class="stat-label">Ready to Send</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="stat-approved" style="color:var(--cyan)">${approved.length}</div>
-      <div class="stat-label">Approved</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="stat-sent" style="color:var(--yellow)">${sent.length}</div>
-      <div class="stat-label">Sent</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="stat-verify-failed" style="color:var(--red)">${verifyFailed.length}</div>
-      <div class="stat-label">Verify Failed</div>
-    </div>
-  `;
-
-  function updateStatCounts() {
-    document.getElementById('stat-ready').textContent = contacts.filter(c => c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body && !c.sent && !c.approved).length;
-    document.getElementById('stat-approved').textContent = contacts.filter(c => c.approved && !c.sent).length;
-    document.getElementById('stat-sent').textContent = contacts.filter(c => c.sent).length;
-    document.getElementById('stat-verify-failed').textContent = contacts.filter(c => c.verifyFailed && !c.rejected).length;
-  }
-
-  // Render
+(() => {
+  // ── State ──
+  let allData = {};          // { username: [emails] }
+  let users = [];
+  let activeUser = null;     // null = "All Users"
   let activeFilter = 'all';
   let searchQuery = '';
-  let salaryFilter = 'all';
-  let typeFilter = 'all';
 
-  function getStatus(c) {
-    if (c.rejected) return 'rejected';
-    if (c.verifyFailed) return 'verify-failed';
-    if (c.sent) return 'sent';
-    if (c.approved) return 'approved';
-    if (c.match?.isGoodMatch && c.email?.to?.includes('@') && c.email?.subject && c.email?.body) return 'sendable';
-    if (!c.email?.to || !c.email.to.includes('@')) return 'no-email';
-    if (!c.match?.isGoodMatch) return 'low-match';
-    return 'sendable';
-  }
-
-  function getSalaryMax(c) {
-    return c.job?.salaryMaxLPA ?? null;
-  }
-
-  function getSalaryDisplay(c) {
-    const min = c.job?.salaryMinLPA;
-    const max = c.job?.salaryMaxLPA;
-    if (min != null && max != null) {
-      return min === max ? `${min} LPA` : `${min}-${max} LPA`;
-    }
-    if (c.job?.salary) return c.job.salary;
-    return null;
-  }
-
-  function matchesFilter(c) {
-    const status = getStatus(c);
-    // Hide rejected/verify-failed from all views except their own filter
-    if (status === 'rejected' && activeFilter !== 'rejected') return false;
-    if (status === 'verify-failed' && activeFilter !== 'verify-failed' && activeFilter !== 'all') return false;
-    // Status filter
-    if (activeFilter === 'has-email') {
-      if (!c.contacts?.emails?.length) return false;
-    } else if (activeFilter !== 'all' && status !== activeFilter) {
-      return false;
-    }
-    // Salary filter
-    if (salaryFilter !== 'all') {
-      const maxLPA = getSalaryMax(c);
-      if (salaryFilter === 'has-salary') {
-        if (maxLPA == null) return false;
-      } else {
-        const threshold = parseInt(salaryFilter);
-        if (maxLPA == null || maxLPA < threshold) return false;
-      }
-    }
-    // Job type filter
-    if (typeFilter !== 'all') {
-      if ((c.job?.type || '').toLowerCase() !== typeFilter) return false;
-    }
-    // Search
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      const haystack = [
-        c.poster?.name, c.poster?.headline,
-        c.job?.title, c.job?.company, c.job?.type,
-        c.email?.to, c.email?.subject,
-        c.match?.reason,
-        ...(c.job?.requirements || []),
-        ...(c.contacts?.emails || []),
-      ].filter(Boolean).join(' ').toLowerCase();
-      return haystack.includes(q);
-    }
-    return true;
+  // ── Helpers ──
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function scoreClass(score) {
@@ -748,116 +621,429 @@
     return 'score-low';
   }
 
-  function statusBadge(c) {
-    const s = getStatus(c);
-    if (s === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
-    if (s === 'verify-failed') return '<span class="badge badge-verify-failed">Verify Failed</span>';
+  function statusBadge(status) {
+    const s = (status || '').toLowerCase();
     if (s === 'sent') return '<span class="badge badge-sent">Sent</span>';
     if (s === 'approved') return '<span class="badge badge-approved">Approved</span>';
-    if (s === 'sendable') return '<span class="badge badge-ready">Ready</span>';
-    if (s === 'no-email') return '<span class="badge badge-no-email">DM Only</span>';
-    if (s === 'low-match') return '<span class="badge badge-low">Low Match</span>';
-    return '';
+    if (s === 'rejected') return '<span class="badge badge-rejected">Rejected</span>';
+    if (s === 'no_email') return '<span class="badge badge-no-email">No Email</span>';
+    return '<span class="badge badge-drafted">Drafted</span>';
   }
 
   function postUrl(postId) {
     return postId ? `https://www.linkedin.com/feed/update/urn:li:activity:${postId}/` : null;
   }
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function getActiveEmails() {
+    if (activeUser) return (allData[activeUser] || []).map(e => ({ ...e, _user: activeUser }));
+    // All users merged
+    const all = [];
+    for (const [user, emails] of Object.entries(allData)) {
+      for (const e of emails) all.push({ ...e, _user: user });
+    }
+    return all;
+  }
+
+  function matchesFilter(e) {
+    const status = (e.status || 'drafted').toLowerCase();
+    // Hide rejected from "all" unless filter is "rejected"
+    if (status === 'rejected' && activeFilter !== 'rejected' && activeFilter !== 'all') return false;
+    if (activeFilter !== 'all' && status !== activeFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const haystack = [
+        e.poster?.name, e.poster?.headline,
+        e.job?.title, e.job?.company,
+        e.email?.to, e.email?.subject,
+        e.matchReason, e.requirements, e._user,
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    }
+    return true;
+  }
+
+  // ── Fetch Data ──
+  async function fetchData() {
+    const res = await fetch('/api/emails/all');
+    const data = await res.json();
+    allData = data.users || {};
+    users = Object.keys(allData).sort();
+  }
+
+  // ── Render User Tabs ──
+  function renderUserTabs() {
+    const totalAll = Object.values(allData).reduce((s, e) => s + e.length, 0);
+    let html = `<button class="user-tab ${!activeUser ? 'active' : ''}" data-user="">All Users<span class="tab-count">${totalAll}</span></button>`;
+    for (const user of users) {
+      const count = (allData[user] || []).length;
+      html += `<button class="user-tab ${activeUser === user ? 'active' : ''}" data-user="${escapeHtml(user)}">${escapeHtml(user)}<span class="tab-count">${count}</span></button>`;
+    }
+    document.getElementById('userTabs').innerHTML = html;
+
+    document.querySelectorAll('.user-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeUser = btn.dataset.user || null;
+        renderUserTabs();
+        renderStats();
+        renderCards();
+      });
+    });
+  }
+
+  // ── Render Stats ──
+  function renderStats() {
+    const emails = getActiveEmails();
+    const total = emails.length;
+    const drafted = emails.filter(e => (e.status || 'drafted') === 'drafted').length;
+    const approved = emails.filter(e => e.status === 'approved').length;
+    const sent = emails.filter(e => e.status === 'sent').length;
+    const rejected = emails.filter(e => e.status === 'rejected').length;
+    const avgScore = total ? (emails.reduce((s, e) => s + (e.score || 0), 0) / total).toFixed(1) : '0';
+
+    document.getElementById('stats').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--accent)">${total}</div>
+        <div class="stat-label">Total Emails</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--pink)">${drafted}</div>
+        <div class="stat-label">Drafted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--cyan)">${approved}</div>
+        <div class="stat-label">Approved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--green)">${sent}</div>
+        <div class="stat-label">Sent</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--red)">${rejected}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color:var(--yellow)">${avgScore}</div>
+        <div class="stat-label">Avg Score</div>
+      </div>
+    `;
+
+    const label = activeUser || 'All users';
+    document.getElementById('subtitle').textContent = `${total} emails for ${label}`;
+  }
+
+  // ── Render Cards ──
+  function bestStatus(entries) {
+    const order = ['approved', 'drafted', 'sent', 'no_email', 'rejected'];
+    for (const s of order) {
+      if (entries.some(e => (e.status || 'drafted') === s)) return s;
+    }
+    return 'drafted';
   }
 
   function renderCards() {
-    const filtered = contacts.filter(matchesFilter);
-    // Sort: sendable first, then by score desc
-    filtered.sort((a, b) => {
-      const sa = getStatus(a) === 'sendable' ? 1 : 0;
-      const sb = getStatus(b) === 'sendable' ? 1 : 0;
-      if (sb !== sa) return sb - sa;
-      return (b.match?.score || 0) - (a.match?.score || 0);
-    });
+    const emails = getActiveEmails().filter(matchesFilter);
 
-    document.getElementById('resultsCount').textContent = `${filtered.length} of ${total} contacts`;
+    const total = getActiveEmails().length;
 
-    if (filtered.length === 0) {
+    if (emails.length === 0) {
+      document.getElementById('resultsCount').textContent = `0 of ${total} emails`;
       document.getElementById('cards').innerHTML = `
         <div class="empty">
           <div class="empty-icon">&#9788;</div>
-          <p>No contacts match your filters</p>
+          <p>No emails match your filters</p>
         </div>`;
       return;
     }
 
-    document.getElementById('cards').innerHTML = filtered.map((c, i) => `
-      <div class="card${c.rejected ? ' rejected-card' : ''}" data-idx="${i}">
-        <div class="card-top" onclick="this.parentElement.classList.toggle('expanded')">
-          <div class="score-ring ${scoreClass(c.match?.score || 0)}">${c.match?.score || 0}</div>
-          <div class="card-info">
-            <h3>${escapeHtml(c.poster?.name || 'Unknown')}</h3>
-            <div class="role">${escapeHtml(c.job?.title || 'Unknown Role')}${c.job?.company ? ' @ ' + escapeHtml(c.job.company) : ''}</div>
-            <div class="reason">${escapeHtml(c.match?.reason || '')}</div>
-          </div>
-          <div class="card-badges">
-            ${statusBadge(c)}
-            ${c.contacts?.method ? `<span class="badge badge-method">${escapeHtml(c.contacts.method)}</span>` : ''}
-            ${c.job?.type ? `<span class="badge badge-method">${escapeHtml(c.job.type)}</span>` : ''}
-            ${getSalaryDisplay(c) ? `<span class="salary-badge">${escapeHtml(getSalaryDisplay(c))}</span>` : ''}
-          </div>
-          <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="card-detail">
-          <div class="detail-grid">
-            <div class="detail-section">
-              <h4>Job Details</h4>
-              <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(c.job?.title || '—')}</span></div>
-              <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(c.job?.company || '—')}</span></div>
-              <div class="detail-row"><span class="label">Type</span><span class="value">${escapeHtml(c.job?.type || '—')}</span></div>
-              <div class="detail-row"><span class="label">Salary</span><span class="value" style="color:var(--green)">${escapeHtml(getSalaryDisplay(c) || '—')}</span></div>
-              ${(c.job?.requirements?.length) ? `<div style="margin-top:8px"><div class="reqs">${c.job.requirements.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
-            </div>
-            <div class="detail-section">
-              <h4>Contact Info</h4>
-              <div class="detail-row"><span class="label">Method</span><span class="value">${escapeHtml(c.contacts?.method || '—')}</span></div>
-              ${(c.contacts?.emails || []).map(e => `<div class="detail-row"><span class="label">Email</span><span class="value" style="color:var(--cyan)">${escapeHtml(e)}</span></div>`).join('')}
-              <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(c.poster?.headline || '—')}</span></div>
-              <div class="detail-row"><span class="label">Post</span><span class="value">${c.postId ? `<a href="${postUrl(c.postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn &nearr;</a>` : '—'}</span></div>
-              ${c.sent ? `<div class="detail-row"><span class="label">Sent At</span><span class="value" style="color:var(--green)">${c.sentAt ? new Date(c.sentAt).toLocaleString() : '—'}</span></div>` : ''}
-            </div>
-            ${c.summary ? `
-            <div class="post-summary" style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:0">
-              <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span> Post Summary</div>
-              <div style="font-size:0.85rem;color:var(--text);line-height:1.7;white-space:pre-wrap">${escapeHtml(c.summary)}</div>
-            </div>` : ''}
-            ${c.email?.to ? `
-            <div class="email-preview">
-              <div class="email-to">To: ${escapeHtml(c.email.to)}</div>
-              ${c.verifyFailed ? `<div style="color:var(--red);font-size:0.8rem;margin:6px 0;padding:8px 12px;background:var(--red-dim);border-radius:8px;border:1px solid #f8717133">Verify Failed: ${escapeHtml(c.verifyError || 'Unknown error')}</div>` : ''}
-              <div class="email-subject">${escapeHtml(c.email.subject || '(no subject)')}</div>
-              <div class="email-body">${escapeHtml(c.email.body || '(no body)')}</div>
-              ${!c.sent && !c.rejected ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
-                <button class="btn-approve ${c.approved ? 'approved' : ''}" data-postid="${escapeHtml(c.postId)}" onclick="handleApprove(event, this)">
-                  ${c.approved ? 'Revoke' : 'Approve Send'}
-                </button>
-                <button class="btn-reject" data-postid="${escapeHtml(c.postId)}" onclick="handleReject(event, this)">Reject</button>
-                ${c.scheduledAt ? `<span class="scheduled-info">Scheduled: ${new Date(c.scheduledAt).toLocaleString()}</span>` : ''}
-              </div>` : ''}
-              ${c.rejected ? `<div style="margin-top:14px"><button class="btn-approve" data-postid="${escapeHtml(c.postId)}" onclick="handleUnreject(event, this)">Restore</button></div>` : ''}
-            </div>` : ''}
-            ${!c.email?.to && !c.sent ? `
-            <div style="grid-column:1/-1;display:flex;gap:12px;padding-top:12px">
-              ${!c.rejected ? `<button class="btn-reject" data-postid="${escapeHtml(c.postId)}" onclick="handleReject(event, this)">Reject</button>` : `<button class="btn-approve" data-postid="${escapeHtml(c.postId)}" onclick="handleUnreject(event, this)">Restore</button>`}
-            </div>` : ''}
-          </div>
-        </div>
-      </div>
-    `).join('');
+    // When showing all users, group by post ID — one card per post with all users' drafts inside
+    if (!activeUser && users.length > 1) {
+      const byPost = new Map();
+      for (const e of emails) {
+        const pid = e.postId || '';
+        if (!byPost.has(pid)) byPost.set(pid, []);
+        byPost.get(pid).push(e);
+      }
+
+      // Sort posts: best status first, then highest score
+      const statusOrder = { drafted: 0, approved: 1, sent: 2, rejected: 3, no_email: 4 };
+      const posts = [...byPost.entries()].sort((a, b) => {
+        const sa = statusOrder[bestStatus(a[1])] ?? 5;
+        const sb = statusOrder[bestStatus(b[1])] ?? 5;
+        if (sa !== sb) return sa - sb;
+        const maxA = Math.max(...a[1].map(e => e.score || 0));
+        const maxB = Math.max(...b[1].map(e => e.score || 0));
+        return maxB - maxA;
+      });
+
+      document.getElementById('resultsCount').textContent = `${posts.length} posts (${emails.length} emails across ${users.length} users)`;
+      document.getElementById('cards').innerHTML = posts.map(([pid, entries]) => renderGroupedCard(pid, entries)).join('');
+      return;
+    }
+
+    // Single user view — one card per email, sorted by status then score
+    const statusOrder = { drafted: 0, approved: 1, sent: 2, rejected: 3, no_email: 4 };
+    emails.sort((a, b) => {
+      const sa = statusOrder[(a.status || 'drafted')] ?? 5;
+      const sb = statusOrder[(b.status || 'drafted')] ?? 5;
+      if (sa !== sb) return sa - sb;
+      return (b.score || 0) - (a.score || 0);
+    });
+
+    document.getElementById('resultsCount').textContent = `${emails.length} of ${total} emails`;
+    document.getElementById('cards').innerHTML = emails.map(renderSingleCard).join('');
   }
 
-  // Filter buttons
+  // Card for "All Users" view — one card per post, multiple user drafts inside
+  function renderGroupedCard(postId, entries) {
+    const first = entries[0];
+    const maxScore = Math.max(...entries.map(e => e.score || 0));
+    const reqs = (first.requirements || '').split(',').map(s => s.trim()).filter(Boolean);
+    const allRejected = entries.every(e => (e.status || 'drafted') === 'rejected');
+
+    // Status summary badges
+    const statuses = {};
+    for (const e of entries) { const s = e.status || 'drafted'; statuses[s] = (statuses[s] || 0) + 1; }
+
+    return `
+    <div class="card${allRejected ? ' rejected-card' : ''}" data-postid="${escapeHtml(postId)}">
+      <div class="card-top" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="score-ring ${scoreClass(maxScore)}">${maxScore}</div>
+        <div class="card-info">
+          <h3>${escapeHtml(first.poster?.name || 'Unknown')}</h3>
+          <div class="role">${escapeHtml(first.job?.title || 'Unknown Role')}${first.job?.company ? ' @ ' + escapeHtml(first.job.company) : ''}</div>
+          <div class="reason">${escapeHtml(first.matchReason || '')}</div>
+        </div>
+        <div class="card-badges">
+          ${entries.map(e => `<span class="badge badge-user">${escapeHtml(e._user)}</span>`).join('')}
+          ${Object.entries(statuses).map(([s, n]) => statusBadge(s)).join('')}
+        </div>
+        <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-detail">
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h4>Job Details</h4>
+            <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(first.job?.title || '—')}</span></div>
+            <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(first.job?.company || '—')}</span></div>
+            <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(first.poster?.headline || '—')}</span></div>
+            ${reqs.length ? `<div style="margin-top:8px"><div class="reqs">${reqs.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
+          </div>
+          <div class="detail-section">
+            <h4>Post Info</h4>
+            <div class="detail-row"><span class="label">Users</span><span class="value">${entries.map(e => escapeHtml(e._user)).join(', ')}</span></div>
+            <div class="detail-row"><span class="label">Post</span><span class="value">${postId ? `<a href="${postUrl(postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
+          </div>
+          ${entries.map(e => renderUserEmailBlock(e)).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Per-user email block inside a grouped card
+  function renderUserEmailBlock(e) {
+    const status = (e.status || 'drafted').toLowerCase();
+    const isRejected = status === 'rejected';
+    const isSent = status === 'sent';
+    const isApproved = status === 'approved';
+    const hasEmail = e.email?.to && e.email.to.includes('@');
+
+    return `
+    <div class="email-preview" style="position:relative">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span class="badge badge-user" style="font-size:0.8rem;padding:4px 14px">${escapeHtml(e._user)}</span>
+        ${statusBadge(status)}
+        <span style="color:var(--text-dim);font-size:0.78rem;font-family:JetBrains Mono,monospace;margin-left:auto">Score: ${e.score || 0}/10</span>
+      </div>
+      ${hasEmail ? `
+        <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
+        <div class="email-subject">${escapeHtml(e.email.subject || '(no subject)')}</div>
+        <div class="email-body">${escapeHtml(e.email.body || '(no body)')}</div>
+      ` : `<div style="color:var(--yellow);font-size:0.85rem">No email drafted</div>`}
+      ${e.approvedBy ? `<div style="font-size:0.75rem;color:var(--cyan);margin-top:8px">Approved by: ${escapeHtml(e.approvedBy)}</div>` : ''}
+      ${e.sentAt ? `<div style="font-size:0.75rem;color:var(--green);margin-top:4px">Sent: ${new Date(e.sentAt).toLocaleString()}</div>` : ''}
+      ${!isSent ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+        ${!isRejected ? `
+          <button class="btn-approve ${isApproved ? 'is-approved' : ''}" onclick="handleApprove(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}', ${isApproved})">
+            ${isApproved ? 'Unapprove' : 'Approve'}
+          </button>
+          <button class="btn-reject" onclick="handleReject(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Reject</button>
+        ` : `
+          <button class="btn-restore" onclick="handleRestore(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Restore</button>
+        `}
+      </div>` : ''}
+    </div>`;
+  }
+
+  // Card for single user view
+  function renderSingleCard(e) {
+    const status = (e.status || 'drafted').toLowerCase();
+    const isRejected = status === 'rejected';
+    const isSent = status === 'sent';
+    const isApproved = status === 'approved';
+    const hasEmail = e.email?.to && e.email.to.includes('@');
+    const reqs = (e.requirements || '').split(',').map(s => s.trim()).filter(Boolean);
+
+    return `
+    <div class="card${isRejected ? ' rejected-card' : ''}" data-user="${escapeHtml(e._user)}" data-postid="${escapeHtml(e.postId)}">
+      <div class="card-top" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="score-ring ${scoreClass(e.score || 0)}">${e.score || 0}</div>
+        <div class="card-info">
+          <h3>${escapeHtml(e.poster?.name || 'Unknown')}</h3>
+          <div class="role">${escapeHtml(e.job?.title || 'Unknown Role')}${e.job?.company ? ' @ ' + escapeHtml(e.job.company) : ''}</div>
+          <div class="reason">${escapeHtml(e.matchReason || '')}</div>
+        </div>
+        <div class="card-badges">
+          ${statusBadge(status)}
+        </div>
+        <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-detail">
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h4>Job Details</h4>
+            <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(e.job?.title || '—')}</span></div>
+            <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(e.job?.company || '—')}</span></div>
+            <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(e.poster?.headline || '—')}</span></div>
+            ${reqs.length ? `<div style="margin-top:8px"><div class="reqs">${reqs.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
+          </div>
+          <div class="detail-section">
+            <h4>Status</h4>
+            <div class="detail-row"><span class="label">Status</span><span class="value">${escapeHtml(status)}</span></div>
+            ${e.approvedBy ? `<div class="detail-row"><span class="label">Approved By</span><span class="value" style="color:var(--cyan)">${escapeHtml(e.approvedBy)}</span></div>` : ''}
+            ${e.generatedAt ? `<div class="detail-row"><span class="label">Generated</span><span class="value">${new Date(e.generatedAt).toLocaleString()}</span></div>` : ''}
+            ${e.sentAt ? `<div class="detail-row"><span class="label">Sent At</span><span class="value" style="color:var(--green)">${new Date(e.sentAt).toLocaleString()}</span></div>` : ''}
+            <div class="detail-row"><span class="label">Post</span><span class="value">${e.postId ? `<a href="${postUrl(e.postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
+          </div>
+          ${hasEmail ? `
+          <div class="email-preview">
+            <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
+            <div class="email-subject">${escapeHtml(e.email.subject || '(no subject)')}</div>
+            <div class="email-body">${escapeHtml(e.email.body || '(no body)')}</div>
+            ${!isSent ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+              ${!isRejected ? `
+                <button class="btn-approve ${isApproved ? 'is-approved' : ''}" onclick="handleApprove(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}', ${isApproved})">
+                  ${isApproved ? 'Unapprove' : 'Approve'}
+                </button>
+                <button class="btn-reject" onclick="handleReject(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Reject</button>
+              ` : `
+                <button class="btn-restore" onclick="handleRestore(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Restore</button>
+              `}
+            </div>` : ''}
+          </div>` : `
+          <div style="grid-column:1/-1;padding:12px 0">
+            ${!isSent && !isRejected ? `
+              <button class="btn-reject" onclick="handleReject(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Reject</button>
+            ` : ''}
+            ${isRejected ? `
+              <button class="btn-restore" onclick="handleRestore(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Restore</button>
+            ` : ''}
+          </div>`}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── API Actions ──
+  window.handleApprove = async function(event, user, postId, isCurrentlyApproved) {
+    event.stopPropagation();
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const endpoint = isCurrentlyApproved ? '/api/unapprove' : '/api/approve';
+      const body = isCurrentlyApproved
+        ? { user, postId }
+        : { user, postId, approvedBy: 'Dashboard' };
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Update local state
+      const emailObj = (allData[user] || []).find(e => e.postId === postId);
+      if (emailObj) {
+        emailObj.status = isCurrentlyApproved ? 'drafted' : 'approved';
+        emailObj.approvedBy = isCurrentlyApproved ? '' : 'Dashboard';
+      }
+
+      renderStats();
+      renderCards();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = isCurrentlyApproved ? 'Unapprove' : 'Approve';
+    }
+  };
+
+  window.handleReject = async function(event, user, postId) {
+    event.stopPropagation();
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const emailObj = (allData[user] || []).find(e => e.postId === postId);
+      if (emailObj) {
+        emailObj.status = 'rejected';
+        emailObj.approvedBy = '';
+      }
+
+      renderStats();
+      renderCards();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Reject';
+    }
+  };
+
+  window.handleRestore = async function(event, user, postId) {
+    event.stopPropagation();
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/unapprove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const emailObj = (allData[user] || []).find(e => e.postId === postId);
+      if (emailObj) {
+        emailObj.status = 'drafted';
+        emailObj.approvedBy = '';
+      }
+
+      renderStats();
+      renderCards();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Restore';
+    }
+  };
+
+  // ── Event Listeners ──
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -867,175 +1053,45 @@
     });
   });
 
-  // Salary filter
-  document.getElementById('salaryFilter').addEventListener('change', (e) => {
-    salaryFilter = e.target.value;
-    renderCards();
-  });
-
-  // Type filter
-  document.getElementById('typeFilter').addEventListener('change', (e) => {
-    typeFilter = e.target.value;
-    renderCards();
-  });
-
-  // Search
   document.getElementById('search').addEventListener('input', (e) => {
     searchQuery = e.target.value;
     renderCards();
   });
 
-  renderCards();
-
-  // In-place DOM update — no full re-render
-  window.handleApprove = async function(event, btn) {
-    event.stopPropagation();
-    const postId = btn.dataset.postid;
-    const isApproved = btn.classList.contains('approved');
-    const endpoint = isApproved ? '/api/unapprove' : '/api/approve';
-    const card = btn.closest('.card');
-
-    btn.disabled = true;
-    btn.textContent = '...';
-
+  // Refresh button
+  document.getElementById('refreshBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spinning');
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      // Update local data
-      const contact = contacts.find(c => c.postId === postId);
-      if (contact) {
-        if (isApproved) {
-          contact.approved = false;
-          delete contact.scheduledAt;
-        } else {
-          contact.approved = true;
-          contact.scheduledAt = data.scheduledAt;
-        }
-      }
-
-      // Update button
-      btn.disabled = false;
-      if (isApproved) {
-        btn.classList.remove('approved');
-        btn.textContent = 'Approve Send';
-      } else {
-        btn.classList.add('approved');
-        btn.textContent = 'Revoke';
-      }
-
-      // Update scheduled info next to button
-      const wrapper = btn.parentElement;
-      let infoEl = wrapper.querySelector('.scheduled-info');
-      if (!isApproved && data.scheduledAt) {
-        if (!infoEl) {
-          infoEl = document.createElement('span');
-          infoEl.className = 'scheduled-info';
-          wrapper.appendChild(infoEl);
-        }
-        infoEl.textContent = 'Scheduled: ' + new Date(data.scheduledAt).toLocaleString();
-      } else if (infoEl) {
-        infoEl.remove();
-      }
-
-      // Update badge on the card header
-      const badges = card.querySelector('.card-badges');
-      const oldStatusBadge = badges.querySelector('.badge-ready,.badge-approved');
-      if (oldStatusBadge) oldStatusBadge.remove();
-      const newBadge = document.createElement('span');
-      newBadge.className = isApproved ? 'badge badge-ready' : 'badge badge-approved';
-      newBadge.textContent = isApproved ? 'READY' : 'APPROVED';
-      badges.prepend(newBadge);
-
-      // Update stat counters
-      updateStatCounts();
-    } catch (err) {
-      alert('Failed: ' + err.message);
-      btn.disabled = false;
-      btn.textContent = isApproved ? 'Revoke' : 'Approve Send';
-    }
-  };
-
-  window.handleReject = async function(event, btn) {
-    event.stopPropagation();
-    const postId = btn.dataset.postid;
-    const card = btn.closest('.card');
-    btn.disabled = true;
-    btn.textContent = '...';
-
-    try {
-      const res = await fetch('/api/reject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      const contact = contacts.find(c => c.postId === postId);
-      if (contact) {
-        contact.rejected = true;
-        contact.approved = false;
-        delete contact.scheduledAt;
-      }
-
-      // In-place update — mark as rejected visually, hide on next reload
-      card.classList.add('rejected-card');
-      const badges = card.querySelector('.card-badges');
-      const oldBadge = badges.querySelector('.badge-ready,.badge-approved,.badge-no-email,.badge-low');
-      if (oldBadge) oldBadge.remove();
-      const rejBadge = document.createElement('span');
-      rejBadge.className = 'badge badge-rejected';
-      rejBadge.textContent = 'REJECTED';
-      badges.prepend(rejBadge);
-
-      // Replace buttons with "Rejected" text
-      const wrapper = btn.parentElement;
-      wrapper.innerHTML = '<span style="color:#888;font-size:0.8rem">Rejected — hidden on next load</span>';
-
-      updateStatCounts();
-    } catch (err) {
-      alert('Failed: ' + err.message);
-      btn.disabled = false;
-      btn.textContent = 'Reject';
-    }
-  };
-
-  window.handleUnreject = async function(event, btn) {
-    event.stopPropagation();
-    const postId = btn.dataset.postid;
-    btn.disabled = true;
-    btn.textContent = '...';
-
-    try {
-      const res = await fetch('/api/unreject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      const contact = contacts.find(c => c.postId === postId);
-      if (contact) {
-        contact.rejected = false;
-        delete contact.rejectedAt;
-      }
-
-      // In-place update — just re-render since we're in rejected view
+      await fetchData();
+      renderUserTabs();
+      renderStats();
       renderCards();
-      updateStatCounts();
     } catch (err) {
-      alert('Failed: ' + err.message);
-      btn.disabled = false;
-      btn.textContent = 'Restore';
+      alert('Refresh failed: ' + err.message);
     }
-  };
+    btn.classList.remove('spinning');
+  });
+
+  // ── Init ──
+  async function init() {
+    try {
+      await fetchData();
+      renderUserTabs();
+      renderStats();
+      renderCards();
+    } catch (err) {
+      document.getElementById('subtitle').textContent = 'Failed to load data';
+      document.getElementById('cards').innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">&#9888;</div>
+          <p>Could not connect to dashboard server</p>
+          <p style="margin-top:8px;font-size:0.85rem">Make sure the server is running: <code style="color:var(--cyan)">npm run dashboard</code></p>
+        </div>`;
+    }
+  }
+
+  init();
 })();
 </script>
 </body>

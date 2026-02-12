@@ -2,14 +2,20 @@
 
 /**
  * Dashboard Server
- * Serves dashboard.html + handles approve/unapprove API endpoints.
+ * Serves dashboard.html + sheet-backed API for cross-user email management.
  */
 
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { approveContact, unapproveContact, rejectContact, unrejectContact } from '../services/contacts-store.js';
+import {
+  listUserTabs,
+  fetchUserEmails,
+  approveUserEmail,
+  rejectUserEmail,
+  unapproveUserEmail,
+} from '../services/googleSheets.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -38,6 +44,12 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function parseUrl(url) {
+  const [pathname, qs] = url.split('?');
+  const params = Object.fromEntries(new URLSearchParams(qs || ''));
+  return { pathname, params };
+}
+
 const server = http.createServer(async (req, res) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
@@ -49,52 +61,76 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  // API: POST /api/approve
-  if (req.method === 'POST' && req.url === '/api/approve') {
-    const body = JSON.parse(await readBody(req));
-    const contact = approveContact(body.postId);
-    if (!contact) return json(res, 404, { error: 'Contact not found' });
-    return json(res, 200, { ok: true, scheduledAt: contact.scheduledAt });
-  }
-
-  // API: POST /api/unapprove
-  if (req.method === 'POST' && req.url === '/api/unapprove') {
-    const body = JSON.parse(await readBody(req));
-    const contact = unapproveContact(body.postId);
-    if (!contact) return json(res, 404, { error: 'Contact not found' });
-    return json(res, 200, { ok: true });
-  }
-
-  // API: POST /api/reject
-  if (req.method === 'POST' && req.url === '/api/reject') {
-    const body = JSON.parse(await readBody(req));
-    const contact = rejectContact(body.postId);
-    if (!contact) return json(res, 404, { error: 'Contact not found' });
-    return json(res, 200, { ok: true });
-  }
-
-  // API: POST /api/unreject
-  if (req.method === 'POST' && req.url === '/api/unreject') {
-    const body = JSON.parse(await readBody(req));
-    const contact = unrejectContact(body.postId);
-    if (!contact) return json(res, 404, { error: 'Contact not found' });
-    return json(res, 200, { ok: true });
-  }
-
-  // Static file serving
-  let filePath = req.url === '/' ? '/dashboard.html' : req.url;
-  filePath = path.join(ROOT, decodeURIComponent(filePath));
-
-  // Prevent directory traversal
-  if (!filePath.startsWith(ROOT)) return json(res, 403, { error: 'Forbidden' });
+  const { pathname, params } = parseUrl(req.url);
 
   try {
+    // GET /api/users — list all user tabs
+    if (req.method === 'GET' && pathname === '/api/users') {
+      const users = await listUserTabs();
+      return json(res, 200, { users });
+    }
+
+    // GET /api/emails?user=Ajay — fetch emails for a user
+    if (req.method === 'GET' && pathname === '/api/emails') {
+      const user = params.user;
+      if (!user) return json(res, 400, { error: 'Missing ?user= parameter' });
+      const emails = await fetchUserEmails(user, params.status || null);
+      return json(res, 200, { user, emails });
+    }
+
+    // GET /api/emails/all — fetch emails for all users
+    if (req.method === 'GET' && pathname === '/api/emails/all') {
+      const users = await listUserTabs();
+      const all = {};
+      for (const user of users) {
+        all[user] = await fetchUserEmails(user, params.status || null);
+      }
+      return json(res, 200, { users: all });
+    }
+
+    // POST /api/approve — { user, postId, approvedBy }
+    if (req.method === 'POST' && pathname === '/api/approve') {
+      const body = JSON.parse(await readBody(req));
+      if (!body.user || !body.postId) return json(res, 400, { error: 'Missing user or postId' });
+      const ok = await approveUserEmail(body.user, body.postId, body.approvedBy || 'Dashboard');
+      if (!ok) return json(res, 404, { error: 'Email not found' });
+      return json(res, 200, { ok: true });
+    }
+
+    // POST /api/reject — { user, postId }
+    if (req.method === 'POST' && pathname === '/api/reject') {
+      const body = JSON.parse(await readBody(req));
+      if (!body.user || !body.postId) return json(res, 400, { error: 'Missing user or postId' });
+      const ok = await rejectUserEmail(body.user, body.postId);
+      if (!ok) return json(res, 404, { error: 'Email not found' });
+      return json(res, 200, { ok: true });
+    }
+
+    // POST /api/unapprove — { user, postId }
+    if (req.method === 'POST' && pathname === '/api/unapprove') {
+      const body = JSON.parse(await readBody(req));
+      if (!body.user || !body.postId) return json(res, 400, { error: 'Missing user or postId' });
+      const ok = await unapproveUserEmail(body.user, body.postId);
+      if (!ok) return json(res, 404, { error: 'Email not found' });
+      return json(res, 200, { ok: true });
+    }
+
+    // Static file serving
+    let filePath = pathname === '/' ? '/dashboard.html' : pathname;
+    filePath = path.join(ROOT, decodeURIComponent(filePath));
+
+    if (!filePath.startsWith(ROOT)) return json(res, 403, { error: 'Forbidden' });
+
     const data = fs.readFileSync(filePath);
     const ext = path.extname(filePath);
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
     res.end(data);
-  } catch {
-    json(res, 404, { error: 'Not found' });
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return json(res, 404, { error: 'Not found' });
+    }
+    console.error('API error:', err.message);
+    json(res, 500, { error: err.message });
   }
 });
 

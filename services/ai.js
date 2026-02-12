@@ -278,18 +278,17 @@ RULES:
 // ============================================================
 
 /**
- * Process posts in batches of 5 through AI.
- * @param {object[]} posts - Array of normalized posts to process
- * @param {object} candidate - Candidate profile from config
- * @returns {object[]} - Array of contact objects for contacts.json
+ * Phase 1 extraction via Gemini (single-phase: extract + score + email all at once).
+ * Returns extraction-like objects compatible with the sheet format.
  */
-export async function processInBatches(posts, candidate) {
+export async function extractPhase1(posts, candidate) {
   const genAI = initializeClient();
   const batchSize = 5;
-  const allContacts = [];
+  const extracted = [];
 
   const totalBatches = Math.ceil(posts.length / batchSize);
-  console.log(`\n   Processing ${posts.length} posts in ${totalBatches} batch(es) of ${batchSize}...\n`);
+  console.log(`\n   PHASE 1: Gemini Extraction`);
+  console.log(`   ${posts.length} posts in ${totalBatches} batch(es) of ${batchSize}\n`);
 
   for (let i = 0; i < posts.length; i += batchSize) {
     const batch = posts.slice(i, i + batchSize);
@@ -305,34 +304,52 @@ export async function processInBatches(posts, candidate) {
     for (const result of results) {
       if (!result.isHiring) continue;
 
-      const contact = {
+      // Normalize to the same shape as bedrock Phase 1 output
+      extracted.push({
         postId: result.postId,
-        generatedAt: new Date().toISOString(),
+        isHiring: true,
         poster: result.poster || {},
+        summary: '', // Gemini single-phase doesn't produce a separate summary
         job: result.job || {},
-        match: result.match || { isGoodMatch: false, score: 0, reason: '' },
-        email: result.email || {},
         contacts: result.contacts || { emails: [], method: '' },
-        sent: false,
-        sentAt: null,
-      };
+        // Store Gemini's own match + email for the full pipeline
+        _geminiMatch: result.match || { isGoodMatch: false, score: 0, reason: '' },
+        _geminiEmail: result.email || {},
+      });
 
-      allContacts.push(contact);
-
-      // Display result
-      const matchIcon = contact.match.isGoodMatch ? '+' : '-';
-      console.log(`   [${matchIcon}] ${contact.poster.name || 'Unknown'} — ${contact.job.title || 'Unknown role'} @ ${contact.job.company || '?'} — Match: ${contact.match.score}/10`);
-      if (contact.email.to) {
-        console.log(`       Email: ${contact.email.to}`);
-      }
+      console.log(`   [+] ${result.poster?.name || '?'} — ${result.job?.title || '?'} @ ${result.job?.company || '?'}`);
     }
 
-    // Small delay between batches to avoid rate limits
     if (i + batchSize < posts.length) {
       console.log('   Waiting 2s before next batch...');
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
   }
 
-  return allContacts;
+  console.log(`\n   Phase 1 complete: ${extracted.length} hiring posts extracted\n`);
+  return extracted;
+}
+
+/**
+ * Process posts in batches of 5 through AI (legacy full pipeline).
+ * @param {object[]} posts - Array of normalized posts to process
+ * @param {object} candidate - Candidate profile from config
+ * @returns {object[]} - Array of contact objects for contacts.json
+ */
+export async function processInBatches(posts, candidate) {
+  const extracted = await extractPhase1(posts, candidate);
+
+  // For Gemini, the single prompt already did scoring + email,
+  // so we just reshape the results into contacts format
+  return extracted.map(ex => ({
+    postId: ex.postId,
+    generatedAt: new Date().toISOString(),
+    poster: ex.poster,
+    job: ex.job,
+    match: ex._geminiMatch,
+    email: ex._geminiEmail,
+    contacts: ex.contacts,
+    sent: false,
+    sentAt: null,
+  }));
 }

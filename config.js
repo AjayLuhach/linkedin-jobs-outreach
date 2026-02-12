@@ -60,7 +60,6 @@ export const config = {
   paths: {
     outputDir: join(__dirname, 'output'),
     extractPath: join(__dirname, 'output', 'extract.json'),
-    contactsPath: join(__dirname, 'output', 'contacts.json'),
     logsDir: join(__dirname, 'logs'),
   },
 
