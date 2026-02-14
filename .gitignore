@@ -5,3 +5,4 @@ logs/
 .qodo/
 .claude/
 .mailer.pid
+*.pdf
