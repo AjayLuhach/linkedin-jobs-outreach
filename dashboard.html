@@ -947,6 +947,60 @@
     </div>`;
   }
 
+  // ── In-place DOM update helpers ──
+  function updateCardStatusInPlace(btn, user, postId, newStatus) {
+    const cardEl = btn.closest('.card');
+    const previewEl = btn.closest('.email-preview');
+    const now = new Date();
+
+    // Update status badge in card-top (single card view)
+    if (cardEl) {
+      const cardBadges = cardEl.querySelector('.card-top .card-badges');
+      if (cardBadges) {
+        const oldBadge = cardBadges.querySelector('.badge:not(.badge-user)');
+        if (oldBadge) oldBadge.outerHTML = statusBadge(newStatus);
+      }
+      // Update rejected-card opacity
+      if (newStatus === 'rejected') cardEl.classList.add('rejected-card');
+      else cardEl.classList.remove('rejected-card');
+    }
+
+    // Update status badge inside email-preview header (grouped view)
+    if (previewEl) {
+      const headerDiv = previewEl.children[0];
+      if (headerDiv) {
+        const oldBadge = headerDiv.querySelector('.badge:not(.badge-user)');
+        if (oldBadge) oldBadge.outerHTML = statusBadge(newStatus);
+      }
+    }
+
+    // Rebuild the action area
+    const actionDiv = btn.closest('div[style*="margin-top"]');
+    if (!actionDiv) return;
+
+    const eu = escapeHtml(user);
+    const ep = escapeHtml(postId);
+
+    if (newStatus === 'approved') {
+      actionDiv.innerHTML = `
+        <button class="btn-approve is-approved" onclick="handleApprove(event, '${eu}', '${ep}', true)">Unapprove</button>
+        <button class="btn-reject" onclick="handleReject(event, '${eu}', '${ep}')">Reject</button>
+        <span style="color:var(--cyan);font-size:0.75rem;margin-left:auto;font-family:JetBrains Mono,monospace">Approved: ${now.toLocaleString()}</span>
+      `;
+    } else if (newStatus === 'rejected') {
+      actionDiv.innerHTML = `
+        <button class="btn-restore" onclick="handleRestore(event, '${eu}', '${ep}')">Restore</button>
+        <span style="color:var(--red);font-size:0.75rem;margin-left:auto;font-family:JetBrains Mono,monospace">Rejected: ${now.toLocaleString()}</span>
+      `;
+    } else {
+      // drafted
+      actionDiv.innerHTML = `
+        <button class="btn-approve" onclick="handleApprove(event, '${eu}', '${ep}', false)">Approve</button>
+        <button class="btn-reject" onclick="handleReject(event, '${eu}', '${ep}')">Reject</button>
+      `;
+    }
+  }
+
   // ── API Actions ──
   window.handleApprove = async function(event, user, postId, isCurrentlyApproved) {
     event.stopPropagation();
@@ -967,15 +1021,21 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
+      const newStatus = isCurrentlyApproved ? 'drafted' : 'approved';
+
       // Update local state
       const emailObj = (allData[user] || []).find(e => e.postId === postId);
       if (emailObj) {
-        emailObj.status = isCurrentlyApproved ? 'drafted' : 'approved';
+        emailObj.status = newStatus;
         emailObj.approvedBy = isCurrentlyApproved ? '' : 'Dashboard';
       }
 
+      // Update stats/tabs but keep cards in place
       renderStats();
-      renderCards();
+      renderUserTabs();
+
+      // In-place card update
+      updateCardStatusInPlace(btn, user, postId, newStatus);
     } catch (err) {
       alert('Failed: ' + err.message);
       btn.disabled = false;
@@ -1005,7 +1065,10 @@
       }
 
       renderStats();
-      renderCards();
+      renderUserTabs();
+
+      // In-place card update
+      updateCardStatusInPlace(btn, user, postId, 'rejected');
     } catch (err) {
       alert('Failed: ' + err.message);
       btn.disabled = false;
@@ -1035,7 +1098,10 @@
       }
 
       renderStats();
-      renderCards();
+      renderUserTabs();
+
+      // In-place card update
+      updateCardStatusInPlace(btn, user, postId, 'drafted');
     } catch (err) {
       alert('Failed: ' + err.message);
       btn.disabled = false;
