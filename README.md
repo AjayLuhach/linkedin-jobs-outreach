@@ -53,7 +53,7 @@ Edit `resumeData.json` with your personal info, skills, and experience.
 
 ```
 1. Parse LinkedIn data    →  output/extract.json
-2. AI generate emails     →  output/contacts.json
+2. AI generate emails     →  Google Sheets (per-user tabs)
 3. Review in dashboard    →  approve / reject contacts
 4. Mailer daemon sends    →  scheduled between 9 AM - 1 PM IST
 ```
@@ -107,7 +107,7 @@ Before sending, each email is automatically checked:
 1. **Junk filter** — skips role-based addresses (noreply@, info@, abuse@, etc.)
 2. **MX lookup** — verifies the domain has mail servers (falls back to A record per RFC 5321)
 
-Failed verifications are marked in `contacts.json` and visible under the "Verify Failed" filter in the dashboard.
+Failed verifications are logged and visible in the dashboard.
 
 Configure in `.env`:
 ```env
@@ -150,7 +150,7 @@ feed-email-extractor/
 │   ├── parse-linkedin-feed.js     # Parse LinkedIn API JSON
 │   ├── parse-linkedin-html.js     # Parse LinkedIn HTML
 │   ├── extract-store.js           # Manages output/extract.json
-│   ├── contacts-store.js          # Manages output/contacts.json
+│   ├── googleSheets.js             # Google Sheets integration (posts + user emails)
 │   ├── email-sender.js            # SMTP email sending
 │   ├── email-validator.js         # Email format validation
 │   └── email-verifier.js          # MX lookup + junk filter
@@ -161,8 +161,7 @@ feed-email-extractor/
 │   ├── mailer-daemon.js           # Background mailer daemon
 │   └── mailer-stop.js             # Stop the daemon
 ├── output/                        # Generated data (gitignored)
-│   ├── extract.json               # Parsed posts
-│   └── contacts.json              # AI-generated contacts + emails
+│   └── extract.json               # Parsed posts
 └── logs/                          # Logs (gitignored)
     └── mailer.log                 # Daemon log
 ```

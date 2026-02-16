@@ -40,11 +40,11 @@ async function getPhase23Provider() {
 }
 
 /**
- * Get the user's first name from config (used as tab name).
+ * Get the user's full name from config (used as tab name).
+ * Uses full name to avoid sending emails for the wrong person.
  */
 function getUsername() {
-  const fullName = config.candidate.name || '';
-  return fullName.split(' ')[0] || 'User';
+  return config.candidate.name || 'User';
 }
 
 // ============================================================

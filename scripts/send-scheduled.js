@@ -1,21 +1,34 @@
 #!/usr/bin/env node
 
 /**
- * Scheduled Email Sender — one-shot send of all due approved emails.
+ * Scheduled Email Sender — one-shot send of all approved unsent emails.
  * Use `npm run mailer` for the background daemon instead.
  */
 
-import { getScheduledReady, markSent } from '../services/contacts-store.js';
+import config from '../config.js';
+import {
+  fetchUserEmails,
+  markUserEmailSent,
+} from '../services/googleSheets.js';
 import { sendEmail, verifyConnection } from '../services/email-sender.js';
 import { isValidEmail } from '../services/email-validator.js';
+
+const USERNAME = config.candidate.name || 'User';
+
+async function getApprovedUnsent() {
+  const emails = await fetchUserEmails(USERNAME, 'approved');
+  return emails
+    .filter(e => !e.sentAt && e.email?.to)
+    .map(e => ({ ...e, _user: USERNAME }));
+}
 
 async function main() {
   console.log('\n   SCHEDULED EMAIL SENDER\n');
 
-  const ready = getScheduledReady();
+  const ready = await getApprovedUnsent();
 
   if (ready.length === 0) {
-    console.log('   No scheduled emails ready to send.');
+    console.log('   No approved emails ready to send.');
     process.exit(0);
   }
 
@@ -44,9 +57,9 @@ async function main() {
     };
 
     try {
-      const result = await sendEmail(emailData, false);
+      const result = await sendEmail(emailData);
       if (result.success) {
-        markSent(to);
+        await markUserEmailSent(contact._user, contact.postId);
         results.sent++;
       } else {
         results.failed++;

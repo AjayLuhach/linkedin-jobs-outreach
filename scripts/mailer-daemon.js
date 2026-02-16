@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Mailer Daemon — runs detached, checks every 60s for due emails,
+ * Mailer Daemon — runs detached, checks every 60s for approved unsent emails,
  * auto-exits at 1 PM IST. Start with: npm run mailer
  */
 
@@ -9,10 +9,16 @@ import { fork } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getScheduledReady, markSent, markVerifyFailed } from '../services/contacts-store.js';
+import config from '../config.js';
+import {
+  fetchUserEmails,
+  markUserEmailSent,
+} from '../services/googleSheets.js';
 import { sendEmail, verifyConnection } from '../services/email-sender.js';
 import { isValidEmail } from '../services/email-validator.js';
 import { verifyEmail } from '../services/email-verifier.js';
+
+const USERNAME = config.candidate.name || 'User';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PID_FILE = path.join(__dirname, '..', '.mailer.pid');
@@ -71,6 +77,13 @@ function isBeforeWindow() {
   return nowMinutes < startMinutes;
 }
 
+async function getApprovedUnsent() {
+  const emails = await fetchUserEmails(USERNAME, 'approved');
+  return emails
+    .filter(e => !e.sentAt && e.email?.to)
+    .map(e => ({ ...e, _user: USERNAME }));
+}
+
 async function tick() {
   if (isPastCutoff()) {
     log('1 PM IST reached — shutting down.');
@@ -80,7 +93,7 @@ async function tick() {
 
   if (isBeforeWindow()) return; // too early, wait
 
-  const ready = getScheduledReady();
+  const ready = await getApprovedUnsent();
   if (ready.length === 0) return;
 
   log(`${ready.length} email(s) due — sending...`);
@@ -95,14 +108,13 @@ async function tick() {
     const check = await verifyEmail(to);
     if (!check.verified) {
       log(`  [SKIP] ${to}: ${check.error}`);
-      markVerifyFailed(to, check.error);
       continue;
     }
 
     try {
-      const result = await sendEmail({ to, subject: contact.email.subject, body: contact.email.body }, false);
+      const result = await sendEmail({ to, subject: contact.email.subject, body: contact.email.body });
       if (result.success) {
-        markSent(to);
+        await markUserEmailSent(contact._user, contact.postId);
         log(`  [SENT] ${to}`);
       } else {
         log(`  [FAIL] ${to}: ${result.error}`);
@@ -123,7 +135,7 @@ process.on('SIGTERM', () => { log('Received SIGTERM'); cleanup(); process.exit(0
 process.on('SIGINT', () => { log('Received SIGINT'); cleanup(); process.exit(0); });
 
 // ── Start ──
-log('Mailer daemon started — checking every 60s');
+log(`Mailer daemon started for "${USERNAME}" — checking every 60s`);
 
 const connected = await verifyConnection();
 if (!connected) {

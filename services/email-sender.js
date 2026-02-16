@@ -7,7 +7,6 @@ import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import { markSent as markEmailAsSent } from "./contacts-store.js";
 import { isValidEmail } from "./email-validator.js";
 
 dotenv.config();
@@ -77,10 +76,9 @@ export async function verifyConnection() {
 /**
  * Send a single email with optional resume attachment
  * @param {Object} emailData - Email object {to, subject, body}
- * @param {boolean} markSent - Whether to mark as sent in contacts.json
  * @returns {Promise<Object>} Send result with success status
  */
-export async function sendEmail(emailData, markSent = true) {
+export async function sendEmail(emailData) {
   const { to, subject, body } = emailData;
 
   // Validate required fields
@@ -136,10 +134,6 @@ export async function sendEmail(emailData, markSent = true) {
     });
 
     console.log(`   [SENT] ${actualRecipient} | messageId=${info.messageId}`);
-
-    if (markSent) {
-      markEmailAsSent(to);
-    }
 
     return {
       success: true,

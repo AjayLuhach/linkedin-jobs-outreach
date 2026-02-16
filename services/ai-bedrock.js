@@ -465,7 +465,7 @@ export async function extractPhase1(posts) {
  * Takes pre-extracted data (from sheet) and runs scoring + email drafting.
  * @param {object[]} extracted - Array of extraction objects (from sheet's approved rows)
  * @param {object} candidate - Candidate profile
- * @returns {object[]} contacts ready for contacts.json
+ * @returns {object[]} contacts ready
  */
 export async function scoreAndDraftEmails(extracted, candidate) {
   // ── PHASE 2: CODE SCORING ──

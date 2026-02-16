@@ -2,38 +2,41 @@
 
 /**
  * Email Sender CLI
- * Sends emails to contacts from output/contacts.json
+ * Sends approved emails from Google Sheets user tabs.
  *
  * Usage:
- *   node scripts/send-emails.js                    # Send all unsent emails
+ *   node scripts/send-emails.js                    # Send all approved unsent emails
  *   node scripts/send-emails.js --verify           # Test SMTP connection
- *   node scripts/send-emails.js --list             # List unsent emails
+ *   node scripts/send-emails.js --list             # List approved unsent emails
  */
 
-import readline from "readline";
+import config from "../config.js";
 import {
   sendEmail,
   verifyConnection,
 } from "../services/email-sender.js";
-import { getUnsent, markSent, markVerifyFailed, loadContacts } from "../services/contacts-store.js";
+import {
+  fetchUserEmails,
+  markUserEmailSent,
+} from "../services/googleSheets.js";
 import { isValidEmail } from "../services/email-validator.js";
 import { verifyEmail } from "../services/email-verifier.js";
 
-function askConfirmation(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
-    });
-  });
-}
-
 const args = process.argv.slice(2);
 const mode = args[0];
+
+/** Current user's full name — only sends emails from their own tab. */
+const USERNAME = config.candidate.name || 'User';
+
+/**
+ * Fetch approved, unsent emails for the current user only.
+ */
+async function getApprovedUnsent() {
+  const emails = await fetchUserEmails(USERNAME, 'approved');
+  return emails
+    .filter(e => !e.sentAt && e.email?.to)
+    .map(e => ({ ...e, _user: USERNAME }));
+}
 
 async function main() {
   console.log("\n   EMAIL SENDER CLI\n");
@@ -45,19 +48,19 @@ async function main() {
     process.exit(success ? 0 : 1);
   }
 
-  // List unsent emails
+  // List approved unsent emails
   if (mode === "--list") {
-    const unsent = getUnsent();
+    const unsent = await getApprovedUnsent();
     if (unsent.length === 0) {
-      console.log("   No unsent emails found in contacts.json");
+      console.log("   No approved unsent emails found");
       process.exit(0);
     }
 
-    console.log(`   Found ${unsent.length} unsent email(s):\n`);
+    console.log(`   Found ${unsent.length} approved unsent email(s):\n`);
     unsent.forEach((c, i) => {
-      console.log(`   ${i + 1}. ${c.email.to}`);
+      console.log(`   ${i + 1}. ${c.email.to} (${c._user})`);
       console.log(`      Job: ${c.job?.title || 'Unknown'} at ${c.job?.company || 'Unknown'}`);
-      console.log(`      Match: ${c.match?.score || '?'}/10`);
+      console.log(`      Score: ${c.score || '?'}/10`);
       console.log(`      Subject: ${c.email?.subject || 'N/A'}`);
       console.log('');
     });
@@ -65,17 +68,17 @@ async function main() {
     process.exit(0);
   }
 
-  // Default: Send all unsent emails
-  console.log("   Sending unsent emails from output/contacts.json\n");
+  // Default: Send approved unsent emails for current user
+  console.log(`   Sending approved unsent emails for "${USERNAME}"\n`);
 
-  const unsent = getUnsent();
+  const unsent = await getApprovedUnsent();
 
   if (unsent.length === 0) {
-    console.log("   No unsent emails found");
+    console.log("   No approved unsent emails found");
     process.exit(0);
   }
 
-  console.log(`   Found ${unsent.length} unsent email(s)\n`);
+  console.log(`   Found ${unsent.length} approved unsent email(s)\n`);
 
   const connected = await verifyConnection();
   if (!connected) {
@@ -98,40 +101,21 @@ async function main() {
     const check = await verifyEmail(to);
     if (!check.verified) {
       console.log(`   [SKIP] ${to}: ${check.error}`);
-      markVerifyFailed(to, check.error);
       results.skipped++;
       continue;
-    }
-
-    // Check if already sent to this email (different post)
-    const allContacts = loadContacts();
-    const previouslySent = allContacts.find(c => c.email?.to === to && c.sent);
-
-    if (previouslySent) {
-      console.log(`\n   DUPLICATE: Already sent to ${to}`);
-      console.log(`   Previous: ${previouslySent.job?.title || '?'} @ ${previouslySent.job?.company || '?'}`);
-      console.log(`   Current:  ${contact.job?.title || '?'} @ ${contact.job?.company || '?'}`);
-
-      const shouldSend = await askConfirmation("   Send anyway? (y/n): ");
-      if (!shouldSend) {
-        console.log("   Skipped\n");
-        markSent(to);
-        results.skipped++;
-        continue;
-      }
     }
 
     // Build email data
     const emailData = {
       to,
       subject: contact.email.subject || `Application for ${contact.job?.title || 'open position'}`,
-      body: contact.email.body || `Dear ${contact.poster?.name || 'Hiring Manager'},\n\nI am interested in the ${contact.job?.title || 'open position'}. Please find my resume attached.\n\nBest regards`,
+      body: contact.email.body || `Dear Hiring Manager,\n\nI am interested in the ${contact.job?.title || 'open position'}. Please find my resume attached.\n\nBest regards`,
     };
 
     try {
-      const result = await sendEmail(emailData, true);
+      const result = await sendEmail(emailData);
       if (result.success) {
-        markSent(to);
+        await markUserEmailSent(contact._user, contact.postId);
         results.sent++;
       } else {
         results.failed++;
