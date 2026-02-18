@@ -455,6 +455,39 @@
     color: var(--text-dim);
   }
 
+  .post-summary {
+    grid-column: 1 / -1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .post-summary h4 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .post-summary h4::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--yellow);
+  }
+
+  .post-summary p {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
   .email-preview {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -655,7 +688,7 @@
         e.poster?.name, e.poster?.headline,
         e.job?.title, e.job?.company,
         e.email?.to, e.email?.subject,
-        e.matchReason, e.requirements, e._user,
+        e.matchReason, e.requirements, e._user, e.postSummary,
       ].filter(Boolean).join(' ').toLowerCase();
       return haystack.includes(q);
     }
@@ -835,6 +868,7 @@
             <div class="detail-row"><span class="label">Users</span><span class="value">${entries.map(e => escapeHtml(e._user)).join(', ')}</span></div>
             <div class="detail-row"><span class="label">Post</span><span class="value">${postId ? `<a href="${postUrl(postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
           </div>
+          ${first.postSummary ? `<div class="post-summary"><h4>Post Summary</h4><p>${escapeHtml(first.postSummary)}</p></div>` : ''}
           ${entries.map(e => renderUserEmailBlock(e)).join('')}
         </div>
       </div>
@@ -918,6 +952,7 @@
             ${e.sentAt ? `<div class="detail-row"><span class="label">Sent At</span><span class="value" style="color:var(--green)">${new Date(e.sentAt).toLocaleString()}</span></div>` : ''}
             <div class="detail-row"><span class="label">Post</span><span class="value">${e.postId ? `<a href="${postUrl(e.postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
           </div>
+          ${e.postSummary ? `<div class="post-summary"><h4>Post Summary</h4><p>${escapeHtml(e.postSummary)}</p></div>` : ''}
           ${hasEmail ? `
           <div class="email-preview">
             <div class="email-to">To: ${escapeHtml(e.email.to)}</div>

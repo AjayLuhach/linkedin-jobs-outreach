@@ -11,6 +11,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import config from './config.js';
 import { readClipboard, detectAndParse } from './services/clipboard.js';
 import { appendPosts, getUnprocessedPosts, markProcessed } from './services/extract-store.js';
@@ -21,6 +22,30 @@ import {
   fetchUserTabPostIds,
   pushEmailsToUserTab,
 } from './services/googleSheets.js';
+
+// ── Temp file helpers for caching AI responses ──
+const TEMP_DIR = config.paths.outputDir;
+const TEMP_PHASE1 = path.join(TEMP_DIR, '.ai-phase1.json');
+const TEMP_PHASE23 = path.join(TEMP_DIR, '.ai-phase23.json');
+
+function saveTempAI(filePath, data) {
+  if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  console.log(`   Cached AI response → ${path.basename(filePath)}`);
+}
+
+function loadTempAI(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    console.log(`   Found cached AI response ← ${path.basename(filePath)}`);
+    return data;
+  } catch { return null; }
+}
+
+function removeTempAI(filePath) {
+  try { fs.unlinkSync(filePath); } catch {}
+}
 
 // Dynamic AI provider import
 async function getPhase1Provider() {
@@ -151,15 +176,25 @@ async function cmdGenerate() {
 
   console.log(`   ${newPosts.length} new post(s) to process with AI`);
 
-  // Phase 1: AI extraction (only on new posts)
-  const extractPhase1 = await getPhase1Provider();
-  const extracted = provider === 'gemini'
-    ? await extractPhase1(newPosts, config.candidate)
-    : await extractPhase1(newPosts);
+  // Phase 1: AI extraction — use cached response if available (from a previous failed sheet save)
+  let extracted = loadTempAI(TEMP_PHASE1);
+
+  if (!extracted) {
+    const extractPhase1 = await getPhase1Provider();
+    extracted = provider === 'gemini'
+      ? await extractPhase1(newPosts, config.candidate)
+      : await extractPhase1(newPosts);
+
+    // Cache AI response before attempting sheet save
+    if (extracted.length > 0) {
+      saveTempAI(TEMP_PHASE1, extracted);
+    }
+  }
 
   if (extracted.length === 0) {
     console.log('\n   No hiring posts found in this batch.');
     console.log(`   ${processedIds.length} post(s) marked as processed.`);
+    removeTempAI(TEMP_PHASE1);
     return;
   }
 
@@ -170,6 +205,9 @@ async function cmdGenerate() {
     unprocessed,
     config.candidate.name || 'CLI'
   );
+
+  // Sheet save succeeded — remove temp cache
+  removeTempAI(TEMP_PHASE1);
 
   console.log('\n   ' + '='.repeat(50));
   console.log('   PHASE 1 RESULTS');
@@ -209,17 +247,30 @@ async function cmdEmails() {
 
   console.log(`   ${hiringPosts.length} post(s) in sheet, ${fresh.length} new for ${username}`);
 
-  // Phase 2+3: Score and draft emails
-  const scoreAndDraft = await getPhase23Provider();
-  const contacts = await scoreAndDraft(fresh, config.candidate);
+  // Phase 2+3: Score and draft — use cached response if available (from a previous failed sheet save)
+  let contacts = loadTempAI(TEMP_PHASE23);
+
+  if (!contacts) {
+    const scoreAndDraft = await getPhase23Provider();
+    contacts = await scoreAndDraft(fresh, config.candidate);
+
+    // Cache AI response before attempting sheet save
+    if (contacts.length > 0) {
+      saveTempAI(TEMP_PHASE23, contacts);
+    }
+  }
 
   if (contacts.length === 0) {
     console.log('\n   No qualifying contacts from these posts.');
+    removeTempAI(TEMP_PHASE23);
     return;
   }
 
   // Push to user's tab in the sheet
   const { added, skipped } = await pushEmailsToUserTab(username, contacts);
+
+  // Sheet save succeeded — remove temp cache
+  removeTempAI(TEMP_PHASE23);
 
   // Summary
   const withEmail = contacts.filter(c => c.email?.body).length;
