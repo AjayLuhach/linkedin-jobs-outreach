@@ -200,12 +200,13 @@ RULES:
 - Non-hiring posts: isHiring=false, empty defaults
 - requirements: 5-8 short technical skill/technology names ONLY (not sentences, not soft skills)
 - NEVER put URLs (http://, https://, lnkd.in) in contacts.emails
-- requiredExperience: use the MINIMUM mentioned (e.g. "5-8 years" → 5)
-- summary: 3-4 lines, capture what the role needs, key responsibilities, and any standout details (team size, product, tech stack context)
+- requiredExperience: use the MINIMUM mentioned (e.g. "5-8 years" → 5) or if not mentioned in years derive from the words
+- summary: 3-4 lines, capture what the role needs, key responsibilities,experience needed and any standout details (team size, product, tech stack context)
 - Mark isHiring=false if the person is LOOKING FOR a job themselves (#OpenToWork, "actively looking", "seeking opportunities", "open to roles"). These are job SEEKERS, not employers hiring
 - Mark isHiring=false if the post requires face-to-face or in-person interviews as part of the hiring process
 - Mark isHiring=false if the post explicitly asks for LOCAL candidates only (e.g. "local candidates preferred", "must be based in [city]", "walk-in interview")
 - Mark isHiring=false if the job requires a specific visa (H1B, work permit, EU citizen, etc.) or is based at a physical office OUTSIDE India and is NOT remote
+- Mark isHiring=false if the job is contractual ,internship or if money mentioned and below 6 lakhs per annum
 - Jobs that are remote-friendly, India-based, or don't mention location restrictions should remain isHiring=true`;
 }
 
