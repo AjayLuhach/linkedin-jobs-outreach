@@ -183,6 +183,8 @@ FOR EACH POST, extract:
      - "$50/hr" → ×2080×85÷100000 = ~88.4 LPA
      - "$92K/yr" → ×85÷100000 = ~78.2 LPA
      - "60 LPM" (lakhs per month) → ×12 = 720 LPA
+     - "₹18,000" or "₹25,000/month" or any ₹ amount under ₹1,50,000 → treat as monthly INR, ×12÷100000 = LPA (e.g. ₹18,000 → 2.16 LPA)
+     - "₹5,00,000" or any ₹ amount ≥ ₹1,50,000 → treat as annual INR, ÷100000 = LPA (e.g. ₹8,00,000 → 8 LPA)
      - Vague ("Best in Industry", "Competitive") → null
    - contacts.emails: array of email addresses found in post text
      - Match: user@domain.com, name [at] company [dot] com
@@ -378,13 +380,14 @@ CANDIDATE:
 
 FOR EACH CONTACT, generate:
 - subject: short natural subject line (not salesy)
-- body: email (150-200 words, 3 short paragraphs):
-  - Para 1: Greet poster by first name (e.g. "Hi Ravi,"). Reference something specific from the postSummary — what caught your eye about this role or company, show genuine interest with something matching your resume  context
-  - Para 2: Connect your matched skills to what they need with concrete examples from your experience. Mention 3-4 skills from matchedSkills naturally. ONLY mention skills from matchedSkills — never claim skills you don't have
-  - Para 3: Brief closing — mention you've attached your resume, express interest in discussing further
-  - Sign off with the candidate sign-off block above — each item on its own line, NOT separated by pipes
+- body: email (90-140 words, single flowing paragraph + sign-off):
+  - Start by greeting poster by first name (e.g. "Hi Ravi,")
+  - Reference something specific from the postSummary that caught your eye, then naturally weave in 3-4 skills from matchedSkills with brief context from experience. ONLY mention skills from matchedSkills — never claim skills you don't have
+  - End with a note about attached resume and interest in discussing further
+  - Sign off with the candidate sign-off block above — each item on its own line
   - Keep it conversational, human, no corporate fluff
   - Plain text only, NO markdown, NO brackets
+  - Do NOT split into multiple paragraphs — keep it as one cohesive paragraph before the sign-off
 
 RESPOND WITH ONLY JSON (no markdown, no code fences):
 {"emails":[{"postId":"id","subject":"Subject","body":"Email body"}]}`;

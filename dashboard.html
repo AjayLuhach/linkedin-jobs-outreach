@@ -615,6 +615,20 @@
     <button class="filter-btn" data-filter="approved">Approved</button>
     <button class="filter-btn" data-filter="sent">Sent</button>
     <button class="filter-btn" data-filter="rejected">Rejected</button>
+    <select class="search-box" id="jobTypeFilter" style="flex:0;min-width:130px;cursor:pointer">
+      <option value="">All Types</option>
+      <option value="full-time">Full-time</option>
+      <option value="contract">Contract</option>
+      <option value="intern">Intern</option>
+      <option value="remote">Remote</option>
+    </select>
+    <select class="search-box" id="salaryFilter" style="flex:0;min-width:140px;cursor:pointer">
+      <option value="">All Salaries</option>
+      <option value="6">6+ LPA</option>
+      <option value="10">10+ LPA</option>
+      <option value="15">15+ LPA</option>
+      <option value="unknown">Not mentioned</option>
+    </select>
     <input type="text" class="search-box" id="search" placeholder="Search by name, role, company, email...">
   </div>
 
@@ -640,6 +654,8 @@
   let users = [];
   let activeUser = null;     // null = "All Users"
   let activeFilter = 'all';
+  let jobTypeFilter = '';
+  let salaryFilter = '';
   let searchQuery = '';
 
   // ── Helpers ──
@@ -677,16 +693,54 @@
     return all;
   }
 
+  function parseSalaryToLPA(sal) {
+    if (!sal) return null;
+    const s = sal.toLowerCase().replace(/,/g, '');
+    // "8 LPA", "8L", "6-10 LPA"
+    let m = s.match(/([\d.]+)\s*(?:-\s*[\d.]+\s*)?(?:lpa|lakhs?\s*per\s*annum|l\b)/);
+    if (m) return parseFloat(m[1]);
+    // "60 LPM" (lakhs per month)
+    m = s.match(/([\d.]+)\s*lpm/);
+    if (m) return parseFloat(m[1]) * 12;
+    // ₹ amounts (Indian Rupees)
+    m = sal.match(/₹\s*([\d,]+)/);
+    if (m) {
+      const amt = parseFloat(m[1].replace(/,/g, ''));
+      return amt >= 100000 ? amt / 100000 : (amt * 12) / 100000;
+    }
+    // $X/hr
+    m = s.match(/\$\s*([\d.]+)\s*(?:\/\s*)?(?:hr|hour)/);
+    if (m) return (parseFloat(m[1]) * 2080 * 85) / 100000;
+    // $XK/yr
+    m = s.match(/\$\s*([\d.]+)\s*k?\s*(?:\/\s*)?(?:yr|year|annual)/);
+    if (m) { let v = parseFloat(m[1]); if (v < 1000) v *= 1000; return (v * 85) / 100000; }
+    // Fallback: plain number — if < 200 treat as LPA, else monthly INR
+    m = s.match(/([\d.]+)/);
+    if (m) { const v = parseFloat(m[1]); return v < 200 ? v : (v * 12) / 100000; }
+    return null;
+  }
+
   function matchesFilter(e) {
     const status = (e.status || 'drafted').toLowerCase();
     // Hide rejected from "all" unless filter is "rejected"
     if (status === 'rejected' && activeFilter !== 'rejected' && activeFilter !== 'all') return false;
     if (activeFilter !== 'all' && status !== activeFilter) return false;
+    if (jobTypeFilter && (e.job?.type || '').toLowerCase() !== jobTypeFilter) return false;
+    if (salaryFilter) {
+      const sal = (e.job?.salary || '').trim();
+      if (salaryFilter === 'unknown') {
+        if (sal) return false;
+      } else {
+        if (!sal) return false;
+        const lpa = parseSalaryToLPA(sal);
+        if (lpa === null || lpa < parseFloat(salaryFilter)) return false;
+      }
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const haystack = [
         e.poster?.name, e.poster?.headline,
-        e.job?.title, e.job?.company,
+        e.job?.title, e.job?.company, e.job?.type,
         e.email?.to, e.email?.subject,
         e.matchReason, e.requirements, e._user, e.postSummary,
       ].filter(Boolean).join(' ').toLowerCase();
@@ -847,6 +901,8 @@
           <div class="reason">${escapeHtml(first.matchReason || '')}</div>
         </div>
         <div class="card-badges">
+          ${first.job?.type ? `<span class="badge" style="background:var(--cyan-dim);color:var(--cyan);border:1px solid #22d3ee44">${escapeHtml(first.job.type)}</span>` : ''}
+          ${first.job?.salary ? `<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid #34d39944">${escapeHtml(first.job.salary)}</span>` : ''}
           ${entries.map(e => `<span class="badge badge-user">${escapeHtml(e._user)}</span>`).join('')}
           ${Object.entries(statuses).map(([s, n]) => statusBadge(s)).join('')}
         </div>
@@ -860,6 +916,9 @@
             <h4>Job Details</h4>
             <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(first.job?.title || '—')}</span></div>
             <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(first.job?.company || '—')}</span></div>
+            ${first.job?.type ? `<div class="detail-row"><span class="label">Type</span><span class="value" style="color:var(--cyan)">${escapeHtml(first.job.type)}</span></div>` : ''}
+            ${first.job?.experience ? `<div class="detail-row"><span class="label">Experience</span><span class="value">${escapeHtml(first.job.experience)} yr</span></div>` : ''}
+            ${first.job?.salary ? `<div class="detail-row"><span class="label">Salary</span><span class="value" style="color:var(--green)">${escapeHtml(first.job.salary)}</span></div>` : ''}
             <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(first.poster?.headline || '—')}</span></div>
             ${reqs.length ? `<div style="margin-top:8px"><div class="reqs">${reqs.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
           </div>
@@ -929,6 +988,8 @@
           <div class="reason">${escapeHtml(e.matchReason || '')}</div>
         </div>
         <div class="card-badges">
+          ${e.job?.type ? `<span class="badge" style="background:var(--cyan-dim);color:var(--cyan);border:1px solid #22d3ee44">${escapeHtml(e.job.type)}</span>` : ''}
+          ${e.job?.salary ? `<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid #34d39944">${escapeHtml(e.job.salary)}</span>` : ''}
           ${statusBadge(status)}
         </div>
         <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -941,6 +1002,9 @@
             <h4>Job Details</h4>
             <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(e.job?.title || '—')}</span></div>
             <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(e.job?.company || '—')}</span></div>
+            ${e.job?.type ? `<div class="detail-row"><span class="label">Type</span><span class="value" style="color:var(--cyan)">${escapeHtml(e.job.type)}</span></div>` : ''}
+            ${e.job?.experience ? `<div class="detail-row"><span class="label">Experience</span><span class="value">${escapeHtml(e.job.experience)} yr</span></div>` : ''}
+            ${e.job?.salary ? `<div class="detail-row"><span class="label">Salary</span><span class="value" style="color:var(--green)">${escapeHtml(e.job.salary)}</span></div>` : ''}
             <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(e.poster?.headline || '—')}</span></div>
             ${reqs.length ? `<div style="margin-top:8px"><div class="reqs">${reqs.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
           </div>
@@ -1156,6 +1220,16 @@
 
   document.getElementById('search').addEventListener('input', (e) => {
     searchQuery = e.target.value;
+    renderCards();
+  });
+
+  document.getElementById('jobTypeFilter').addEventListener('change', (e) => {
+    jobTypeFilter = e.target.value;
+    renderCards();
+  });
+
+  document.getElementById('salaryFilter').addEventListener('change', (e) => {
+    salaryFilter = e.target.value;
     renderCards();
   });
 
