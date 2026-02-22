@@ -17,7 +17,6 @@
     "send:verify": "node scripts/send-emails.js --verify",
     "send:list": "node scripts/send-emails.js --list",
     "dashboard": "node scripts/dashboard-server.js",
-    "send:scheduled": "node scripts/send-scheduled.js",
     "mailer": "node scripts/mailer-daemon.js",
     "mailer:stop": "node scripts/mailer-stop.js"
   },

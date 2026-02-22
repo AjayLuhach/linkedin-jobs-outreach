@@ -157,7 +157,6 @@ feed-email-extractor/
 ├── scripts/
 │   ├── dashboard-server.js        # Dashboard HTTP server
 │   ├── send-emails.js             # CLI for sending emails
-│   ├── send-scheduled.js          # Send scheduled emails
 │   ├── mailer-daemon.js           # Background mailer daemon
 │   └── mailer-stop.js             # Stop the daemon
 ├── output/                        # Generated data (gitignored)

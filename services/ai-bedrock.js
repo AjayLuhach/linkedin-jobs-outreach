@@ -370,7 +370,11 @@ CANDIDATE:
 - Experience: ${candidate.experience}
 - Key Skills: ${candidate.skills.slice(0, 15).join(', ')}
 - Summary: ${candidate.summary}
-- Sign-off: ${candidate.name} | ${candidate.portfolio} | ${candidate.linkedin} | ${candidate.github}
+- Sign-off (use this exact multi-line format):
+  ${candidate.name}
+  ${candidate.portfolio}
+  ${candidate.linkedin}
+  ${candidate.github}
 
 FOR EACH CONTACT, generate:
 - subject: short natural subject line (not salesy)
@@ -378,7 +382,7 @@ FOR EACH CONTACT, generate:
   - Para 1: Greet poster by first name (e.g. "Hi Ravi,"). Reference something specific from the postSummary — what caught your eye about this role or company, show genuine interest with something matching your resume  context
   - Para 2: Connect your matched skills to what they need with concrete examples from your experience. Mention 3-4 skills from matchedSkills naturally. ONLY mention skills from matchedSkills — never claim skills you don't have
   - Para 3: Brief closing — mention you've attached your resume, express interest in discussing further
-  - Sign off with the candidate sign-off line above (plain text URLs, no formatting)
+  - Sign off with the candidate sign-off block above — each item on its own line, NOT separated by pipes
   - Keep it conversational, human, no corporate fluff
   - Plain text only, NO markdown, NO brackets
 

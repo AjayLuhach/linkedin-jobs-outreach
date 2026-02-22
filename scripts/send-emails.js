@@ -128,7 +128,9 @@ async function main() {
     }
 
     if (i < unsent.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const delaySec = Math.floor(Math.random() * 51) + 100; // 100-150 seconds
+      console.log(`   Waiting ${delaySec}s before next email...`);
+      await new Promise((resolve) => setTimeout(resolve, delaySec * 1000));
     }
   }
 
