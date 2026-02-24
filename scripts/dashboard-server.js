@@ -15,6 +15,8 @@ import {
   approveUserEmail,
   rejectUserEmail,
   unapproveUserEmail,
+  fetchAllPosts,
+  updatePostStatus,
 } from '../services/googleSheets.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -112,6 +114,30 @@ const server = http.createServer(async (req, res) => {
       if (!body.user || !body.postId) return json(res, 400, { error: 'Missing user or postId' });
       const ok = await unapproveUserEmail(body.user, body.postId);
       if (!ok) return json(res, 404, { error: 'Email not found' });
+      return json(res, 200, { ok: true });
+    }
+
+    // GET /api/posts — fetch all posts from shared Posts tab
+    if (req.method === 'GET' && pathname === '/api/posts') {
+      const posts = await fetchAllPosts();
+      return json(res, 200, { posts });
+    }
+
+    // POST /api/posts/skip — { postId }
+    if (req.method === 'POST' && pathname === '/api/posts/skip') {
+      const body = JSON.parse(await readBody(req));
+      if (!body.postId) return json(res, 400, { error: 'Missing postId' });
+      const ok = await updatePostStatus(body.postId, 'skipped');
+      if (!ok) return json(res, 404, { error: 'Post not found' });
+      return json(res, 200, { ok: true });
+    }
+
+    // POST /api/posts/restore — { postId }
+    if (req.method === 'POST' && pathname === '/api/posts/restore') {
+      const body = JSON.parse(await readBody(req));
+      if (!body.postId) return json(res, 400, { error: 'Missing postId' });
+      const ok = await updatePostStatus(body.postId, 'hiring');
+      if (!ok) return json(res, 404, { error: 'Post not found' });
       return json(res, 200, { ok: true });
     }
 

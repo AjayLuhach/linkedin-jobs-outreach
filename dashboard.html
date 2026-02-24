@@ -609,28 +609,7 @@
   <div class="user-tabs" id="userTabs"></div>
   <div class="stats" id="stats"></div>
 
-  <div class="filters" id="filters">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="drafted">Drafted</button>
-    <button class="filter-btn" data-filter="approved">Approved</button>
-    <button class="filter-btn" data-filter="sent">Sent</button>
-    <button class="filter-btn" data-filter="rejected">Rejected</button>
-    <select class="search-box" id="jobTypeFilter" style="flex:0;min-width:130px;cursor:pointer">
-      <option value="">All Types</option>
-      <option value="full-time">Full-time</option>
-      <option value="contract">Contract</option>
-      <option value="intern">Intern</option>
-      <option value="remote">Remote</option>
-    </select>
-    <select class="search-box" id="salaryFilter" style="flex:0;min-width:140px;cursor:pointer">
-      <option value="">All Salaries</option>
-      <option value="6">6+ LPA</option>
-      <option value="10">10+ LPA</option>
-      <option value="15">15+ LPA</option>
-      <option value="unknown">Not mentioned</option>
-    </select>
-    <input type="text" class="search-box" id="search" placeholder="Search by name, role, company, email...">
-  </div>
+  <div class="filters" id="filters"></div>
 
   <div class="results-count" id="resultsCount"></div>
   <div class="cards" id="cards">
@@ -651,9 +630,12 @@
 (() => {
   // ── State ──
   let allData = {};          // { username: [emails] }
+  let postsData = [];        // raw posts from Posts tab
   let users = [];
   let activeUser = null;     // null = "All Users"
+  let postsView = false;     // true = showing Posts tab
   let activeFilter = 'all';
+  let postsStatusFilter = 'hiring'; // 'all', 'hiring', 'skipped'
   let jobTypeFilter = '';
   let salaryFilter = '';
   let searchQuery = '';
@@ -751,26 +733,39 @@
 
   // ── Fetch Data ──
   async function fetchData() {
-    const res = await fetch('/api/emails/all');
-    const data = await res.json();
-    allData = data.users || {};
+    const [emailsRes, postsRes] = await Promise.all([
+      fetch('/api/emails/all'),
+      fetch('/api/posts'),
+    ]);
+    const emailsData = await emailsRes.json();
+    const postsJson = await postsRes.json();
+    allData = emailsData.users || {};
+    postsData = postsJson.posts || [];
     users = Object.keys(allData).sort();
   }
 
   // ── Render User Tabs ──
   function renderUserTabs() {
     const totalAll = Object.values(allData).reduce((s, e) => s + e.length, 0);
-    let html = `<button class="user-tab ${!activeUser ? 'active' : ''}" data-user="">All Users<span class="tab-count">${totalAll}</span></button>`;
+    let html = `<button class="user-tab ${postsView ? 'active' : ''}" data-view="posts">Posts<span class="tab-count">${postsData.length}</span></button>`;
+    html += `<button class="user-tab ${!postsView && !activeUser ? 'active' : ''}" data-user="">All Users<span class="tab-count">${totalAll}</span></button>`;
     for (const user of users) {
       const count = (allData[user] || []).length;
-      html += `<button class="user-tab ${activeUser === user ? 'active' : ''}" data-user="${escapeHtml(user)}">${escapeHtml(user)}<span class="tab-count">${count}</span></button>`;
+      html += `<button class="user-tab ${!postsView && activeUser === user ? 'active' : ''}" data-user="${escapeHtml(user)}">${escapeHtml(user)}<span class="tab-count">${count}</span></button>`;
     }
     document.getElementById('userTabs').innerHTML = html;
 
     document.querySelectorAll('.user-tab').forEach(btn => {
       btn.addEventListener('click', () => {
-        activeUser = btn.dataset.user || null;
+        if (btn.dataset.view === 'posts') {
+          postsView = true;
+          activeUser = null;
+        } else {
+          postsView = false;
+          activeUser = btn.dataset.user || null;
+        }
         renderUserTabs();
+        renderFilters();
         renderStats();
         renderCards();
       });
@@ -779,6 +774,39 @@
 
   // ── Render Stats ──
   function renderStats() {
+    if (postsView) {
+      const total = postsData.length;
+      const hiring = postsData.filter(p => p.status !== 'skipped').length;
+      const skipped = postsData.filter(p => p.status === 'skipped').length;
+      const withEmail = postsData.filter(p => p.contacts?.method === 'email').length;
+      const dmOnly = postsData.filter(p => p.contacts?.method === 'DM').length;
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-number" style="color:var(--accent)">${total}</div>
+          <div class="stat-label">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:var(--green)">${hiring}</div>
+          <div class="stat-label">Hiring</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:var(--red)">${skipped}</div>
+          <div class="stat-label">Skipped</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:var(--cyan)">${withEmail}</div>
+          <div class="stat-label">Has Email</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:var(--yellow)">${dmOnly}</div>
+          <div class="stat-label">DM Only</div>
+        </div>
+      `;
+      document.getElementById('subtitle').textContent = `${total} posts in shared pool`;
+      return;
+    }
+
     const emails = getActiveEmails();
     const total = emails.length;
     const drafted = emails.filter(e => (e.status || 'drafted') === 'drafted').length;
@@ -827,7 +855,119 @@
     return 'drafted';
   }
 
+  // ── Posts filtering ──
+  function matchesPostFilter(p) {
+    if (postsStatusFilter !== 'all' && p.status !== postsStatusFilter) return false;
+    if (jobTypeFilter && (p.job?.type || '').toLowerCase() !== jobTypeFilter) return false;
+    if (salaryFilter) {
+      const sal = (p.job?.salary || '').trim();
+      if (salaryFilter === 'unknown') {
+        if (sal) return false;
+      } else {
+        if (!sal) return false;
+        const lpa = parseSalaryToLPA(sal);
+        if (lpa === null || lpa < parseFloat(salaryFilter)) return false;
+      }
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const haystack = [
+        p.poster?.name, p.poster?.headline,
+        p.job?.title, p.job?.company, p.job?.type,
+        p.summary, (p.job?.requirements || []).join(' '),
+        (p.contacts?.emails || []).join(' '),
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  }
+
+  // ── Render post card ──
+  function renderPostCard(p) {
+    const isSkipped = p.status === 'skipped';
+    const reqs = (p.job?.requirements || []);
+    const contactEmails = (p.contacts?.emails || []);
+    const salaryLPA = p.job?.salary ? parseSalaryToLPA(p.job.salary) : null;
+
+    return `
+    <div class="card${isSkipped ? ' rejected-card' : ''}" data-postid="${escapeHtml(p.postId)}">
+      <div class="card-top" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="score-ring ${p.contacts?.method === 'email' ? 'score-high' : 'score-low'}" style="font-size:0.65rem">${p.contacts?.method === 'email' ? 'Email' : 'DM'}</div>
+        <div class="card-info">
+          <h3>${escapeHtml(p.poster?.name || 'Unknown')}</h3>
+          <div class="role">${escapeHtml(p.job?.title || 'Unknown Role')}${p.job?.company ? ' @ ' + escapeHtml(p.job.company) : ''}</div>
+          <div class="reason">${escapeHtml(p.summary || '').substring(0, 120)}${(p.summary || '').length > 120 ? '...' : ''}</div>
+        </div>
+        <div class="card-badges">
+          ${p.contacts?.method === 'email'
+            ? `<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid #34d39944">Email</span>`
+            : `<span class="badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid #fbbf2444">DM Only</span>`}
+          ${p.job?.type ? `<span class="badge" style="background:var(--cyan-dim);color:var(--cyan);border:1px solid #22d3ee44">${escapeHtml(p.job.type)}</span>` : ''}
+          ${p.job?.salary ? `<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid #34d39944">${escapeHtml(p.job.salary)}${salaryLPA !== null ? ' (~' + salaryLPA.toFixed(1) + ' LPA)' : ''}</span>` : ''}
+          ${isSkipped
+            ? `<span class="badge" style="background:var(--red-dim);color:var(--red);border:1px solid #f8717144">Skipped</span>`
+            : `<span class="badge" style="background:var(--green-dim);color:var(--green);border:1px solid #34d39944">Hiring</span>`}
+        </div>
+        ${!isSkipped
+          ? `<button class="btn-reject" style="padding:4px 14px;font-size:0.75rem;white-space:nowrap" onclick="event.stopPropagation();handleSkipPost(event, '${escapeHtml(p.postId)}')">Skip</button>`
+          : `<button class="btn-restore" style="padding:4px 14px;font-size:0.75rem;white-space:nowrap" onclick="event.stopPropagation();handleRestorePost(event, '${escapeHtml(p.postId)}')">Restore</button>`}
+        <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-detail">
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h4>Job Details</h4>
+            <div class="detail-row"><span class="label">Title</span><span class="value">${escapeHtml(p.job?.title || '—')}</span></div>
+            <div class="detail-row"><span class="label">Company</span><span class="value">${escapeHtml(p.job?.company || '—')}</span></div>
+            ${p.job?.type ? `<div class="detail-row"><span class="label">Type</span><span class="value" style="color:var(--cyan)">${escapeHtml(p.job.type)}</span></div>` : ''}
+            ${p.job?.requiredExperience != null ? `<div class="detail-row"><span class="label">Experience</span><span class="value">${p.job.requiredExperience} yr</span></div>` : ''}
+            ${p.job?.salary ? `<div class="detail-row"><span class="label">Salary</span><span class="value" style="color:var(--green)">${escapeHtml(p.job.salary)}${salaryLPA !== null ? ' (~' + salaryLPA.toFixed(1) + ' LPA)' : ''}</span></div>` : ''}
+            ${p.job?.location ? `<div class="detail-row"><span class="label">Location</span><span class="value">${escapeHtml(p.job.location)}</span></div>` : ''}
+            <div class="detail-row"><span class="label">Poster</span><span class="value">${escapeHtml(p.poster?.headline || '—')}</span></div>
+            ${reqs.length ? `<div style="margin-top:8px"><div class="reqs">${reqs.map(r => `<span class="req-tag">${escapeHtml(r)}</span>`).join('')}</div></div>` : ''}
+          </div>
+          <div class="detail-section">
+            <h4>Contact</h4>
+            <div class="detail-row"><span class="label">Method</span><span class="value" style="color:${p.contacts?.method === 'email' ? 'var(--green)' : 'var(--yellow)'}">${p.contacts?.method === 'email' ? 'Email' : 'DM only'}</span></div>
+            ${contactEmails.length ? `<div class="detail-row"><span class="label">Email(s)</span><span class="value" style="color:var(--cyan);font-family:JetBrains Mono,monospace;font-size:0.8rem">${contactEmails.map(e => escapeHtml(e)).join(', ')}</span></div>` : ''}
+            <div class="detail-row"><span class="label">Added By</span><span class="value">${escapeHtml(p.addedBy || '—')}</span></div>
+            ${p.addedAt ? `<div class="detail-row"><span class="label">Added</span><span class="value">${new Date(p.addedAt).toLocaleString()}</span></div>` : ''}
+            <div class="detail-row"><span class="label">Post</span><span class="value">${p.postId ? `<a href="${postUrl(p.postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
+          </div>
+          ${p.summary ? `<div class="post-summary"><h4>Post Summary</h4><p>${escapeHtml(p.summary)}</p></div>` : ''}
+          ${p.postText ? `<div class="post-summary" style="grid-column:1/-1"><h4>Original Post</h4><p style="white-space:pre-wrap;font-size:0.82rem;line-height:1.55;max-height:300px;overflow-y:auto">${escapeHtml(p.postText)}</p></div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
   function renderCards() {
+    // Posts view
+    if (postsView) {
+      const filtered = postsData.filter(matchesPostFilter);
+      if (filtered.length === 0) {
+        document.getElementById('resultsCount').textContent = `0 of ${postsData.length} posts`;
+        document.getElementById('cards').innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">&#9788;</div>
+            <p>No posts match your filters</p>
+          </div>`;
+        return;
+      }
+      // Sort: hiring first, then by date (newest first)
+      filtered.sort((a, b) => {
+        if (a.status === 'skipped' && b.status !== 'skipped') return 1;
+        if (a.status !== 'skipped' && b.status === 'skipped') return -1;
+        return (b.addedAt || '').localeCompare(a.addedAt || '');
+      });
+      document.getElementById('resultsCount').textContent = `${filtered.length} of ${postsData.length} posts`;
+      document.getElementById('cards').innerHTML = filtered.map(renderPostCard).join('');
+      return;
+    }
+
+    // Emails view
     const emails = getActiveEmails().filter(matchesFilter);
 
     const total = getActiveEmails().length;
@@ -1208,30 +1348,132 @@
     }
   };
 
-  // ── Event Listeners ──
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilter = btn.dataset.filter;
+  // ── Post Actions ──
+  window.handleSkipPost = async function(event, postId) {
+    event.stopPropagation();
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/posts/skip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const post = postsData.find(p => p.postId === postId);
+      if (post) post.status = 'skipped';
+
+      renderStats();
+      renderUserTabs();
       renderCards();
-    });
-  });
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Skip Post';
+    }
+  };
 
-  document.getElementById('search').addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    renderCards();
-  });
+  window.handleRestorePost = async function(event, postId) {
+    event.stopPropagation();
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '...';
 
-  document.getElementById('jobTypeFilter').addEventListener('change', (e) => {
-    jobTypeFilter = e.target.value;
-    renderCards();
-  });
+    try {
+      const res = await fetch('/api/posts/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-  document.getElementById('salaryFilter').addEventListener('change', (e) => {
-    salaryFilter = e.target.value;
-    renderCards();
-  });
+      const post = postsData.find(p => p.postId === postId);
+      if (post) post.status = 'hiring';
+
+      renderStats();
+      renderUserTabs();
+      renderCards();
+    } catch (err) {
+      alert('Failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Restore Post';
+    }
+  };
+
+  // ── Render Filters ──
+  function renderFilters() {
+    const filtersEl = document.getElementById('filters');
+    if (postsView) {
+      filtersEl.innerHTML = `
+        <button class="filter-btn ${postsStatusFilter === 'all' ? 'active' : ''}" data-pfilter="all">All</button>
+        <button class="filter-btn ${postsStatusFilter === 'hiring' ? 'active' : ''}" data-pfilter="hiring">Hiring</button>
+        <button class="filter-btn ${postsStatusFilter === 'skipped' ? 'active' : ''}" data-pfilter="skipped">Skipped</button>
+        <select class="search-box" id="jobTypeFilter" style="flex:0;min-width:130px;cursor:pointer">
+          <option value="">All Types</option>
+          <option value="full-time" ${jobTypeFilter==='full-time'?'selected':''}>Full-time</option>
+          <option value="contract" ${jobTypeFilter==='contract'?'selected':''}>Contract</option>
+          <option value="intern" ${jobTypeFilter==='intern'?'selected':''}>Intern</option>
+          <option value="remote" ${jobTypeFilter==='remote'?'selected':''}>Remote</option>
+        </select>
+        <select class="search-box" id="salaryFilter" style="flex:0;min-width:140px;cursor:pointer">
+          <option value="">All Salaries</option>
+          <option value="6" ${salaryFilter==='6'?'selected':''}>6+ LPA</option>
+          <option value="10" ${salaryFilter==='10'?'selected':''}>10+ LPA</option>
+          <option value="15" ${salaryFilter==='15'?'selected':''}>15+ LPA</option>
+          <option value="unknown" ${salaryFilter==='unknown'?'selected':''}>Not mentioned</option>
+        </select>
+        <input type="text" class="search-box" id="search" placeholder="Search by name, role, company..." value="${escapeHtml(searchQuery)}">
+      `;
+      filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          postsStatusFilter = btn.dataset.pfilter;
+          renderCards();
+        });
+      });
+    } else {
+      filtersEl.innerHTML = `
+        <button class="filter-btn ${activeFilter==='all'?'active':''}" data-filter="all">All</button>
+        <button class="filter-btn ${activeFilter==='drafted'?'active':''}" data-filter="drafted">Drafted</button>
+        <button class="filter-btn ${activeFilter==='approved'?'active':''}" data-filter="approved">Approved</button>
+        <button class="filter-btn ${activeFilter==='sent'?'active':''}" data-filter="sent">Sent</button>
+        <button class="filter-btn ${activeFilter==='rejected'?'active':''}" data-filter="rejected">Rejected</button>
+        <select class="search-box" id="jobTypeFilter" style="flex:0;min-width:130px;cursor:pointer">
+          <option value="">All Types</option>
+          <option value="full-time" ${jobTypeFilter==='full-time'?'selected':''}>Full-time</option>
+          <option value="contract" ${jobTypeFilter==='contract'?'selected':''}>Contract</option>
+          <option value="intern" ${jobTypeFilter==='intern'?'selected':''}>Intern</option>
+          <option value="remote" ${jobTypeFilter==='remote'?'selected':''}>Remote</option>
+        </select>
+        <select class="search-box" id="salaryFilter" style="flex:0;min-width:140px;cursor:pointer">
+          <option value="">All Salaries</option>
+          <option value="6" ${salaryFilter==='6'?'selected':''}>6+ LPA</option>
+          <option value="10" ${salaryFilter==='10'?'selected':''}>10+ LPA</option>
+          <option value="15" ${salaryFilter==='15'?'selected':''}>15+ LPA</option>
+          <option value="unknown" ${salaryFilter==='unknown'?'selected':''}>Not mentioned</option>
+        </select>
+        <input type="text" class="search-box" id="search" placeholder="Search by name, role, company, email..." value="${escapeHtml(searchQuery)}">
+      `;
+      filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeFilter = btn.dataset.filter;
+          renderCards();
+        });
+      });
+    }
+    // Shared filter listeners
+    document.getElementById('search').addEventListener('input', (e) => { searchQuery = e.target.value; renderCards(); });
+    document.getElementById('jobTypeFilter').addEventListener('change', (e) => { jobTypeFilter = e.target.value; renderCards(); });
+    document.getElementById('salaryFilter').addEventListener('change', (e) => { salaryFilter = e.target.value; renderCards(); });
+  }
 
   // Refresh button
   document.getElementById('refreshBtn').addEventListener('click', async () => {
@@ -1240,6 +1482,7 @@
     try {
       await fetchData();
       renderUserTabs();
+      renderFilters();
       renderStats();
       renderCards();
     } catch (err) {
@@ -1253,6 +1496,7 @@
     try {
       await fetchData();
       renderUserTabs();
+      renderFilters();
       renderStats();
       renderCards();
     } catch (err) {
