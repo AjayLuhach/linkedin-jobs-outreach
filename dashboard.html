@@ -665,6 +665,10 @@
     return postId ? `https://www.linkedin.com/feed/update/urn:li:activity:${postId}/` : null;
   }
 
+  function findPost(postId) {
+    return postId ? postsData.find(p => p.postId === postId) : null;
+  }
+
   function getActiveEmails() {
     if (activeUser) return (allData[activeUser] || []).map(e => ({ ...e, _user: activeUser }));
     // All users merged
@@ -1068,6 +1072,7 @@
             <div class="detail-row"><span class="label">Post</span><span class="value">${postId ? `<a href="${postUrl(postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
           </div>
           ${first.postSummary ? `<div class="post-summary"><h4>Post Summary</h4><p>${escapeHtml(first.postSummary)}</p></div>` : ''}
+          ${(() => { const mp = findPost(postId); return mp && mp.postText ? `<div class="post-summary" style="grid-column:1/-1"><h4>Original Post</h4><p style="white-space:pre-wrap;font-size:0.82rem;line-height:1.55;max-height:300px;overflow-y:auto">${escapeHtml(mp.postText)}</p></div>` : ''; })()}
           ${entries.map(e => renderUserEmailBlock(e)).join('')}
         </div>
       </div>
@@ -1157,6 +1162,7 @@
             <div class="detail-row"><span class="label">Post</span><span class="value">${e.postId ? `<a href="${postUrl(e.postId)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none;font-family:JetBrains Mono,monospace;font-size:0.75rem" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on LinkedIn</a>` : '—'}</span></div>
           </div>
           ${e.postSummary ? `<div class="post-summary"><h4>Post Summary</h4><p>${escapeHtml(e.postSummary)}</p></div>` : ''}
+          ${(() => { const mp = findPost(e.postId); return mp && mp.postText ? `<div class="post-summary" style="grid-column:1/-1"><h4>Original Post</h4><p style="white-space:pre-wrap;font-size:0.82rem;line-height:1.55;max-height:300px;overflow-y:auto">${escapeHtml(mp.postText)}</p></div>` : ''; })()}
           ${hasEmail ? `
           <div class="email-preview">
             <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
