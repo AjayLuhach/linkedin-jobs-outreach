@@ -372,22 +372,16 @@ CANDIDATE:
 - Experience: ${candidate.experience}
 - Key Skills: ${candidate.skills.slice(0, 15).join(', ')}
 - Summary: ${candidate.summary}
-- Sign-off (use this exact multi-line format):
-  ${candidate.name}
-  ${candidate.portfolio}
-  ${candidate.linkedin}
-  ${candidate.github}
-
 FOR EACH CONTACT, generate:
 - subject: short natural subject line (not salesy)
-- body: email (90-140 words, single flowing paragraph + sign-off):
+- body: email (90-140 words, single flowing paragraph — NO sign-off):
   - Start by greeting poster by first name (e.g. "Hi Ravi,")
   - Reference something specific from the postSummary that caught your eye, then naturally weave in 3-4 skills from matchedSkills with brief context from experience. ONLY mention skills from matchedSkills — never claim skills you don't have
   - End with a note about attached resume and interest in discussing further
-  - Sign off with the candidate sign-off block above — each item on its own line
+  - Do NOT include any sign-off (name, portfolio, linkedin, github) — it is appended automatically
   - Keep it conversational, human, no corporate fluff
   - Plain text only, NO markdown, NO brackets
-  - Do NOT split into multiple paragraphs — keep it as one cohesive paragraph before the sign-off
+  - Do NOT split into multiple paragraphs — keep it as one cohesive paragraph
 
 RESPOND WITH ONLY JSON (no markdown, no code fences):
 {"emails":[{"postId":"id","subject":"Subject","body":"Email body"}]}`;
@@ -559,13 +553,14 @@ export async function scoreAndDraftEmails(extracted, candidate) {
       const emails = Array.isArray(parsed.emails) ? parsed.emails
         : Array.isArray(parsed) ? parsed : [];
 
+      const signoff = `\n\n${candidate.name}\n${candidate.portfolio}\n${candidate.linkedin}\n${candidate.github}`;
       for (const emailResult of emails) {
         const contact = allContacts.find(c => c.postId === emailResult.postId);
         if (contact && emailResult.subject && emailResult.body) {
           contact.email = {
             to: contact.contacts.emails[0],
             subject: emailResult.subject,
-            body: emailResult.body,
+            body: emailResult.body + signoff,
           };
           console.log(`   [Email] ${contact.poster.name} — drafted`);
         }
