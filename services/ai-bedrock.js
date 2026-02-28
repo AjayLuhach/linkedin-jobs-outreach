@@ -375,7 +375,7 @@ CANDIDATE:
 FOR EACH CONTACT, generate:
 - subject: short natural subject line (not salesy)
 - body: email (90-140 words, single flowing paragraph — NO sign-off):
-  - Start by greeting poster by first name (e.g. "Hi Ravi,")
+  - Start with a generic greeting (e.g. "Hi," or "Hello,") — do NOT use the poster's name anywhere in the email
   - Reference something specific from the postSummary that caught your eye, then naturally weave in 3-4 skills from matchedSkills with brief context from experience. ONLY mention skills from matchedSkills — never claim skills you don't have
   - End with a note about attached resume and interest in discussing further
   - Do NOT include any sign-off (name, portfolio, linkedin, github) — it is appended automatically
