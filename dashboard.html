@@ -596,6 +596,78 @@
   .refresh-btn.spinning svg {
     animation: spin 0.8s linear infinite;
   }
+
+  /* ── Email Edit UI ── */
+  .btn-edit {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-edit:hover { background: var(--accent); color: #fff; }
+
+  .edit-form { margin-top: 12px; }
+  .edit-form label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .edit-form label:first-child { margin-top: 0; }
+  .edit-form input, .edit-form textarea {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .edit-form input:focus, .edit-form textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .edit-form textarea { min-height: 120px; }
+  .edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .btn-save {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 6px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { background: var(--green); color: #fff; }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-cancel-edit {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+  .btn-cancel-edit:hover { border-color: var(--text-dim); color: var(--text); }
 </style>
 </head>
 <body>
@@ -1088,21 +1160,24 @@
     const hasEmail = e.email?.to && e.email.to.includes('@');
 
     return `
-    <div class="email-preview" style="position:relative">
+    <div class="email-preview" style="position:relative" data-email-user="${escapeHtml(e._user)}" data-email-postid="${escapeHtml(e.postId)}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <span class="badge badge-user" style="font-size:0.8rem;padding:4px 14px">${escapeHtml(e._user)}</span>
         ${statusBadge(status)}
         <span style="color:var(--text-dim);font-size:0.78rem;font-family:JetBrains Mono,monospace;margin-left:auto">Score: ${e.score || 0}/10</span>
       </div>
       ${hasEmail ? `
-        <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
-        <div class="email-subject">${escapeHtml(e.email.subject || '(no subject)')}</div>
-        <div class="email-body">${escapeHtml(e.email.body || '(no body)')}</div>
+        <div class="email-display">
+          <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
+          <div class="email-subject">${escapeHtml(e.email.subject || '(no subject)')}</div>
+          <div class="email-body">${escapeHtml(e.email.body || '(no body)')}</div>
+        </div>
       ` : `<div style="color:var(--yellow);font-size:0.85rem">No email drafted</div>`}
       ${e.approvedBy ? `<div style="font-size:0.75rem;color:var(--cyan);margin-top:8px">Approved by: ${escapeHtml(e.approvedBy)}</div>` : ''}
       ${e.sentAt ? `<div style="font-size:0.75rem;color:var(--green);margin-top:4px">Sent: ${new Date(e.sentAt).toLocaleString()}</div>` : ''}
-      ${!isSent ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+      ${!isSent ? `<div class="email-actions" style="margin-top:14px;display:flex;align-items:center;gap:12px">
         ${!isRejected ? `
+          ${hasEmail ? `<button class="btn-edit" onclick="handleEdit(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Edit</button>` : ''}
           <button class="btn-approve ${isApproved ? 'is-approved' : ''}" onclick="handleApprove(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}', ${isApproved})">
             ${isApproved ? 'Unapprove' : 'Approve'}
           </button>
@@ -1164,12 +1239,15 @@
           ${e.postSummary ? `<div class="post-summary"><h4>Post Summary</h4><p>${escapeHtml(e.postSummary)}</p></div>` : ''}
           ${(() => { const mp = findPost(e.postId); return mp && mp.postText ? `<div class="post-summary" style="grid-column:1/-1"><h4>Original Post</h4><p style="white-space:pre-wrap;font-size:0.82rem;line-height:1.55;max-height:300px;overflow-y:auto">${escapeHtml(mp.postText)}</p></div>` : ''; })()}
           ${hasEmail ? `
-          <div class="email-preview">
-            <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
-            <div class="email-subject">${escapeHtml(e.email.subject || '(no subject)')}</div>
-            <div class="email-body">${escapeHtml(e.email.body || '(no body)')}</div>
-            ${!isSent ? `<div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+          <div class="email-preview" data-email-user="${escapeHtml(e._user)}" data-email-postid="${escapeHtml(e.postId)}">
+            <div class="email-display">
+              <div class="email-to">To: ${escapeHtml(e.email.to)}</div>
+              <div class="email-subject">${escapeHtml(e.email.subject || '(no subject)')}</div>
+              <div class="email-body">${escapeHtml(e.email.body || '(no body)')}</div>
+            </div>
+            ${!isSent ? `<div class="email-actions" style="margin-top:14px;display:flex;align-items:center;gap:12px">
               ${!isRejected ? `
+                <button class="btn-edit" onclick="handleEdit(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}')">Edit</button>
                 <button class="btn-approve ${isApproved ? 'is-approved' : ''}" onclick="handleApprove(event, '${escapeHtml(e._user)}', '${escapeHtml(e.postId)}', ${isApproved})">
                   ${isApproved ? 'Unapprove' : 'Approve'}
                 </button>
@@ -1220,14 +1298,18 @@
     }
 
     // Rebuild the action area
-    const actionDiv = btn.closest('div[style*="margin-top"]');
+    const actionDiv = btn.closest('.email-actions');
     if (!actionDiv) return;
 
     const eu = escapeHtml(user);
     const ep = escapeHtml(postId);
 
+    // Check if this email preview has an email (to show Edit button)
+    const hasEditBtn = previewEl && previewEl.querySelector('.email-display');
+
     if (newStatus === 'approved') {
       actionDiv.innerHTML = `
+        ${hasEditBtn ? `<button class="btn-edit" onclick="handleEdit(event, '${eu}', '${ep}')">Edit</button>` : ''}
         <button class="btn-approve is-approved" onclick="handleApprove(event, '${eu}', '${ep}', true)">Unapprove</button>
         <button class="btn-reject" onclick="handleReject(event, '${eu}', '${ep}')">Reject</button>
         <span style="color:var(--cyan);font-size:0.75rem;margin-left:auto;font-family:JetBrains Mono,monospace">Approved: ${now.toLocaleString()}</span>
@@ -1240,6 +1322,7 @@
     } else {
       // drafted
       actionDiv.innerHTML = `
+        ${hasEditBtn ? `<button class="btn-edit" onclick="handleEdit(event, '${eu}', '${ep}')">Edit</button>` : ''}
         <button class="btn-approve" onclick="handleApprove(event, '${eu}', '${ep}', false)">Approve</button>
         <button class="btn-reject" onclick="handleReject(event, '${eu}', '${ep}')">Reject</button>
       `;
@@ -1351,6 +1434,96 @@
       alert('Failed: ' + err.message);
       btn.disabled = false;
       btn.textContent = 'Restore';
+    }
+  };
+
+  // ── Edit Email ──
+  window.handleEdit = function(event, user, postId) {
+    event.stopPropagation();
+    const previewEl = event.target.closest('.email-preview');
+    if (!previewEl) return;
+
+    const emailObj = (allData[user] || []).find(e => e.postId === postId);
+    if (!emailObj || !emailObj.email) return;
+
+    const displayEl = previewEl.querySelector('.email-display');
+    if (!displayEl) return;
+
+    // Hide the display and show edit form
+    displayEl.style.display = 'none';
+
+    // Hide action buttons while editing
+    const actionDiv = previewEl.querySelector('.email-actions');
+    if (actionDiv) actionDiv.style.display = 'none';
+
+    const editForm = document.createElement('div');
+    editForm.className = 'edit-form';
+    editForm.innerHTML = `
+      <label>Subject</label>
+      <input type="text" class="edit-subject" value="${escapeHtml(emailObj.email.subject || '')}">
+      <label>Body</label>
+      <textarea class="edit-body">${escapeHtml(emailObj.email.body || '')}</textarea>
+      <div class="edit-actions">
+        <button class="btn-save" onclick="handleSaveEdit(event, '${escapeHtml(user)}', '${escapeHtml(postId)}')">Save</button>
+        <button class="btn-cancel-edit" onclick="handleCancelEdit(event)">Cancel</button>
+      </div>
+    `;
+    displayEl.insertAdjacentElement('afterend', editForm);
+  };
+
+  window.handleCancelEdit = function(event) {
+    event.stopPropagation();
+    const editForm = event.target.closest('.edit-form');
+    const previewEl = editForm.closest('.email-preview');
+    const displayEl = previewEl.querySelector('.email-display');
+    const actionDiv = previewEl.querySelector('.email-actions');
+
+    editForm.remove();
+    displayEl.style.display = '';
+    if (actionDiv) actionDiv.style.display = '';
+  };
+
+  window.handleSaveEdit = async function(event, user, postId) {
+    event.stopPropagation();
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const editForm = btn.closest('.edit-form');
+    const subject = editForm.querySelector('.edit-subject').value;
+    const body = editForm.querySelector('.edit-body').value;
+
+    try {
+      const res = await fetch('/api/emails/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, postId, subject, body }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Update local state (preserve existing status and approval)
+      const emailObj = (allData[user] || []).find(e => e.postId === postId);
+      if (emailObj) {
+        emailObj.email.subject = subject;
+        emailObj.email.body = body;
+      }
+
+      // Update the display with new content
+      const previewEl = editForm.closest('.email-preview');
+      const displayEl = previewEl.querySelector('.email-display');
+      displayEl.querySelector('.email-subject').textContent = subject || '(no subject)';
+      displayEl.querySelector('.email-body').textContent = body || '(no body)';
+
+      // Remove edit form, show display and action buttons
+      editForm.remove();
+      displayEl.style.display = '';
+      const actionDiv = previewEl.querySelector('.email-actions');
+      if (actionDiv) actionDiv.style.display = '';
+    } catch (err) {
+      alert('Save failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Save';
     }
   };
 

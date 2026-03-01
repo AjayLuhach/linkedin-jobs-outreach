@@ -6,7 +6,7 @@
  * Commands:
  *   node index.js parse [--file <path>]   Parse LinkedIn data → output/extract.json
  *   node index.js generate                Phase 1: AI extract → push to shared Google Sheet
- *   node index.js emails                  Phase 2+3: Score sheet posts → draft emails → user tab
+ *   node index.js emails [--redraft]       Phase 2+3: Score sheet posts → draft emails → user tab
  *   node index.js send                    List unsent emails
  */
 
@@ -79,12 +79,14 @@ function getUsername() {
 function parseArgs() {
   const args = process.argv.slice(2);
   const command = args[0] || 'help';
-  const options = { file: null };
+  const options = { file: null, redraft: false };
 
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--file' && args[i + 1]) {
       options.file = args[i + 1];
       i++;
+    } else if (args[i] === '--redraft') {
+      options.redraft = true;
     }
   }
 
@@ -223,9 +225,10 @@ async function cmdGenerate() {
 // COMMAND: emails — Phase 2+3: Score sheet posts → draft → user tab
 // ============================================================
 
-async function cmdEmails() {
+async function cmdEmails(options = {}) {
   const username = getUsername();
-  console.log(`\n   EMAILS — Score & Draft for "${username}"\n`);
+  const redraft = options.redraft || false;
+  console.log(`\n   EMAILS — Score & Draft for "${username}"${redraft ? ' (REDRAFT mode)' : ''}\n`);
 
   // Fetch all hiring posts from shared sheet
   const hiringPosts = await fetchHiringPosts();
@@ -237,7 +240,9 @@ async function cmdEmails() {
   }
 
   // Filter out posts already in this user's tab
-  const usedIds = await fetchUserTabPostIds(username);
+  // In redraft mode, include posts with "drafted" status so they can be re-processed
+  const fetchOpts = redraft ? { excludeStatuses: ["drafted"] } : {};
+  const usedIds = await fetchUserTabPostIds(username, fetchOpts);
   const fresh = hiringPosts.filter(p => !usedIds.has(p.postId));
 
   if (fresh.length === 0) {
@@ -245,7 +250,7 @@ async function cmdEmails() {
     return;
   }
 
-  console.log(`   ${hiringPosts.length} post(s) in sheet, ${fresh.length} new for ${username}`);
+  console.log(`   ${hiringPosts.length} post(s) in sheet, ${fresh.length} ${redraft ? 'to process' : 'new'} for ${username}`);
 
   // Phase 2+3: Score and draft — use cached response if available (from a previous failed sheet save)
   let contacts = loadTempAI(TEMP_PHASE23);
@@ -267,7 +272,7 @@ async function cmdEmails() {
   }
 
   // Push to user's tab in the sheet
-  const { added, skipped } = await pushEmailsToUserTab(username, contacts);
+  const { added, skipped, updated } = await pushEmailsToUserTab(username, contacts, { redraft });
 
   // Sheet save succeeded — remove temp cache
   removeTempAI(TEMP_PHASE23);
@@ -283,6 +288,7 @@ async function cmdEmails() {
   console.log(`   Good matches:     ${goodMatch}`);
   console.log(`   Emails drafted:   ${withEmail}`);
   console.log(`   Added to tab:     ${added} (${skipped} duplicates)`);
+  if (updated > 0) console.log(`   Re-drafted:       ${updated}`);
   console.log('\n   Review emails in the dashboard: npm run dashboard');
 }
 
@@ -325,6 +331,7 @@ function cmdHelp() {
      npm run parse:file <path>  Parse from file
      npm run generate           Phase 1: AI extract → shared Google Sheet
      npm run emails             Phase 2+3: Score posts → draft emails → your tab
+     npm run emails:redraft     Re-draft emails for posts with "drafted" status
      npm run send               List approved emails ready to send
      npm run dashboard          Review & approve emails for all users
 
@@ -363,7 +370,7 @@ async function main() {
         await cmdGenerate();
         break;
       case 'emails':
-        await cmdEmails();
+        await cmdEmails(options);
         break;
       case 'send':
         await cmdSend();

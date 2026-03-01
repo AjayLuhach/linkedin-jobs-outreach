@@ -15,6 +15,7 @@ import {
   approveUserEmail,
   rejectUserEmail,
   unapproveUserEmail,
+  updateUserEmailContent,
   fetchAllPosts,
   updatePostStatus,
 } from '../services/googleSheets.js';
@@ -104,6 +105,16 @@ const server = http.createServer(async (req, res) => {
       const body = JSON.parse(await readBody(req));
       if (!body.user || !body.postId) return json(res, 400, { error: 'Missing user or postId' });
       const ok = await rejectUserEmail(body.user, body.postId);
+      if (!ok) return json(res, 404, { error: 'Email not found' });
+      return json(res, 200, { ok: true });
+    }
+
+    // POST /api/emails/update — { user, postId, subject, body }
+    if (req.method === 'POST' && pathname === '/api/emails/update') {
+      const body = JSON.parse(await readBody(req));
+      if (!body.user || !body.postId) return json(res, 400, { error: 'Missing user or postId' });
+      if (body.subject == null || body.body == null) return json(res, 400, { error: 'Missing subject or body' });
+      const ok = await updateUserEmailContent(body.user, body.postId, { subject: body.subject, body: body.body });
       if (!ok) return json(res, 404, { error: 'Email not found' });
       return json(res, 200, { ok: true });
     }
