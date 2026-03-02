@@ -198,8 +198,11 @@ RULES:
 - Mark isHiring=false if the person is LOOKING FOR a job themselves (#OpenToWork, "actively looking", "seeking opportunities", "open to roles"). These are job SEEKERS, not employers hiring
 - Mark isHiring=false if the post requires face-to-face or in-person interviews as part of the hiring process
 - Mark isHiring=false if the post explicitly asks for LOCAL candidates only (e.g. "local candidates preferred", "must be based in [city]", "walk-in interview")
-- Mark isHiring=false if the job requires a specific visa (H1B, work permit, EU citizen, etc.) or is based at a physical office OUTSIDE India and is NOT remote
-- Mark isHiring=false if the job is contractual ,internship or if money mentioned and below 6 lakhs per annum
+- Mark isHiring=false if the job requires a specific visa (H1B, work permit, EU citizen, etc.) or is based at a physical office OUTSIDE India and is NOT remote. This includes Pakistan (Lahore, Karachi, Multan, Islamabad), Nigeria, Dubai, and any other non-India country
+- Mark isHiring=false if the job is contractual, internship or if money mentioned and below 6 lakhs per annum
+- Mark isHiring=false if the role is primarily a TRAINER, TEACHING, or INSTRUCTOR position (not a developer/engineer role)
+- Mark isHiring=false if the PRIMARY technology required is NOT related to web/frontend/backend/full-stack (e.g. Java-only, .NET-only, Python-only, AI/ML-only roles). The candidate is a MERN developer — only extract roles where JavaScript/TypeScript/Node.js/React is a core requirement
+- Mark isHiring=false if the minimum experience required is 4+ years (candidate has ~3 years)
 - Jobs that are remote-friendly, India-based, or don't mention location restrictions should remain isHiring=true`;
 }
 
@@ -367,12 +370,12 @@ FOR EACH CONTACT, generate:
 - subject: short natural subject line (not salesy)
 - body: email (90-140 words, single flowing paragraph — NO sign-off):
   - Start with a generic greeting (e.g. "Hi," or "Hello,") — do NOT use the poster's name anywhere in the email
-  - Reference something specific from the postSummary that caught your eye, then naturally weave in 3-4 skills from matchedSkills with brief context from experience. ONLY mention skills from matchedSkills — never claim skills you don't have
+  - From next line Reference something specific from the postSummary that caught your eye, then naturally weave in 3-4 skills from matchedSkills with brief context from experience. ONLY mention skills from matchedSkills — never claim skills you don't have
   - End with a note about attached resume and interest in discussing further
   - Do NOT include any sign-off (name, portfolio, linkedin, github) — it is appended automatically
   - Keep it conversational, human, no corporate fluff
   - Plain text only, NO markdown, NO brackets
-  - Do NOT split into multiple paragraphs — keep it as one cohesive paragraph
+  - Do NOT split into more than 2 paragraphs — keep it as two cohesive paragraphs
 
 RESPOND WITH ONLY JSON (no markdown, no code fences):
 {"emails":[{"postId":"id","subject":"Subject","body":"Email body"}]}`;
