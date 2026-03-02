@@ -9,7 +9,11 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from '@aws-sdk/client-bedrock-runtime';
+import fs from 'fs';
+import path from 'path';
 import config from '../config.js';
+
+const OUTPUT_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'output');
 
 // ============================================================
 // BEDROCK CLIENT
@@ -508,7 +512,41 @@ export async function scoreAndDraftEmails(extracted, candidate) {
   const goodWithEmail = [...emailBestMap.values()];
   const dedupedCount = allContacts.filter(c => c.match.score >= 7 && c.contacts.emails?.length > 0).length - goodWithEmail.length;
 
-  console.log(`\n   Phase 2 complete: ${allContacts.filter(c => c.match.isGoodMatch).length} good matches, ${goodWithEmail.length} qualify for email${dedupedCount > 0 ? ` (${dedupedCount} duplicate emails removed)` : ''}\n`);
+  const goodCount = allContacts.filter(c => c.match.isGoodMatch).length;
+  const rejectedCount = allContacts.length - goodCount;
+  console.log(`\n   Phase 2 complete: ${goodCount} good matches, ${goodWithEmail.length} qualify for email${dedupedCount > 0 ? ` (${dedupedCount} duplicate emails removed)` : ''}\n`);
+
+  // Save scoring log for false-negative review
+  const scoringLog = {
+    runAt: new Date().toISOString(),
+    summary: { total: allContacts.length, good: goodCount, rejected: rejectedCount, needEmail: goodWithEmail.length },
+    accepted: allContacts.filter(c => c.match.isGoodMatch).map(c => ({
+      poster: c.poster?.name || '?',
+      jobTitle: c.job?.title || '?',
+      company: c.job?.company || '?',
+      score: c.match.score,
+      reason: c.match.reason,
+      emails: c.contacts?.emails || [],
+    })),
+    rejected: allContacts.filter(c => !c.match.isGoodMatch).map(c => {
+      const src = extracted.find(e => e.postId === c.postId);
+      return {
+        poster: c.poster?.name || '?',
+        headline: c.poster?.headline || '',
+        jobTitle: c.job?.title || '?',
+        company: c.job?.company || '?',
+        score: c.match.score,
+        reason: c.match.reason,
+        requirements: c.job?.requirements || [],
+        requiredExperience: c.job?.requiredExperience,
+        type: c.job?.type,
+        postText: src?.postText || '',
+        summary: c.summary || '',
+        emails: c.contacts?.emails || [],
+      };
+    }),
+  };
+  fs.writeFileSync(path.join(OUTPUT_DIR, '.cc-scoring-log.json'), JSON.stringify(scoringLog, null, 2));
 
   // ── PHASE 3: AI EMAIL DRAFTING ──
   if (goodWithEmail.length === 0) {
