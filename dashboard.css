@@ -538,10 +538,16 @@ body::before {
 }
 
 /* -- COUNTER -- */
+.results-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
 .results-count {
   font-size: 0.85rem;
   color: var(--text-dim);
-  margin-bottom: 16px;
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -562,6 +568,35 @@ body::before {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.send-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 15px;
+  border: 1px solid var(--green);
+  background: var(--green-dim);
+  color: var(--green);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.send-all-btn:hover {
+  background: var(--green);
+  color: var(--bg);
+  transform: scale(1.05);
+}
+
+.send-all-btn:disabled {
+  cursor: not-allowed;
+}
+
 
 .refresh-btn {
   position: fixed;

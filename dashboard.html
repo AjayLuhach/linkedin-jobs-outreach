@@ -19,7 +19,15 @@
 
   <div class="filters" id="filters"></div>
 
-  <div class="results-count" id="resultsCount"></div>
+  <div class="results-row">
+    <div class="results-count" id="resultsCount"></div>
+    <button class="send-all-btn" id="sendAllBtn" title="Send all approved emails">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+        <path d="M2 10l7-7m0 0l7 7m-7-7v14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 10 10)"/>
+      </svg>
+      Send All
+    </button>
+  </div>
   <div class="cards" id="cards">
     <div class="loading">
       <div class="loading-spinner"></div>
@@ -27,6 +35,7 @@
     </div>
   </div>
 </div>
+
 
 <button class="refresh-btn" id="refreshBtn" title="Refresh data from sheet">
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -367,6 +376,10 @@
   }
 
   function renderCards() {
+    // Show Send All only on approved filter (non-posts view)
+    document.getElementById('sendAllBtn').style.display =
+      (!postsView && activeFilter === 'approved') ? '' : 'none';
+
     // Posts view
     if (postsView) {
       const filtered = postsData.filter(matchesPostFilter);
@@ -1073,6 +1086,42 @@
       alert('Refresh failed: ' + err.message);
     }
     btn.classList.remove('spinning');
+  });
+
+  // Send All button
+  document.getElementById('sendAllBtn').addEventListener('click', async () => {
+    const approved = getActiveEmails().filter(e => e.status === 'approved' && !e.sentAt);
+    if (approved.length === 0) {
+      alert('No approved unsent emails to send.');
+      return;
+    }
+    if (!confirm(`Send ${approved.length} approved email(s)? This will start sending immediately.`)) return;
+
+    const btn = document.getElementById('sendAllBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('/api/send-emails', { method: 'POST' });
+      const data = await res.json();
+      // Parse summary from output
+      const lines = data.output.split('\n');
+      const summaryLines = [];
+      let inSummary = false;
+      for (const line of lines) {
+        if (line.includes('SUMMARY')) inSummary = true;
+        if (inSummary && line.trim()) summaryLines.push(line.trim());
+      }
+      alert(summaryLines.length ? summaryLines.join('\n') : 'Done. Check console for details.');
+      await fetchData();
+      renderStats();
+      renderCards();
+    } catch (err) {
+      alert('Error sending emails: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '→ Send All';
+    }
   });
 
   // ── Init ──

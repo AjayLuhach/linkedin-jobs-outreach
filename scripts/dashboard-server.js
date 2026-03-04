@@ -9,6 +9,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
 import {
   listUserTabs,
   fetchUserEmails,
@@ -150,6 +151,35 @@ const server = http.createServer(async (req, res) => {
       const ok = await updatePostStatus(body.postId, 'hiring');
       if (!ok) return json(res, 404, { error: 'Post not found' });
       return json(res, 200, { ok: true });
+    }
+
+    // POST /api/send-emails — spawn send-emails.js and return summary
+    if (req.method === 'POST' && pathname === '/api/send-emails') {
+      const child = spawn('node', [path.join(__dirname, 'send-emails.js')], {
+        cwd: ROOT,
+        env: { ...process.env },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      let output = '';
+      child.stdout.on('data', (chunk) => { output += chunk.toString(); });
+      child.stderr.on('data', (chunk) => { output += chunk.toString(); });
+
+      child.on('close', (code) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ code, output }));
+      });
+
+      child.on('error', (err) => {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      });
+
+      req.on('close', () => {
+        child.kill();
+      });
+
+      return;
     }
 
     // Static file serving
