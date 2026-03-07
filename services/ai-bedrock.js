@@ -200,10 +200,10 @@ RULES:
 - requiredExperience: use the MINIMUM mentioned (e.g. "5-8 years" → 5) or if not mentioned in years derive from the words
 - summary: 3-4 lines, capture what the role needs, key responsibilities,experience needed and any standout details (team size, product, tech stack context)
 - Mark isHiring=false if the person is LOOKING FOR a job themselves (#OpenToWork, "actively looking", "seeking opportunities", "open to roles"). These are job SEEKERS, not employers hiring
-- Mark isHiring=false if the post requires face-to-face or in-person interviews as part of the hiring process
-- Mark isHiring=false if the post explicitly asks for LOCAL candidates only (e.g. "local candidates preferred", "must be based in [city]", "walk-in interview")
-- Mark isHiring=false if the job requires a specific visa (H1B, work permit, EU citizen, etc.) or is based at a physical office OUTSIDE India and is NOT remote. This includes Pakistan (Lahore, Karachi, Multan, Islamabad), Nigeria, Dubai, and any other non-India country
-- Mark isHiring=false if the job is contractual, internship or if money mentioned and below 6 lakhs per annum
+- Mark isHiring=false if ANY interview round requires physical presence (face-to-face, walk-in, in-person at any stage). Even if early rounds are virtual, any in-person requirement = reject
+- Mark isHiring=false if the post has ANY location restriction or preference for candidates — asking for local candidates, candidates from a specific city/state/region, or "based in [location]". The candidate is remote-only and will NOT relocate
+- Mark isHiring=false if the job is located OUTSIDE India. Check both the stated job location AND the email domain for country clues (e.g. .bd = Bangladesh, .pk = Pakistan). Any non-India location = reject
+- Mark isHiring=false if the job is contractual, internship, or if any salary/CTC/budget is mentioned and works out to less than 6 LPA when converted to annual (monthly × 12, hourly × 2080 × ₹85)
 - Mark isHiring=false if the role is primarily a TRAINER, TEACHING, or INSTRUCTOR position (not a developer/engineer role)
 - Mark isHiring=false if the PRIMARY technology required is NOT related to web/frontend/backend/full-stack (e.g. Java-only, .NET-only, Python-only, AI/ML-only roles). The candidate is a MERN developer — only extract roles where JavaScript/TypeScript/Node.js/React is a core requirement
 - Mark isHiring=false if the minimum experience required is 4+ years (candidate has ~3 years)

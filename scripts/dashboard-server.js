@@ -89,6 +89,14 @@ const server = http.createServer(async (req, res) => {
       for (const user of users) {
         all[user] = await fetchUserEmails(user, params.status || null);
       }
+      if (params.includePostText === '1') {
+        const posts = await fetchAllPosts();
+        const textMap = {};
+        for (const p of posts) textMap[p.postId] = p.postText || '';
+        for (const emails of Object.values(all)) {
+          for (const e of emails) e.postText = textMap[e.postId] || '';
+        }
+      }
       return json(res, 200, { users: all });
     }
 
