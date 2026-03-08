@@ -24,7 +24,7 @@ import config from '../config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const PORT = process.env.DASHBOARD_PORT || 3008;
+const PORT = process.env.DASHBOARD_PORT || 3456;
 
 const MIME = {
   '.html': 'text/html',
