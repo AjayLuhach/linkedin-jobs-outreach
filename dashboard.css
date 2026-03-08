@@ -597,6 +597,91 @@ body::before {
   cursor: not-allowed;
 }
 
+.send-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 520px;
+  height: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: none;
+  flex-direction: column;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.send-panel.visible {
+  display: flex;
+}
+
+.send-panel.minimized {
+  top: auto;
+  bottom: 24px;
+  left: 24px;
+  transform: none;
+  width: 280px;
+  height: 42px;
+  border-radius: 21px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.send-panel.minimized .send-panel-log {
+  display: none;
+}
+
+.send-panel.minimized .send-panel-header {
+  border: none;
+}
+
+.send-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.send-panel-header-btns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.send-panel-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.send-panel-btn:hover {
+  color: var(--text);
+}
+
+.send-panel-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.send-panel-log p {
+  margin: 2px 0;
+}
 
 .refresh-btn {
   position: fixed;

@@ -20,10 +20,11 @@ import {
   fetchAllPosts,
   updatePostStatus,
 } from '../services/googleSheets.js';
+import config from '../config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const PORT = process.env.DASHBOARD_PORT || 3456;
+const PORT = process.env.DASHBOARD_PORT || 3008;
 
 const MIME = {
   '.html': 'text/html',
@@ -68,6 +69,11 @@ const server = http.createServer(async (req, res) => {
   const { pathname, params } = parseUrl(req.url);
 
   try {
+    // GET /api/config-user — return the configured sender username
+    if (req.method === 'GET' && pathname === '/api/config-user') {
+      return json(res, 200, { name: config.candidate.name || 'User' });
+    }
+
     // GET /api/users — list all user tabs
     if (req.method === 'GET' && pathname === '/api/users') {
       const users = await listUserTabs();
@@ -161,26 +167,41 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true });
     }
 
-    // POST /api/send-emails — spawn send-emails.js and return summary
+    // POST /api/send-emails — spawn send-emails.js and stream output via SSE
     if (req.method === 'POST' && pathname === '/api/send-emails') {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      });
+
       const child = spawn('node', [path.join(__dirname, 'send-emails.js')], {
         cwd: ROOT,
         env: { ...process.env },
         stdio: ['ignore', 'pipe', 'pipe'],
       });
 
-      let output = '';
-      child.stdout.on('data', (chunk) => { output += chunk.toString(); });
-      child.stderr.on('data', (chunk) => { output += chunk.toString(); });
+      const sendSSE = (data) => {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      };
+
+      const onData = (chunk) => {
+        for (const line of chunk.toString().split('\n').filter(l => l.trim())) {
+          sendSSE({ message: line.trim() });
+        }
+      };
+
+      child.stdout.on('data', onData);
+      child.stderr.on('data', onData);
 
       child.on('close', (code) => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ code, output }));
+        sendSSE({ done: true, code });
+        res.end();
       });
 
       child.on('error', (err) => {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
+        sendSSE({ error: err.message });
+        res.end();
       });
 
       req.on('close', () => {

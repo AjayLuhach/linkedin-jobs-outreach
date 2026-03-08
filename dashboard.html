@@ -36,6 +36,16 @@
   </div>
 </div>
 
+<div class="send-panel" id="sendPanel">
+  <div class="send-panel-header">
+    <span>Sending Emails</span>
+    <div class="send-panel-header-btns">
+      <button class="send-panel-btn" id="sendPanelMinimize" title="Minimize">&minus;</button>
+      <button class="send-panel-btn" id="sendPanelMaximize" title="Maximize" style="display:none">&#43;</button>
+    </div>
+  </div>
+  <div class="send-panel-log" id="sendLog"></div>
+</div>
 
 <button class="refresh-btn" id="refreshBtn" title="Refresh data from sheet">
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -49,6 +59,7 @@
   let allData = {};          // { username: [emails] }
   let postsData = [];        // raw posts from Posts tab
   let users = [];
+  let configUser = '';       // configured sender from config (e.g. "Sonam")
   let activeUser = null;     // null = "All Users"
   let postsView = false;     // true = showing Posts tab
   let activeFilter = 'all';
@@ -377,8 +388,13 @@
 
   function renderCards() {
     // Show Send All only on approved filter (non-posts view)
-    document.getElementById('sendAllBtn').style.display =
+    const sendBtn = document.getElementById('sendAllBtn');
+    sendBtn.style.display =
       (!postsView && activeFilter === 'approved') ? '' : 'none';
+    if (!sendBtn.disabled && configUser) {
+      const count = (allData[configUser] || []).filter(e => e.status === 'approved' && !e.sentAt).length;
+      sendBtn.textContent = `→ Send All (${configUser}: ${count})`;
+    }
 
     // Posts view
     if (postsView) {
@@ -1088,45 +1104,84 @@
     btn.classList.remove('spinning');
   });
 
-  // Send All button
-  document.getElementById('sendAllBtn').addEventListener('click', async () => {
-    const approved = getActiveEmails().filter(e => e.status === 'approved' && !e.sentAt);
-    if (approved.length === 0) {
-      alert('No approved unsent emails to send.');
+  // Send All button — always sends for configUser only
+  document.getElementById('sendAllBtn').addEventListener('click', () => {
+    const userEmails = (allData[configUser] || []).filter(e => e.status === 'approved' && !e.sentAt);
+    if (userEmails.length === 0) {
+      alert(`No approved unsent emails for ${configUser}.`);
       return;
     }
-    if (!confirm(`Send ${approved.length} approved email(s)? This will start sending immediately.`)) return;
+    if (!confirm(`Send ${userEmails.length} approved email(s) for ${configUser}? This will start sending immediately.`)) return;
 
     const btn = document.getElementById('sendAllBtn');
+    const panel = document.getElementById('sendPanel');
+    const log = document.getElementById('sendLog');
+
     btn.disabled = true;
     btn.textContent = 'Sending...';
+    panel.classList.add('visible');
+    log.innerHTML = '<p>Starting email sender...</p>';
 
-    try {
-      const res = await fetch('/api/send-emails', { method: 'POST' });
-      const data = await res.json();
-      // Parse summary from output
-      const lines = data.output.split('\n');
-      const summaryLines = [];
-      let inSummary = false;
-      for (const line of lines) {
-        if (line.includes('SUMMARY')) inSummary = true;
-        if (inSummary && line.trim()) summaryLines.push(line.trim());
+    fetch('/api/send-emails', { method: 'POST' }).then(response => {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      function read() {
+        reader.read().then(({ done, value }) => {
+          if (done) {
+            btn.disabled = false;
+            renderCards();
+            fetchData().then(() => { renderStats(); renderCards(); });
+            return;
+          }
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.message) {
+                  const p = document.createElement('p');
+                  p.textContent = data.message;
+                  log.appendChild(p);
+                  log.scrollTop = log.scrollHeight;
+                }
+              } catch {}
+            }
+          }
+          read();
+        });
       }
-      alert(summaryLines.length ? summaryLines.join('\n') : 'Done. Check console for details.');
-      await fetchData();
-      renderStats();
-      renderCards();
-    } catch (err) {
-      alert('Error sending emails: ' + err.message);
-    } finally {
+      read();
+    }).catch(err => {
+      log.innerHTML += `<p style="color:var(--red)">Error: ${err.message}</p>`;
       btn.disabled = false;
-      btn.textContent = '→ Send All';
-    }
+      renderCards();
+    });
+  });
+
+  document.getElementById('sendPanelMinimize').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('sendPanel').classList.add('minimized');
+    document.getElementById('sendPanelMinimize').style.display = 'none';
+    document.getElementById('sendPanelMaximize').style.display = '';
+  });
+
+  document.getElementById('sendPanelMaximize').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('sendPanel').classList.remove('minimized');
+    document.getElementById('sendPanelMaximize').style.display = 'none';
+    document.getElementById('sendPanelMinimize').style.display = '';
   });
 
   // ── Init ──
   async function init() {
     try {
+      const cfgRes = await fetch('/api/config-user');
+      const cfgData = await cfgRes.json();
+      configUser = cfgData.name;
       await fetchData();
       renderUserTabs();
       renderFilters();

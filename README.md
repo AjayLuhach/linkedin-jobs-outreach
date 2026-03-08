@@ -66,7 +66,7 @@ Edit `resumeData.json` with your personal info, skills, and experience.
 | `npm run parse:file <path>` | Parse from a file |
 | `npm run generate` | AI process posts into contacts + emails |
 | `npm run send` | List unsent emails |
-| `npm run dashboard` | Open web dashboard (localhost:3456) |
+| `npm run dashboard` | Open web dashboard (localhost:3008) |
 | `npm run mailer` | Start background mailer daemon |
 | `npm run mailer:stop` | Stop the mailer daemon |
 | `npm run send:emails` | Send all unsent emails immediately |
@@ -91,7 +91,7 @@ npm run mailer
 
 ## Dashboard
 
-`npm run dashboard` starts a local server at `http://localhost:3456` with:
+`npm run dashboard` starts a local server at `http://localhost:3008` with:
 
 - Contact cards with match scores, job details, and email previews
 - Approve / reject / restore actions
