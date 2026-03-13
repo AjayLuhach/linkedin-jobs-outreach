@@ -17,6 +17,9 @@ import {
   rejectUserEmail,
   unapproveUserEmail,
   updateUserEmailContent,
+  batchRejectUserEmails,
+  batchApproveUserEmails,
+  batchUpdateUserEmailContents,
   fetchAllPosts,
   updatePostStatus,
 } from '../services/googleSheets.js';
@@ -141,6 +144,25 @@ const server = http.createServer(async (req, res) => {
       const ok = await unapproveUserEmail(body.user, body.postId);
       if (!ok) return json(res, 404, { error: 'Email not found' });
       return json(res, 200, { ok: true });
+    }
+
+    // POST /api/batch — batch reject/approve/update in minimal Sheets API calls
+    // Body: { reject: { "User": ["id1",...] }, approve: { "User": ["id1",...] }, update: { "User": [{ postId, subject, body },...] } }
+    if (req.method === 'POST' && pathname === '/api/batch') {
+      const body = JSON.parse(await readBody(req));
+      const results = { reject: {}, approve: {}, update: {} };
+
+      for (const [user, postIds] of Object.entries(body.reject || {})) {
+        results.reject[user] = await batchRejectUserEmails(user, postIds);
+      }
+      for (const [user, postIds] of Object.entries(body.approve || {})) {
+        results.approve[user] = await batchApproveUserEmails(user, postIds, 'Claude');
+      }
+      for (const [user, updates] of Object.entries(body.update || {})) {
+        results.update[user] = await batchUpdateUserEmailContents(user, updates);
+      }
+
+      return json(res, 200, results);
     }
 
     // GET /api/posts — fetch all posts from shared Posts tab
