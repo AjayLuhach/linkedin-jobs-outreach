@@ -200,14 +200,27 @@ RULES:
 - requiredExperience: use the MINIMUM mentioned (e.g. "5-8 years" → 5) or if not mentioned in years derive from the words
 - summary: 3-4 lines, capture what the role needs, key responsibilities,experience needed and any standout details (team size, product, tech stack context)
 - Mark isHiring=false if the person is LOOKING FOR a job themselves (#OpenToWork, "actively looking", "seeking opportunities", "open to roles"). These are job SEEKERS, not employers hiring
-- Mark isHiring=false if ANY interview round requires physical presence (face-to-face, walk-in, in-person at any stage). Even if early rounds are virtual, any in-person requirement = reject
-- Mark isHiring=false if the post has ANY location restriction or preference for candidates — asking for local candidates, candidates from a specific city/state/region, or "based in [location]". The candidate is remote-only and will NOT relocate
-- Mark isHiring=false if the job is located OUTSIDE India. Check both the stated job location AND the email domain for country clues (e.g. .bd = Bangladesh, .pk = Pakistan). Any non-India location = reject
-- Mark isHiring=false if the job is contractual, internship, or if any salary/CTC/budget is mentioned and works out to less than 6 LPA when converted to annual (monthly × 12, hourly × 2080 × ₹85)
+- Mark isHiring=false if the minimum experience required is 4+ years (candidate has ~3 years)
 - Mark isHiring=false if the role is primarily a TRAINER, TEACHING, or INSTRUCTOR position (not a developer/engineer role)
 - Mark isHiring=false if the PRIMARY technology required is NOT related to web/frontend/backend/full-stack (e.g. Java-only, .NET-only, Python-only, AI/ML-only roles). The candidate is a MERN developer — only extract roles where JavaScript/TypeScript/Node.js/React is a core requirement
-- Mark isHiring=false if the minimum experience required is 4+ years (candidate has ~3 years)
-- Jobs that are remote-friendly, India-based, or don't mention location restrictions should remain isHiring=true`;
+
+CRITICAL REJECTION RULES
+
+Set isHiring=false if ANY of these apply:
+1. Interview requires physical presence
+   - walk-in, face-to-face, F2F, in-person interview.
+2. Candidate location is restricted
+   - phrases like "local candidates only", "only from <city>", "must be from Delhi/NCR".
+   - mentioning an office or relocation is OK.
+3. Job location is outside India
+   - non-Indian cities or domains (.pk, .bd, .ae, .uk, .us, etc).
+4. Role type or salary invalid
+   - internship or contract roles
+   - salary < 6 LPA (monthly ×12, hourly ×2080×₹85).
+
+Remote, hybrid, on-site jobs in India without location restrictions are valid.
+
+`;
 }
 
 // ============================================================
