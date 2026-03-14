@@ -598,7 +598,9 @@ export async function scoreAndDraftEmails(extracted, candidate) {
       const emails = Array.isArray(parsed.emails) ? parsed.emails
         : Array.isArray(parsed) ? parsed : [];
 
-      const signoff = `\n\n${candidate.name}\n${candidate.portfolio}\n${candidate.linkedin}\n${candidate.github}`;
+      const ctcLine = candidate.currentCTC && candidate.expectedCTC
+        ? `\n\nCurrent CTC: ${candidate.currentCTC} | Expected CTC: ${candidate.expectedCTC}` : '';
+      const signoff = `${ctcLine}\n\nRegards,\n${candidate.name}\n${candidate.portfolio}\n${candidate.linkedin}\n${candidate.github}`;
       for (const emailResult of emails) {
         const contact = allContacts.find(c => c.postId === emailResult.postId);
         if (contact && emailResult.subject && emailResult.body) {

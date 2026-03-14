@@ -38,6 +38,8 @@ function loadCandidate() {
     linkedin: info.linkedin,
     github: info.github,
     portfolio: info.portfolio,
+    currentCTC: info.currentCTC || null,
+    expectedCTC: info.expectedCTC || null,
     stack: data.stack,
     primaryCloud: data.primaryCloud,
     experienceStart: data.experienceStart,
