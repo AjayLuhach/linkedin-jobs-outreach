@@ -30,8 +30,10 @@ const SMTP_USER = getEnv("SMTP_USER");
 const SMTP_PASS = getEnv("SMTP_PASS");
 const FROM_NAME = process.env.FROM_NAME || "Job Applicant";
 
-// Master resume path
-const RESUME_PATH = process.env.RESUME_PATH;
+// Master resume path — resolved relative to project root
+const RESUME_PATH = process.env.RESUME_PATH
+  ? path.resolve(process.env.RESUME_PATH)
+  : null;
 
 // ============================================================
 // TRANSPORTER
@@ -105,24 +107,24 @@ export async function sendEmail(emailData) {
 
   // Test mode: redirect emails to test inbox when EMAIL_TEST_MODE=true
   const testMode = process.env.EMAIL_TEST_MODE === 'true';
-  const testInbox = process.env.EMAIL_TEST_INBOX || 'sonamtest@yopmail.com';
+  const testInbox = process.env.EMAIL_TEST_INBOX || 'test@yopmail.com';
   const actualRecipient = testMode ? testInbox : to;
 
   if (testMode) {
     console.log(`   [TEST MODE] Redirecting ${to} -> ${actualRecipient}`);
   }
 
-  // Prepare attachments (master resume)
-  const attachments = [];
-  if (RESUME_PATH && fs.existsSync(RESUME_PATH)) {
-    attachments.push({
-      filename: path.basename(RESUME_PATH),
-      path: RESUME_PATH,
-    });
-  } else if (RESUME_PATH) {
-    console.warn(`   Resume not found at: ${RESUME_PATH}`);
-    console.warn(`   Email will be sent without attachment`);
+  // Prepare attachments (master resume — REQUIRED)
+  if (!RESUME_PATH) {
+    throw new Error("RESUME_PATH not set in .env — cannot send emails without resume attachment");
   }
+  if (!fs.existsSync(RESUME_PATH)) {
+    throw new Error(`Resume file not found at: ${RESUME_PATH} — cannot send emails without resume attachment`);
+  }
+  const attachments = [{
+    filename: path.basename(RESUME_PATH),
+    path: RESUME_PATH,
+  }];
 
   try {
     const info = await getTransporter().sendMail({

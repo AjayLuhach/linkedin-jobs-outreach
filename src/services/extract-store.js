@@ -10,7 +10,7 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const EXTRACT_PATH = path.join(__dirname, '..', 'output', 'extract.json');
+const EXTRACT_PATH = path.join(__dirname, '..', '..', 'output', 'extract.json');
 
 function ensureOutputDir() {
   const dir = path.dirname(EXTRACT_PATH);
@@ -43,7 +43,7 @@ export function loadExtract() {
 /**
  * Save extract data to file.
  */
-function saveExtract(data) {
+export function saveExtract(data) {
   ensureOutputDir();
   fs.writeFileSync(EXTRACT_PATH, JSON.stringify(data, null, 2));
 }
