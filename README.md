@@ -48,7 +48,13 @@ RESUME_PATH=./Your_Resume.pdf
 
 Gmail users: use an [App Password](https://support.google.com/accounts/answer/185833), not your regular password.
 
-Edit `resumeData.json` with your personal info, skills, and experience.
+Create your resume data file:
+
+```bash
+cp resumeData.example.json resumeData.json
+```
+
+Edit `resumeData.json` with your real personal info, skills, and experience. See [resumeData.example.json](resumeData.example.json) for the expected format — replace all fields with your own details.
 
 ## Workflow
 
@@ -174,7 +180,8 @@ feed-email-extractor/
 │   └── users/{name}.json
 ├── output/                       # Generated data (gitignored)
 │   └── extract.json
-├── resumeData.json               # Your personal info (edit this)
+├── resumeData.example.json       # Resume data template (copy to resumeData.json)
+├── resumeData.json               # Your personal info (gitignored)
 ├── .env.example                  # Environment template
 └── logs/                         # Logs (gitignored)
     └── mailer.log

@@ -6,3 +6,4 @@ logs/
 .mailer.pid
 *.pdf
 output2/
+resumeData.json

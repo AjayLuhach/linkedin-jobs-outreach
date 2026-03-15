@@ -1,0 +1,91 @@
+{
+  "personalInfo": {
+    "name": "Rahul Sharma",
+    "email": "rahul.sharma.dev@example.com",
+    "phone": "+91-9876543210",
+    "location": "Jaipur, Rajasthan, India",
+    "linkedin": "linkedin.com/in/rahulsharma-dev",
+    "github": "github.com/rahulsharma-dev",
+    "portfolio": "https://rahulsharma.dev",
+    "currentCTC": "5 LPA",
+    "expectedCTC": "10-12 LPA"
+  },
+  "experienceStart": "Sep 2023",
+  "stack": "MERN",
+  "primaryCloud": "AWS",
+  "summary": "Full Stack MERN Developer with 2+ years building scalable web applications using React, Next.js, TypeScript, Node.js, Express, MongoDB, and PostgreSQL. Focused on clean architecture, performance optimization, and reliable production deployments.",
+  "skills": {
+    "React.js": ["react", "reactjs", "react.js", "react js"],
+    "Next.js": ["next", "nextjs", "next.js", "next js"],
+    "TypeScript": ["typescript", "ts"],
+    "JavaScript": ["javascript", "js", "es6", "ecmascript"],
+    "Node.js": ["node", "nodejs", "node.js", "node js"],
+    "Express.js": ["express", "expressjs", "express.js"],
+    "MongoDB": ["mongodb", "mongo"],
+    "PostgreSQL": ["postgresql", "postgres", "psql", "pg"],
+    "MySQL": ["mysql", "sql", "mysql"],
+    "Redis": ["redis", "caching"],
+    "Firebase": ["firebase", "firestore"],
+    "HTML5": ["html", "html5"],
+    "CSS3": ["css", "css3"],
+    "Tailwind CSS": ["tailwind", "tailwindcss", "tailwind css"],
+    "Material UI": ["mui", "materialui", "material ui", "material-ui"],
+    "Redux Toolkit": ["redux", "reduxtoolkit", "redux toolkit"],
+    "React Query": ["reactquery", "react query", "tanstack query", "tanstack"],
+    "WebSockets": ["websocket", "websockets", "ws"],
+    "Socket.io": ["socket", "socketio", "socket.io"],
+    "REST APIs": ["rest", "restapi", "rest api", "rest apis", "restful", "api"],
+    "Docker": ["docker", "containerization", "containers"],
+    "AWS EC2": ["ec2", "awsec2", "aws ec2"],
+    "AWS S3": ["s3", "awss3", "aws s3"],
+    "AWS": ["aws", "amazon web services"],
+    "Nginx": ["nginx"],
+    "Git": ["git"],
+    "GitHub": ["github"],
+    "GitHub Actions": ["github actions", "githubactions", "gh actions"],
+    "CI/CD": ["cicd", "ci/cd", "ci cd", "continuous integration", "continuous deployment"],
+    "Jest": ["jest"],
+    "TDD": ["tdd", "test driven"],
+    "JWT": ["jwt", "json web token", "jsonwebtoken"],
+    "RBAC": ["rbac", "role based access", "access control"],
+    "OAuth2": ["oauth", "oauth2", "oauth 2.0"],
+    "SSR": ["ssr", "server side rendering", "server rendering"],
+    "SEO": ["seo", "search engine optimization"],
+    "i18n": ["i18n", "internationalization", "localization", "l10n"],
+    "AWS Bedrock": ["bedrock", "aws bedrock"],
+    "Google Gemini API": ["gemini", "gemini api"],
+    "Prompt Engineering": ["prompt engineering", "prompting", "llm"],
+    "MERN Stack": ["mern", "mern stack"],
+    "Full Stack": ["fullstack", "full stack", "full-stack"]
+  },
+  "experience": [
+    {
+      "company": "TechNova Solutions Pvt. Ltd.",
+      "title": "Software Engineer (Full Stack Developer)",
+      "duration": "Sep 2023 – Present",
+      "bullets": [
+        "Built and maintained multiple production web applications using React, Next.js, TypeScript, and Node.js",
+        "Improved page load performance by implementing lazy loading, caching, and optimized API queries",
+        "Developed real-time features using WebSockets and Socket.io including notifications and live updates",
+        "Integrated third-party APIs including messaging services and analytics platforms",
+        "Implemented JWT authentication, RBAC authorization, and validation layers across backend services"
+      ]
+    }
+  ],
+  "projects": [
+    { "name": "UrbanFlow", "desc": "B2B SaaS operations platform — React, Node.js, MongoDB, WebSockets, AWS" },
+    { "name": "CreatorConnect", "desc": "Influencer collaboration platform — React, Express, MySQL, social media APIs" },
+    { "name": "TeamHR", "desc": "HR management system — attendance tracking, payroll management, role-based access control" },
+    { "name": "ResumeCraft", "desc": "AI-powered resume tailoring tool — ATS scoring, LLM prompt workflows, automated resume generation" }
+  ],
+  "cannotClaim": [
+    "Java", "Spring Boot", "Kotlin", "Scala",
+    "Python Django", "Python Flask", "FastAPI",
+    "Ruby on Rails", "PHP Laravel",
+    "C#", ".NET", "ASP.NET", "Go", "Rust", "Elixir",
+    "GCP", "Azure", "Kubernetes", "Terraform",
+    "Kafka", "RabbitMQ", "Apache Spark", "Cassandra", "DynamoDB", "GraphQL", "gRPC",
+    "Machine Learning", "ML", "AI", "Data Science", "TensorFlow", "PyTorch",
+    "iOS", "Swift", "Android Native", "Flutter", "React Native"
+  ]
+}
