@@ -5,14 +5,14 @@ CLI tool that extracts hiring posts from LinkedIn, uses AI to identify contacts 
 ## Features
 
 - Parse LinkedIn feed API responses (JSON) or scraped HTML
-- AI-powered hiring post detection (Gemini or AWS Bedrock)
+- AI-powered hiring post detection (Gemini, AWS Bedrock, or OpenAI)
 - Extract and validate emails from posts (including obfuscated formats)
 - Generate personalized cold emails with AI
 - Web dashboard for reviewing, approving, and rejecting contacts
 - Scheduled email sending with background mailer daemon (9 AM - 1 PM IST)
 - Email verification before sending (MX lookup + junk filter)
 - Test mode for safe email testing
-- Resume PDF attachment
+- Resume PDF attachment (required — fails hard if missing)
 
 ## Prerequisites
 
@@ -20,6 +20,7 @@ CLI tool that extracts hiring posts from LinkedIn, uses AI to identify contacts 
 - AI provider — one of:
   - [Gemini API key](https://makersuite.google.com/app/apikey) (free)
   - AWS credentials for Bedrock
+  - [OpenAI API key](https://platform.openai.com/api-keys)
 - SMTP credentials (Gmail/Outlook/custom)
 
 ## Setup
@@ -32,7 +33,7 @@ cp .env.example .env    # edit with your credentials
 Edit `.env`:
 
 ```env
-# AI — choose "gemini" or "bedrock"
+# AI — choose "gemini", "bedrock", or "openai"
 AI_PROVIDER=gemini
 GEMINI_API_KEY=your_key
 
@@ -53,9 +54,10 @@ Edit `resumeData.json` with your personal info, skills, and experience.
 
 ```
 1. Parse LinkedIn data    →  output/extract.json
-2. AI generate emails     →  Google Sheets (per-user tabs)
-3. Review in dashboard    →  approve / reject contacts
-4. Mailer daemon sends    →  scheduled between 9 AM - 1 PM IST
+2. AI extract hiring posts →  data/posts.json
+3. Score + draft emails   →  data/users/{name}.json
+4. Review in dashboard    →  approve / reject contacts
+5. Mailer daemon sends    →  scheduled between 9 AM - 1 PM IST
 ```
 
 ## Commands
@@ -64,12 +66,14 @@ Edit `resumeData.json` with your personal info, skills, and experience.
 |---|---|
 | `npm run parse` | Parse LinkedIn data from clipboard |
 | `npm run parse:file <path>` | Parse from a file |
-| `npm run generate` | AI process posts into contacts + emails |
-| `npm run send` | List unsent emails |
-| `npm run dashboard` | Open web dashboard (localhost:3008) |
+| `npm run generate` | Phase 1: AI extract hiring posts → posts DB |
+| `npm run emails` | Phase 2+3: Score posts → draft emails → user DB |
+| `npm run emails:redraft` | Re-draft emails for posts with "drafted" status |
+| `npm run send` | List approved emails ready to send |
+| `npm run dashboard` | Open web dashboard (localhost:3456) |
 | `npm run mailer` | Start background mailer daemon |
 | `npm run mailer:stop` | Stop the mailer daemon |
-| `npm run send:emails` | Send all unsent emails immediately |
+| `npm run send:emails` | Send all approved emails immediately |
 | `npm run send:list` | List unsent emails |
 | `npm run send:verify` | Test SMTP connection |
 
@@ -79,26 +83,28 @@ Edit `resumeData.json` with your personal info, skills, and experience.
 # 1. Copy LinkedIn feed JSON to clipboard, then:
 npm run parse
 
-# 2. Run AI to identify hiring posts and generate emails:
+# 2. AI extract hiring posts from parsed data:
 npm run generate
 
-# 3. Open dashboard to review and approve contacts:
+# 3. Score posts and draft emails:
+npm run emails
+
+# 4. Open dashboard to review and approve contacts:
 npm run dashboard
 
-# 4. Start the mailer daemon (sends approved emails on schedule):
+# 5. Start the mailer daemon (sends approved emails on schedule):
 npm run mailer
 ```
 
 ## Dashboard
 
-`npm run dashboard` starts a local server at `http://localhost:3008` with:
+`npm run dashboard` starts a local server at `http://localhost:3456` with:
 
 - Contact cards with match scores, job details, and email previews
 - Approve / reject / restore actions
 - Filters: Sendable, Approved, Sent, Email Only, DM Only, Low Match, Rejected, Verify Failed
 - Salary and job type filters
 - Search across all fields
-- Scheduled send time display
 
 ## Email Verification
 
@@ -138,31 +144,40 @@ EMAIL_TEST_INBOX=test@yopmail.com
 
 ```
 feed-email-extractor/
-├── index.js                       # CLI entry point (parse/generate/send)
-├── config.js                      # Configuration loader
-├── resumeData.json                # Your personal info (edit this)
-├── dashboard.html                 # Web dashboard UI
-├── .env.example                   # Environment template
-├── services/
-│   ├── ai.js                      # Gemini AI integration
-│   ├── ai-bedrock.js              # AWS Bedrock AI integration
-│   ├── clipboard.js               # Clipboard reader
-│   ├── parse-linkedin-feed.js     # Parse LinkedIn API JSON
-│   ├── parse-linkedin-html.js     # Parse LinkedIn HTML
-│   ├── extract-store.js           # Manages output/extract.json
-│   ├── googleSheets.js             # Google Sheets integration (posts + user emails)
-│   ├── email-sender.js            # SMTP email sending
-│   ├── email-validator.js         # Email format validation
-│   └── email-verifier.js          # MX lookup + junk filter
-├── scripts/
-│   ├── dashboard-server.js        # Dashboard HTTP server
-│   ├── send-emails.js             # CLI for sending emails
-│   ├── mailer-daemon.js           # Background mailer daemon
-│   └── mailer-stop.js             # Stop the daemon
-├── output/                        # Generated data (gitignored)
-│   └── extract.json               # Parsed posts
-└── logs/                          # Logs (gitignored)
-    └── mailer.log                 # Daemon log
+├── src/
+│   ├── cli.js                    # CLI entry point (parse/generate/emails/send)
+│   ├── config.js                 # Configuration loader
+│   ├── services/
+│   │   ├── ai-bedrock.js         # 3-phase pipeline (extract, score, draft)
+│   │   ├── ai-provider.js        # Unified AI provider (Bedrock/Gemini/OpenAI)
+│   │   ├── prompts.js            # AI prompt templates
+│   │   ├── db.js                 # JSON file database
+│   │   ├── clipboard.js          # Clipboard reader
+│   │   ├── parse-linkedin-feed.js # Parse LinkedIn API JSON
+│   │   ├── parse-linkedin-html.js # Parse LinkedIn HTML
+│   │   ├── extract-store.js      # Manages output/extract.json
+│   │   ├── email-sender.js       # SMTP email sending
+│   │   ├── email-validator.js    # Email format validation
+│   │   ├── email-verifier.js     # MX lookup + junk filter
+│   │   └── location-filter.js    # India-only location filter
+│   └── scripts/
+│       ├── dashboard-server.js   # Dashboard HTTP server
+│       ├── send-emails.js        # CLI for sending emails
+│       ├── mailer-daemon.js      # Background mailer daemon
+│       ├── mailer-stop.js        # Stop the daemon
+│       └── reset-rejected.js     # Reset rejected emails
+├── dashboard/
+│   ├── index.html                # Dashboard UI
+│   └── styles.css                # Dashboard styles
+├── data/                         # JSON file DB (gitignored)
+│   ├── posts.json
+│   └── users/{name}.json
+├── output/                       # Generated data (gitignored)
+│   └── extract.json
+├── resumeData.json               # Your personal info (edit this)
+├── .env.example                  # Environment template
+└── logs/                         # Logs (gitignored)
+    └── mailer.log
 ```
 
 ## AI Providers
@@ -172,9 +187,8 @@ feed-email-extractor/
 ```env
 AI_PROVIDER=gemini
 GEMINI_API_KEY=your_key
+# GEMINI_MODEL=gemini-2.0-flash
 ```
-
-Auto-rotates between models on rate limits: gemini-2.5-pro, gemini-3-pro-preview, gemini-2.5-flash, gemini-3-flash-preview, gemini-2.0-flash, gemini-2.0-flash-lite.
 
 ### AWS Bedrock
 
@@ -184,6 +198,14 @@ AWS_ACCESS_KEY_ID=your_key
 AWS_SECRET_ACCESS_KEY=your_secret
 AWS_REGION=us-east-1
 BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
+```
+
+### OpenAI
+
+```env
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_key
+# OPENAI_MODEL=gpt-4o-mini
 ```
 
 ## Notes
