@@ -1,25 +1,26 @@
 {
   "name": "feed-email-extractor",
-  "version": "1.0.0",
-  "description": "CLI tool to extract hiring emails from LinkedIn feed and generate personalized email content using Gemini AI",
+  "version": "2.0.0",
+  "description": "CLI tool to extract hiring posts from LinkedIn feed, score against your resume, and draft personalized cold emails using AI",
   "type": "module",
-  "main": "index.js",
+  "main": "src/cli.js",
   "bin": {
-    "feed-email-extractor": "./index.js"
+    "feed-email-extractor": "./src/cli.js"
   },
   "scripts": {
-    "parse": "node index.js parse",
-    "parse:file": "node index.js parse --file",
-    "generate": "node index.js generate",
-    "emails": "node index.js emails",
-    "emails:redraft": "node index.js emails --redraft",
-    "send": "node index.js send",
-    "send:emails": "node scripts/send-emails.js",
-    "send:verify": "node scripts/send-emails.js --verify",
-    "send:list": "node scripts/send-emails.js --list",
-    "dashboard": "node scripts/dashboard-server.js",
-    "mailer": "node scripts/mailer-daemon.js",
-    "mailer:stop": "node scripts/mailer-stop.js"
+    "parse": "node src/cli.js parse",
+    "parse:file": "node src/cli.js parse --file",
+    "generate": "node src/cli.js generate",
+    "emails": "node src/cli.js emails",
+    "emails:redraft": "node src/cli.js emails --redraft",
+    "send": "node src/cli.js send",
+    "send:emails": "node src/scripts/send-emails.js",
+    "send:verify": "node src/scripts/send-emails.js --verify",
+    "send:list": "node src/scripts/send-emails.js --list",
+    "dashboard": "node src/scripts/dashboard-server.js",
+    "mailer": "node src/scripts/mailer-daemon.js",
+    "mailer:stop": "node src/scripts/mailer-stop.js",
+    "reset": "node src/scripts/reset-rejected.js"
   },
   "keywords": [
     "linkedin",
@@ -29,7 +30,7 @@
     "cli",
     "job-search"
   ],
-  "author": "",
+  "author": "ajayluhach",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.990.0",
@@ -37,6 +38,7 @@
     "cheerio": "^1.2.0",
     "clipboardy": "^4.0.0",
     "dotenv": "^17.2.3",
-    "nodemailer": "^6.9.0"
+    "nodemailer": "^6.9.0",
+    "openai": "^6.29.0"
   }
 }

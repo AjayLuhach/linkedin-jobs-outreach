@@ -11,7 +11,7 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const RESUME_DATA_PATH = join(__dirname, 'resumeData.json');
+const RESUME_DATA_PATH = join(__dirname, '..', 'resumeData.json');
 
 function loadCandidate() {
   if (!fs.existsSync(RESUME_DATA_PATH)) {
@@ -60,22 +60,15 @@ export const config = {
   aiProvider: (process.env.AI_PROVIDER || 'gemini').toLowerCase(),
 
   paths: {
-    outputDir: join(__dirname, 'output'),
-    extractPath: join(__dirname, 'output', 'extract.json'),
-    logsDir: join(__dirname, 'logs'),
+    outputDir: join(__dirname, '..', 'output'),
+    extractPath: join(__dirname, '..', 'output', 'extract.json'),
+    logsDir: join(__dirname, '..', 'logs'),
   },
 
   // Gemini config
   ai: {
     geminiApiKey: process.env.GEMINI_API_KEY || '',
-    models: [
-      'gemini-2.5-pro',
-      'gemini-3-pro-preview',
-      'gemini-2.5-flash',
-      'gemini-3-flash-preview',
-      'gemini-2.0-flash',
-      'gemini-2.0-flash-lite',
-    ],
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
     rateLimitCooldown: 60000,
   },
 
@@ -85,6 +78,12 @@ export const config = {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
     region: process.env.AWS_REGION || 'us-east-1',
     modelId: process.env.BEDROCK_MODEL_ID || 'google.gemma-3-27b-it',
+  },
+
+  // OpenAI config
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY || '',
+    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
   },
 
   candidate: loadCandidate(),

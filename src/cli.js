@@ -4,16 +4,17 @@
  * Feed Email Extractor CLI
  *
  * Commands:
- *   node index.js parse [--file <path>]   Parse LinkedIn data → output/extract.json
- *   node index.js generate                Phase 1: AI extract → push to shared Google Sheet
- *   node index.js emails [--redraft]       Phase 2+3: Score sheet posts → draft emails → user tab
- *   node index.js send                    List unsent emails
+ *   node src/cli.js parse [--file <path>]   Parse LinkedIn data → output/extract.json
+ *   node src/cli.js generate                Phase 1: AI extract → push to posts DB
+ *   node src/cli.js emails [--redraft]       Phase 2+3: Score posts → draft emails → user DB
+ *   node src/cli.js send                    List unsent emails
  */
 
 import fs from 'fs';
 import path from 'path';
 import config from './config.js';
 import { readClipboard, detectAndParse } from './services/clipboard.js';
+import { validateProvider, getProviderInfo } from './services/ai-provider.js';
 import { appendPosts, getUnprocessedPosts, markProcessed } from './services/extract-store.js';
 import {
   pushPhase1ToSheet,
@@ -21,9 +22,10 @@ import {
   fetchHiringPosts,
   fetchUserTabPostIds,
   pushEmailsToUserTab,
-} from './services/googleSheets.js';
+  fetchUserEmails,
+} from './services/db.js';
 
-// ── Temp file helpers for caching AI responses ──
+// -- Temp file helpers for caching AI responses --
 const TEMP_DIR = config.paths.outputDir;
 const TEMP_PHASE1 = path.join(TEMP_DIR, '.ai-phase1.json');
 const TEMP_PHASE23 = path.join(TEMP_DIR, '.ai-phase23.json');
@@ -47,26 +49,19 @@ function removeTempAI(filePath) {
   try { fs.unlinkSync(filePath); } catch {}
 }
 
-// Dynamic AI provider import
+// AI pipeline imports (provider-agnostic — routed by AI_PROVIDER in .env)
 async function getPhase1Provider() {
-  if (config.aiProvider === 'bedrock') {
-    const mod = await import('./services/ai-bedrock.js');
-    return mod.extractPhase1;
-  }
-  const mod = await import('./services/ai.js');
+  const mod = await import('./services/ai-bedrock.js');
   return mod.extractPhase1;
 }
 
 async function getPhase23Provider() {
-  // Always use bedrock's scoreAndDraftEmails for Phase 2+3
-  // (works with both providers since it takes pre-extracted data)
   const mod = await import('./services/ai-bedrock.js');
   return mod.scoreAndDraftEmails;
 }
 
 /**
- * Get the user's full name from config (used as tab name).
- * Uses full name to avoid sending emails for the wrong person.
+ * Get the user's full name from config.
  */
 function getUsername() {
   return config.candidate.name || 'User';
@@ -131,21 +126,15 @@ async function cmdParse(options) {
 }
 
 // ============================================================
-// COMMAND: generate — Phase 1 only → push to shared sheet
+// COMMAND: generate — Phase 1 only → push to posts DB
 // ============================================================
 
 async function cmdGenerate() {
-  console.log('\n   GENERATE — Phase 1: AI Extract → Shared Sheet\n');
+  console.log('\n   GENERATE — Phase 1: AI Extract → Posts DB\n');
 
-  const provider = config.aiProvider;
-  console.log(`   AI Provider: ${provider}`);
-
-  if (provider === 'bedrock' && !config.bedrock.accessKeyId) {
-    throw new Error('AWS_ACCESS_KEY_ID not set in .env (AI_PROVIDER=bedrock)');
-  }
-  if (provider === 'gemini' && !config.ai.geminiApiKey) {
-    throw new Error('GEMINI_API_KEY not set in .env (AI_PROVIDER=gemini)');
-  }
+  const { label, name: providerName } = validateProvider();
+  const { model } = getProviderInfo();
+  console.log(`   AI Provider: ${label} (${model})`);
 
   const unprocessed = getUnprocessedPosts();
 
@@ -157,37 +146,34 @@ async function cmdGenerate() {
 
   console.log(`   Found ${unprocessed.length} unprocessed post(s)`);
 
-  // Pre-filter: skip posts already in the sheet (saves AI calls)
-  const existingSheetIds = await fetchExistingPostIds();
-  const newPosts = unprocessed.filter(p => !existingSheetIds.has(p.id));
-  const alreadyInSheet = unprocessed.length - newPosts.length;
+  // Pre-filter: skip posts already in the DB (saves AI calls)
+  const existingIds = await fetchExistingPostIds();
+  const newPosts = unprocessed.filter(p => !existingIds.has(p.id));
+  const alreadyInDB = unprocessed.length - newPosts.length;
 
-  if (alreadyInSheet > 0) {
-    console.log(`   ${alreadyInSheet} post(s) already in sheet — skipping`);
+  if (alreadyInDB > 0) {
+    console.log(`   ${alreadyInDB} post(s) already in DB — skipping`);
   }
 
-  // Mark ALL unprocessed as processed locally (including ones already in sheet)
+  // Mark ALL unprocessed as processed locally (including ones already in DB)
   const processedIds = unprocessed.map(p => p.id);
   markProcessed(processedIds);
 
   if (newPosts.length === 0) {
-    console.log(`\n   All ${unprocessed.length} post(s) already in the sheet. Nothing to extract.`);
+    console.log(`\n   All ${unprocessed.length} post(s) already in the DB. Nothing to extract.`);
     console.log(`   ${processedIds.length} post(s) marked as processed.`);
     return;
   }
 
   console.log(`   ${newPosts.length} new post(s) to process with AI`);
 
-  // Phase 1: AI extraction — use cached response if available (from a previous failed sheet save)
+  // Phase 1: AI extraction — use cached response if available
   let extracted = loadTempAI(TEMP_PHASE1);
 
   if (!extracted) {
     const extractPhase1 = await getPhase1Provider();
-    extracted = provider === 'gemini'
-      ? await extractPhase1(newPosts, config.candidate)
-      : await extractPhase1(newPosts);
+    extracted = await extractPhase1(newPosts);
 
-    // Cache AI response before attempting sheet save
     if (extracted.length > 0) {
       saveTempAI(TEMP_PHASE1, extracted);
     }
@@ -200,15 +186,14 @@ async function cmdGenerate() {
     return;
   }
 
-  // Push hiring posts to shared Google Sheet
-  console.log('\n   Pushing to shared Google Sheet...');
+  // Push hiring posts to DB
+  console.log('\n   Pushing to posts DB...');
   const { added, skipped } = await pushPhase1ToSheet(
     extracted,
     unprocessed,
     config.candidate.name || 'CLI'
   );
 
-  // Sheet save succeeded — remove temp cache
   removeTempAI(TEMP_PHASE1);
 
   console.log('\n   ' + '='.repeat(50));
@@ -216,50 +201,49 @@ async function cmdGenerate() {
   console.log('   ' + '='.repeat(50));
   console.log(`   Posts processed:   ${processedIds.length}`);
   console.log(`   Hiring posts:      ${extracted.length}`);
-  console.log(`   Added to sheet:    ${added}`);
-  console.log(`   Already in sheet:  ${skipped}`);
+  console.log(`   Added to DB:       ${added}`);
+  console.log(`   Already in DB:     ${skipped}`);
   console.log('\n   Next: npm run emails');
 }
 
 // ============================================================
-// COMMAND: emails — Phase 2+3: Score sheet posts → draft → user tab
+// COMMAND: emails — Phase 2+3: Score posts → draft → user DB
 // ============================================================
 
 async function cmdEmails(options = {}) {
   const username = getUsername();
   const redraft = options.redraft || false;
+  validateProvider(); // fail fast if no AI configured
   console.log(`\n   EMAILS — Score & Draft for "${username}"${redraft ? ' (REDRAFT mode)' : ''}\n`);
 
-  // Fetch all hiring posts from shared sheet
+  // Fetch all hiring posts from DB
   const hiringPosts = await fetchHiringPosts();
 
   if (hiringPosts.length === 0) {
-    console.log('   No hiring posts in the sheet.');
+    console.log('   No hiring posts in the DB.');
     console.log('   Run "npm run generate" first.');
     return;
   }
 
-  // Filter out posts already in this user's tab
-  // In redraft mode, include posts with "drafted" status so they can be re-processed
+  // Filter out posts already in this user's data
   const fetchOpts = redraft ? { excludeStatuses: ["drafted"] } : {};
   const usedIds = await fetchUserTabPostIds(username, fetchOpts);
   const fresh = hiringPosts.filter(p => !usedIds.has(p.postId));
 
   if (fresh.length === 0) {
-    console.log(`   ${hiringPosts.length} post(s) in sheet, but all already processed for ${username}.`);
+    console.log(`   ${hiringPosts.length} post(s) in DB, but all already processed for ${username}.`);
     return;
   }
 
-  console.log(`   ${hiringPosts.length} post(s) in sheet, ${fresh.length} ${redraft ? 'to process' : 'new'} for ${username}`);
+  console.log(`   ${hiringPosts.length} post(s) in DB, ${fresh.length} ${redraft ? 'to process' : 'new'} for ${username}`);
 
-  // Phase 2+3: Score and draft — use cached response if available (from a previous failed sheet save)
+  // Phase 2+3: Score and draft — use cached response if available
   let contacts = loadTempAI(TEMP_PHASE23);
 
   if (!contacts) {
     const scoreAndDraft = await getPhase23Provider();
     contacts = await scoreAndDraft(fresh, config.candidate);
 
-    // Cache AI response before attempting sheet save
     if (contacts.length > 0) {
       saveTempAI(TEMP_PHASE23, contacts);
     }
@@ -271,10 +255,9 @@ async function cmdEmails(options = {}) {
     return;
   }
 
-  // Push to user's tab in the sheet
+  // Push to user's DB
   const { added, skipped, updated } = await pushEmailsToUserTab(username, contacts, { redraft });
 
-  // Sheet save succeeded — remove temp cache
   removeTempAI(TEMP_PHASE23);
 
   // Summary
@@ -287,7 +270,7 @@ async function cmdEmails(options = {}) {
   console.log(`   Posts scored:     ${fresh.length}`);
   console.log(`   Good matches:     ${goodMatch}`);
   console.log(`   Emails drafted:   ${withEmail}`);
-  console.log(`   Added to tab:     ${added} (${skipped} duplicates)`);
+  console.log(`   Added:            ${added} (${skipped} duplicates)`);
   if (updated > 0) console.log(`   Re-drafted:       ${updated}`);
   console.log('\n   Review emails in the dashboard: npm run dashboard');
 }
@@ -300,7 +283,6 @@ async function cmdSend() {
   const username = getUsername();
   console.log(`\n   SEND — Approved emails for "${username}"\n`);
 
-  const { fetchUserEmails } = await import('./services/googleSheets.js');
   const approved = await fetchUserEmails(username, 'approved');
 
   if (approved.length === 0) {
@@ -315,7 +297,7 @@ async function cmdSend() {
     console.log(`      Score: ${c.score}/10 — ${c.matchReason || ''}`);
   });
 
-  console.log('\n   To send these, use: node scripts/send-emails.js');
+  console.log('\n   To send these, use: npm run send:emails');
 }
 
 // ============================================================
@@ -329,8 +311,8 @@ function cmdHelp() {
    Commands:
      npm run parse              Parse LinkedIn data from clipboard
      npm run parse:file <path>  Parse from file
-     npm run generate           Phase 1: AI extract → shared Google Sheet
-     npm run emails             Phase 2+3: Score posts → draft emails → your tab
+     npm run generate           Phase 1: AI extract → posts DB
+     npm run emails             Phase 2+3: Score posts → draft emails → your user DB
      npm run emails:redraft     Re-draft emails for posts with "drafted" status
      npm run send               List approved emails ready to send
      npm run dashboard          Review & approve emails for all users
@@ -338,14 +320,14 @@ function cmdHelp() {
    Workflow:
      1. Copy LinkedIn feed HTML or API JSON to clipboard
      2. npm run parse              → saves to output/extract.json
-     3. npm run generate           → AI extracts hiring posts → Posts tab in sheet
-     4. npm run emails             → scores posts, drafts emails → your user tab
-     5. npm run dashboard          → review & approve emails (any user can approve for anyone)
-     6. npm run send               → send approved emails
+     3. npm run generate           → AI extracts hiring posts → data/posts.json
+     4. npm run emails             → scores posts, drafts emails → data/users/{name}.json
+     5. npm run dashboard          → review & approve emails
+     6. npm run send:emails        → send approved emails
 
    Collaborative:
      - Multiple people can run parse + generate to contribute posts
-     - Each person runs "emails" to get their own scored/drafted emails in their tab
+     - Each person runs "emails" to get their own scored/drafted emails
      - One person can approve emails for everyone via the dashboard
   `);
 }
