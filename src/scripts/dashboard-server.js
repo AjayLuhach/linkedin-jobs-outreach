@@ -2,7 +2,7 @@
 
 /**
  * Dashboard Server
- * Serves dashboard.html + sheet-backed API for cross-user email management.
+ * Serves dashboard UI + JSON DB-backed API for cross-user email management.
  */
 
 import http from 'http';
@@ -22,11 +22,13 @@ import {
   batchUpdateUserEmailContents,
   fetchAllPosts,
   updatePostStatus,
-} from '../services/googleSheets.js';
+} from '../services/db.js';
 import config from '../config.js';
+import { validateProvider, getProviderInfo } from '../services/ai-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(__dirname, '..');
+const ROOT = path.join(__dirname, '..', '..');
+const DASHBOARD_DIR = path.join(ROOT, 'dashboard');
 const PORT = process.env.DASHBOARD_PORT || 3456;
 
 const MIME = {
@@ -146,8 +148,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true });
     }
 
-    // POST /api/batch — batch reject/approve/update in minimal Sheets API calls
-    // Body: { reject: { "User": ["id1",...] }, approve: { "User": ["id1",...] }, update: { "User": [{ postId, subject, body },...] } }
+    // POST /api/batch — batch reject/approve/update
     if (req.method === 'POST' && pathname === '/api/batch') {
       const body = JSON.parse(await readBody(req));
       const results = { reject: {}, approve: {}, update: {} };
@@ -156,7 +157,7 @@ const server = http.createServer(async (req, res) => {
         results.reject[user] = await batchRejectUserEmails(user, postIds);
       }
       for (const [user, postIds] of Object.entries(body.approve || {})) {
-        results.approve[user] = await batchApproveUserEmails(user, postIds, 'Claude');
+        results.approve[user] = await batchApproveUserEmails(user, postIds, 'Dashboard');
       }
       for (const [user, updates] of Object.entries(body.update || {})) {
         results.update[user] = await batchUpdateUserEmailContents(user, updates);
@@ -165,7 +166,7 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, results);
     }
 
-    // GET /api/posts — fetch all posts from shared Posts tab
+    // GET /api/posts — fetch all posts
     if (req.method === 'GET' && pathname === '/api/posts') {
       const posts = await fetchAllPosts();
       return json(res, 200, { posts });
@@ -233,11 +234,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // Static file serving
-    let filePath = pathname === '/' ? '/dashboard.html' : pathname;
-    filePath = path.join(ROOT, decodeURIComponent(filePath));
+    // Static file serving — serve from dashboard/ directory
+    let filePath = pathname === '/' ? '/index.html' : pathname;
+    filePath = path.join(DASHBOARD_DIR, decodeURIComponent(filePath));
 
-    if (!filePath.startsWith(ROOT)) return json(res, 403, { error: 'Forbidden' });
+    if (!filePath.startsWith(DASHBOARD_DIR)) return json(res, 403, { error: 'Forbidden' });
 
     const data = fs.readFileSync(filePath);
     const ext = path.extname(filePath);
@@ -252,7 +253,16 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`\n   Dashboard → http://localhost:${PORT}`);
-  console.log('   Press Ctrl+C to stop\n');
-});
+// Validate AI provider before starting
+try {
+  const { label } = validateProvider();
+  const { model } = getProviderInfo();
+  server.listen(PORT, () => {
+    console.log(`\n   Dashboard → http://localhost:${PORT}`);
+    console.log(`   AI Provider: ${label} (${model})`);
+    console.log('   Press Ctrl+C to stop\n');
+  });
+} catch (err) {
+  console.error(`\n   FATAL: ${err.message}\n`);
+  process.exit(1);
+}

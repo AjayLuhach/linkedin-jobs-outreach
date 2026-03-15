@@ -4,7 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const PID_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.mailer.pid');
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const PID_FILE = path.join(ROOT, '.mailer.pid');
 
 if (!fs.existsSync(PID_FILE)) {
   console.log('  No mailer daemon running.');

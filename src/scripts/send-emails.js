@@ -2,12 +2,12 @@
 
 /**
  * Email Sender CLI
- * Sends approved emails from Google Sheets user tabs.
+ * Sends approved emails from user JSON DB.
  *
  * Usage:
- *   node scripts/send-emails.js                    # Send all approved unsent emails
- *   node scripts/send-emails.js --verify           # Test SMTP connection
- *   node scripts/send-emails.js --list             # List approved unsent emails
+ *   node src/scripts/send-emails.js                    # Send all approved unsent emails
+ *   node src/scripts/send-emails.js --verify           # Test SMTP connection
+ *   node src/scripts/send-emails.js --list             # List approved unsent emails
  */
 
 import config from "../config.js";
@@ -18,14 +18,14 @@ import {
 import {
   fetchUserEmails,
   markUserEmailSent,
-} from "../services/googleSheets.js";
+} from "../services/db.js";
 import { isValidEmail } from "../services/email-validator.js";
 import { verifyEmail } from "../services/email-verifier.js";
 
 const args = process.argv.slice(2);
 const mode = args[0];
 
-/** Current user's full name — only sends emails from their own tab. */
+/** Current user's full name — only sends emails from their own data. */
 const USERNAME = config.candidate.name || 'User';
 
 /**

@@ -13,7 +13,7 @@ import config from '../config.js';
 import {
   fetchUserEmails,
   markUserEmailSent,
-} from '../services/googleSheets.js';
+} from '../services/db.js';
 import { sendEmail, verifyConnection } from '../services/email-sender.js';
 import { isValidEmail } from '../services/email-validator.js';
 import { verifyEmail } from '../services/email-verifier.js';
@@ -21,10 +21,11 @@ import { verifyEmail } from '../services/email-verifier.js';
 const USERNAME = config.candidate.name || 'User';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PID_FILE = path.join(__dirname, '..', '.mailer.pid');
-const LOG_FILE = path.join(__dirname, '..', 'logs', 'mailer.log');
+const ROOT = path.join(__dirname, '..', '..');
+const PID_FILE = path.join(ROOT, '.mailer.pid');
+const LOG_FILE = path.join(ROOT, 'logs', 'mailer.log');
 
-// ── Self-detach: fork into background and exit parent ──
+// -- Self-detach: fork into background and exit parent --
 if (!process.env.__MAILER_DAEMON) {
   // Kill any existing daemon first
   if (fs.existsSync(PID_FILE)) {
@@ -54,7 +55,7 @@ if (!process.env.__MAILER_DAEMON) {
   process.exit(0);
 }
 
-// ── Daemon process below ──
+// -- Daemon process below --
 
 function log(msg) {
   const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -134,7 +135,7 @@ function cleanup() {
 process.on('SIGTERM', () => { log('Received SIGTERM'); cleanup(); process.exit(0); });
 process.on('SIGINT', () => { log('Received SIGINT'); cleanup(); process.exit(0); });
 
-// ── Start ──
+// -- Start --
 log(`Mailer daemon started for "${USERNAME}" — checking every 60s`);
 
 const connected = await verifyConnection();
