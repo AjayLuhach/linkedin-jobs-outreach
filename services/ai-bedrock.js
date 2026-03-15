@@ -12,6 +12,7 @@ import {
 import fs from 'fs';
 import path from 'path';
 import config from '../config.js';
+import { checkRawPost, checkExtractedPost } from './location-filter.js';
 
 const OUTPUT_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'output');
 
@@ -317,6 +318,16 @@ function scoreContact(extracted, candidate) {
     };
   }
 
+  // Location filter — safety net for posts that slipped through pre-filter
+  const locationReject = checkExtractedPost(extracted);
+  if (locationReject) {
+    return {
+      isGoodMatch: false,
+      score: 0,
+      reason: locationReject,
+    };
+  }
+
   // Skill matching
   const requirements = extracted.job?.requirements || [];
   if (requirements.length === 0) {
@@ -406,15 +417,34 @@ export async function extractPhase1(posts) {
   const batchSize = parseInt(process.env.BATCH_SIZE) || 7;
   const modelId = config.bedrock.modelId;
 
-  console.log(`\n   PHASE 1: AI Extraction`);
-  console.log(`   Model: ${modelId} | Posts: ${posts.length} | Batch: ${batchSize}\n`);
+  // Pre-filter: reject non-India / F2F posts before wasting API calls
+  const filtered = [];
+  const locationRejected = [];
+  for (const post of posts) {
+    const reason = checkRawPost(post);
+    if (reason) {
+      locationRejected.push({ id: post.id, author: post.author?.name, reason });
+    } else {
+      filtered.push(post);
+    }
+  }
 
-  const totalBatches = Math.ceil(posts.length / batchSize);
+  if (locationRejected.length > 0) {
+    console.log(`\n   PRE-FILTER: ${locationRejected.length} posts rejected (location/F2F)`);
+    for (const r of locationRejected) {
+      console.log(`   [✗] ${r.author || '?'} — ${r.reason}`);
+    }
+  }
+
+  console.log(`\n   PHASE 1: AI Extraction`);
+  console.log(`   Model: ${modelId} | Posts: ${filtered.length}/${posts.length} (${locationRejected.length} pre-filtered) | Batch: ${batchSize}\n`);
+
+  const totalBatches = Math.ceil(filtered.length / batchSize);
 
   const batches = [];
-  for (let i = 0; i < posts.length; i += batchSize) {
+  for (let i = 0; i < filtered.length; i += batchSize) {
     batches.push({
-      posts: posts.slice(i, i + batchSize),
+      posts: filtered.slice(i, i + batchSize),
       batchNum: Math.floor(i / batchSize) + 1,
     });
   }
